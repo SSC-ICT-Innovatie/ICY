@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/fluttter.iml" filepath="$PROJECT_DIR$/fluttter.iml" />
+      <module fileurl="file://$PROJECT_DIR$/android/fluttter_android.iml" filepath="$PROJECT_DIR$/android/fluttter_android.iml" />
     </modules>
   </component>
 </project>
