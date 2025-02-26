@@ -1,16 +1,39 @@
-# icy
-
-A new Flutter project.
+# ICY Flutter Application
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+Welcome to the ICY Flutter project! This guide will help new developers understand the workflow and contribution process for our company's Duolingo-like clone.
 
-A few resources to get you started if this is your first Flutter project:
+### Development Workflow
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+1. **Work on Branches**
+    - Always create a new branch for features or fixes
+    - Never commit directly to the main branch
+    - Name branches meaningfully (e.g., `feature/login-screen`, `bugfix/navigation-error`)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+2. **Making Changes**
+    - Make frequent, small commits with clear messages
+    - Keep your branch updated with the main branch
+
+3. **Pull Requests**
+    - When your feature/fix is complete, create a pull request
+    - Add a description explaining the changes
+    - Request reviews from team members
+    - Respond to feedback and make necessary changes
+
+### Project Setup
+
+1. Clone the repository
+2. Run `flutter pub get` to install dependencies
+3. Run `flutter run` to start the application
+
+### Learning Resources
+
+- **Bloc State Management**: [Flutter Bloc Tutorial](https://youtu.be/3bEkaRUVOeU)
+- **Flutter Widgets**: [Flutter Widget Tutorial](https://youtu.be/5vDq5DXXxss)
+- **Network Requests**: [Flutter Network Requests](https://youtu.be/hz2LQ43muio)
+- [Flutter Documentation](https://docs.flutter.dev/)
+- [Project Wiki](link-to-your-wiki)
+- [Team Communication Channel](link-to-your-channel)
+
+For questions or issues, contact the project lead.
