@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:icy/icy_tab_registerar.dart';
+import 'package:icy/abstractions/navigation/services/icy_tab_registerar.dart';
 
 class NavigationState extends Equatable {
   final List<IcyTab> tabs;

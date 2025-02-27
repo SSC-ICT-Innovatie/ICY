@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:forui/forui.dart';
 import 'package:icy/abstractions/navigation/state/navigation_cubit.dart';
 import 'package:icy/abstractions/navigation/state/navigation_state.dart';
-import 'package:icy/icy_tab_registerar.dart';
+import 'package:icy/abstractions/navigation/services/icy_tab_registerar.dart';
 
 class IceNavigation extends StatelessWidget {
   const IceNavigation({super.key});
