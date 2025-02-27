@@ -1,0 +1,17 @@
+
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:icy/abstractions/navigation/state/navigation_cubit.dart';
+import 'package:icy/icy_tab_registerar.dart';
+
+class DependencyInjector {
+  static Future<List<BlocProvider>> getProviders() async {
+    final tabs = await injectNavigationTabs();
+    
+    return [
+      BlocProvider<NavigationCubit>(
+        create: (context) => NavigationCubit(tabs),
+      ),
+      // Add other providers as needed
+    ];
+  }
+}
