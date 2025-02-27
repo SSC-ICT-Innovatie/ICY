@@ -34,6 +34,6 @@ Welcome to the ICY Flutter project! This guide will help new developers understa
 - **Network Requests**: [Flutter Network Requests](https://youtu.be/hz2LQ43muio)
 - [Flutter Documentation](https://docs.flutter.dev/)
 - [Project Wiki](link-to-your-wiki)
-- [Team Communication Channel](link-to-your-channel)
+
 
 For questions or issues, contact the project lead.
