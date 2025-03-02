@@ -33,7 +33,7 @@ Welcome to the ICY Flutter project! This guide will help new developers understa
 - **Flutter Widgets**: [Flutter Widget Tutorial](https://youtu.be/5vDq5DXXxss)
 - **Network Requests**: [Flutter Network Requests](https://youtu.be/hz2LQ43muio)
 - [Flutter Documentation](https://docs.flutter.dev/)
-- [Project Wiki](link-to-your-wiki)
+- [Project Wiki](https://github.com/SSC-ICT-Innovatie/ICY/edit/main/client/icy)
 
 
 For questions or issues, contact the project lead.
