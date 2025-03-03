@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Unsuccessful - SellaOS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
+            font-family: 'Bricolage Grotesque', Arial, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 90%;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background-color: #fff;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: clamp(24px, 5vw, 32px);
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        p {
+            color: #4a5568;
+            font-size: clamp(16px, 3vw, 18px);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .error-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            width: 80px;
+            height: 80px;
+            background-color: #EF4444;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 40px;
+            animation: bounceIn 1s ease-out;
+        }
+
+        .gif-container {
+            margin: 30px auto;
+            max-width: 300px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .gif-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 24px;
+            background-color: #414EDE;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: clamp(16px, 3vw, 18px);
+            margin: 20px auto;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(65, 78, 222, 0.2);
+        }
+
+        .button:hover {
+            background-color: #3540b8;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(65, 78, 222, 0.3);
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .button i {
+            margin-right: 8px;
+        }
+
+        .contact-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            font-size: clamp(14px, 2.5vw, 16px);
+            color: #4a5568;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 15px;
+            }
+            
+            .gif-container {
+                max-width: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="error-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h1>Subscription Unsuccessful</h1>
+        <p>We apologize, but there was an issue processing your subscription. Don't worry - our support team is here to help!</p>
+        
+        <div class="gif-container">
+            <img src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExdjY3ZDA3NjFkaTIzZ2YzeTMxbjV3MThzdXd4cWJsczlraXU0NGk5dCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/zI2xxBtbAig6Y/giphy.gif" alt="Subscription unsuccessful animation">
+        </div>
+        
+        <a href="mailto:app@sellaos.com" class="button">
+            <i class="fas fa-envelope"></i>
+            Contact Support
+        </a>
+        
+        <div class="contact-info">
+            Or email us directly at: <strong>app@sellaos.com</strong>
+        </div>
+    </div>
+</body>
+</html>

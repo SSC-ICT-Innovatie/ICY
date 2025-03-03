@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Unsuccessful - SellaOS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
+            font-family: 'Bricolage Grotesque', Arial, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 90%;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background-color: #fff;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: clamp(24px, 5vw, 32px);
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        p {
+            color: #4a5568;
+            font-size: clamp(16px, 3vw, 18px);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .error-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            width: 80px;
+            height: 80px;
+            background-color: #EF4444;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 40px;
+            animation: bounceIn 1s ease-out;
+        }
+
+        .message-box {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #e2e8f0;
+        }
+
+        .suggestions {
+            text-align: left;
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 0;
+        }
+
+        .suggestion-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 15px;
+            color: #4a5568;
+            font-size: clamp(14px, 2.5vw, 16px);
+        }
+
+        .suggestion-item i {
+            color: #414EDE;
+            margin-top: 4px;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 24px;
+            background-color: #414EDE;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: clamp(16px, 3vw, 18px);
+            margin: 20px auto;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(65, 78, 222, 0.2);
+        }
+
+        .button:hover {
+            background-color: #3540b8;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(65, 78, 222, 0.3);
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .button i {
+            margin-right: 8px;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 15px;
+            }
+            
+            .message-box {
+                padding: 15px;
+                margin: 15px 0;
+            }
+            
+            .suggestions {
+                padding: 0 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="error-icon">
+            <i class="fas fa-times"></i>
+        </div>
+        
+        <h1>Payment Unsuccessful</h1>
+        
+        <div class="message-box">
+            <p>We were unable to process your payment at this time.</p>
+        </div>
+
+        <div class="suggestions">
+            <div class="suggestion-item">
+                <i class="fas fa-credit-card"></i>
+                <span>Verify your card information and try again</span>
+            </div>
+            <div class="suggestion-item">
+                <i class="fas fa-shield-alt"></i>
+                <span>Ensure your card has sufficient funds</span>
+            </div>
+            <div class="suggestion-item">
+                <i class="fas fa-university"></i>
+                <span>Check with your bank for any transaction restrictions</span>
+            </div>
+        </div>
+
+        <a href="javascript:history.back()" class="button">
+            <i class="fas fa-redo"></i>
+            Try Again
+        </a>
+    </div>
+</body>
+</html>
