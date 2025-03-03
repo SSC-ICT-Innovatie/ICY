@@ -6,17 +6,16 @@ import 'package:icy/dependency_injector.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   final providers = await DependencyInjector.getProviders();
-  
+
   runApp(
-    MultiBlocProvider(
-      providers: providers,
-      child: FTheme(
-        data: FThemes.zinc.light, 
-        child: const IceNavigation()
+    MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: MultiBlocProvider(
+        providers: providers,
+        child: FTheme(data: FThemes.orange.light, child: const IceNavigation()),
       ),
-    )
+    ),
   );
 }
-
