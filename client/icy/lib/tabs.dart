@@ -4,7 +4,7 @@ import 'package:icy/abstractions/navigation/services/icy_tab_registerar.dart';
 import 'package:icy/features/authentication/screens/login.dart';
 import 'package:icy/features/authentication/screens/signup.dart';
 import 'package:icy/features/authentication/services/auth_cache_service.dart';
-
+import 'package:icy/features/home/screens/home_screen.dart';
 
 // Function that dynamically checks login status using the current context
 bool hasLoggedIn(BuildContext context) {
@@ -42,22 +42,14 @@ List<IcyTab> injectNavigationTabs(BuildContext context) {
       showInTabBar: isLoggedIn,
       icon: FAssets.icons.house,
       title: "Home",
-      content: Container(
-        color: Colors.pink,
-        child: Center(
-          child: Text(
-            "HOME SCREEN",
-            style: TextStyle(fontSize: 24, color: Colors.white),
-          ),
-        ),
-      ),
+      content: HomeScreen(),
       // Use the cached value for access rules
       accessRule: () => AuthCacheService().isLoggedIn,
     ),
     IcyTab(
       showInTabBar: isLoggedIn,
-      icon: FAssets.icons.search,
-      title: "Search",
+      icon: FAssets.icons.trophy,
+      title: "Achievements",
       content: Container(
         color: Colors.blue,
         child: Center(
@@ -72,13 +64,29 @@ List<IcyTab> injectNavigationTabs(BuildContext context) {
     ),
     IcyTab(
       showInTabBar: isLoggedIn,
-      icon: FAssets.icons.testTube,
-      title: "Test",
+      icon: FAssets.icons.store,
+      title: "Marketplace",
       content: Container(
         color: Colors.orange,
         child: Center(
           child: Text(
-            "TEST SCREEN",
+            "Marketplace",
+            style: TextStyle(fontSize: 24, color: Colors.white),
+          ),
+        ),
+      ),
+      // Use the cached value for access rules
+      accessRule: () => AuthCacheService().isLoggedIn,
+    ),
+    IcyTab(
+      showInTabBar: isLoggedIn,
+      icon: FAssets.icons.user,
+      title: "Profile",
+      content: Container(
+        color: Colors.orange,
+        child: Center(
+          child: Text(
+            "Profile",
             style: TextStyle(fontSize: 24, color: Colors.white),
           ),
         ),
