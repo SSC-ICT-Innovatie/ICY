@@ -28,12 +28,13 @@ class SurveyResults extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: context.theme.colorScheme.primary,
                   image: DecorationImage(
-                    // laat een icon zien in plaats van een afbeelding als er geen afbeelding is
                     image: NetworkImage(surveyThumnail),
                     fit: BoxFit.cover,
                   ),
                   borderRadius: BorderRadius.circular(8),
                 ),
+                // laat een icon zien in plaats van een afbeelding als er geen afbeelding is
+                child: Center(child: FIcon(FAssets.icons.listTodo)),
               ),
             ),
             suffixIcon: FButton.icon(

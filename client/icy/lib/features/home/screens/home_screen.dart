@@ -5,6 +5,7 @@ import 'package:forui/forui.dart';
 import 'package:icy/features/home/pages/tabs/new.dart';
 import 'package:icy/features/home/pages/tabs/ongoing_survey.dart';
 import 'package:icy/features/home/pages/tabs/results.dart';
+import 'package:lottie/lottie.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -18,10 +19,10 @@ class HomeScreen extends StatelessWidget {
             title: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Icon(
-                  Icons.groups_2,
-                  size: 35,
-                  color: context.theme.colorScheme.primary,
+                SizedBox(
+                  height: 50,
+                  width: 50,
+                  child: Lottie.asset('assets/animations/tabs/1.lottie'),
                 ),
                 Icon(
                   Icons.local_fire_department,
