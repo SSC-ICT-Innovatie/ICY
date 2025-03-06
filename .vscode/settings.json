@@ -3,7 +3,6 @@
         "**/.git": true,
         "**/.svn": true,
         "**/.hg": true,
-        "**/CVS": true,
         "**/.DS_Store": true,
         "**/Thumbs.db": true,
         ".dart_tool": true,
@@ -12,7 +11,8 @@
         ".vscode": true,
         "**/analysis_options.yaml": true,
         "devtools_options.yaml": true,
-        "README.md": true
+        "README.md": true,
+        "**/CVS": true
     },
     "hide-files.files": []
 }

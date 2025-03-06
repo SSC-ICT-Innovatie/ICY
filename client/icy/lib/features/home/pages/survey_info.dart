@@ -15,23 +15,26 @@ class SurveyInfo extends StatelessWidget {
           description: Text("You are 70% complete"),
           headerHeight: 70,
           body: Center(
-            child: FTileGroup(
-              description: Text("Survey Controls"),
-              children: [
-                FTile(
-                  title: FButton(
-                    style: FButtonStyle.secondary,
-                    onPress: () {},
-                    label: Text("Pause Survey"),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: FTileGroup(
+                description: Text("Survey Controls"),
+                children: [
+                  FTile(
+                    title: FButton(
+                      style: FButtonStyle.secondary,
+                      onPress: () {},
+                      label: Text("Pause Survey"),
+                    ),
                   ),
-                ),
-                FTile(
-                  details: Text(
-                    "Ensure you have gone through all questions before submission",
+                  FTile(
+                    details: Text(
+                      "Ensure you have gone through all questions before submission",
+                    ),
+                    title: FButton(onPress: () {}, label: Text("Submit Survey")),
                   ),
-                  title: FButton(onPress: () {}, label: Text("Submit Survey")),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

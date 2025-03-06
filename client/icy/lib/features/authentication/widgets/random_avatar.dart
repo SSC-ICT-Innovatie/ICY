@@ -37,9 +37,9 @@ class _RandomAvatarPickState extends State<RandomAvatarPick> {
       alignment: WrapAlignment.center,
       direction: Axis.horizontal,
       children: [
-        FButton.icon(child: FIcon(FAssets.icons.chevronLeft), onPress: back),
+        FButton.icon(onPress: back, child: FIcon(FAssets.icons.chevronLeft)),
         RandomAvatar(count.toString(), height: 60, width: 60),
-        FButton.icon(child: FIcon(FAssets.icons.chevronRight), onPress: next),
+        FButton.icon(onPress: next, child: FIcon(FAssets.icons.chevronRight)),
       ],
     );
   }

@@ -1,11 +1,9 @@
 import 'package:blurrycontainer/blurrycontainer.dart';
 import 'package:flutter/material.dart';
-
 import 'package:forui/forui.dart';
 import 'package:icy/features/home/pages/tabs/new.dart';
 import 'package:icy/features/home/pages/tabs/ongoing_survey.dart';
 import 'package:icy/features/home/pages/tabs/results.dart';
-import 'package:lottie/lottie.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -16,31 +14,16 @@ class HomeScreen extends StatelessWidget {
       header: Column(
         children: [
           FHeader(
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                SizedBox(
-                  height: 50,
-                  width: 50,
-                  child: Lottie.asset('assets/animations/tabs/1.lottie'),
-                ),
-                Icon(
-                  Icons.local_fire_department,
-                  size: 35,
-                  color: context.theme.colorScheme.primary,
-                ),
-                Icon(
-                  Icons.diamond,
-                  size: 35,
-                  color: context.theme.colorScheme.primary,
-                ),
-                Icon(
-                  Icons.bolt,
-                  size: 35,
-                  color: context.theme.colorScheme.primary,
-                ),
-              ],
-            ),
+            title: Text("Icy"),
+            actions: [
+              Stack(
+                alignment: Alignment.topRight,
+                children: [
+                  // in het echt checkt t altijd of de gebruiker een melding heeft ontvangen voordat we een badge laten zien
+                  Badge(label: Text("1"), child: FIcon(FAssets.icons.bell)),
+                ],
+              ),
+            ],
           ).blurry(),
           FDivider(
             style: context.theme.dividerStyles.horizontalStyle.copyWith(

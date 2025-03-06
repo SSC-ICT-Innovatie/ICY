@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:blurrycontainer/blurrycontainer.dart';
-
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:icy/abstractions/utils/constants.dart';
@@ -32,63 +31,66 @@ class ModalWrapper extends StatelessWidget {
       child: DependencyInjector().injectStateIntoApp(
         FScaffold(
           contentPad: false,
-          content: Column(
-            children: [
-              BlurryContainer(
-                blur: 40,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(0),
-                  bottomRight: Radius.circular(0),
-                  topLeft:
-                      Platform.isIOS && AppConstants().hasNotch(context)
-                          ? const Radius.circular(8)
-                          : Radius.zero,
-                  topRight:
-                      Platform.isIOS && AppConstants().hasNotch(context)
-                          ? const Radius.circular(8)
-                          : Radius.zero,
-                ),
+          content: SafeArea(
+            top: Platform.isAndroid,
+            child: Column(
+              children: [
+                BlurryContainer(
+                  blur: 40,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(0),
+                    bottomRight: Radius.circular(0),
+                    topLeft:
+                        Platform.isIOS && AppConstants().hasNotch(context)
+                            ? const Radius.circular(8)
+                            : Radius.zero,
+                    topRight:
+                        Platform.isIOS && AppConstants().hasNotch(context)
+                            ? const Radius.circular(8)
+                            : Radius.zero,
+                  ),
 
-                height: description != null ? 100 : headerHeight,
-                child: Column(
-                  spacing: 14,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        prefix ?? const SizedBox(),
-                        Text(
-                          title ?? 'Example',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 15,
-                            color:
-                                context
-                                    .theme
-                                    .headerStyle
-                                    .nestedStyle
-                                    .titleTextStyle
-                                    .color,
+                  height: description != null ? 100 : headerHeight,
+                  child: Column(
+                    spacing: 14,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          prefix ?? const SizedBox(),
+                          Text(
+                            title ?? 'Example',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 15,
+                              color:
+                                  context
+                                      .theme
+                                      .headerStyle
+                                      .nestedStyle
+                                      .titleTextStyle
+                                      .color,
+                            ),
                           ),
-                        ),
-                        FButton.icon(
-                          style: FButtonStyle.ghost,
-                          onPress: () => Navigator.of(context).pop(),
-                          child: FIcon(FAssets.icons.x),
-                        ),
-                      ],
-                    ),
-                    description != null ? (description!) : SizedBox(),
-                  ],
+                          FButton.icon(
+                            style: FButtonStyle.ghost,
+                            onPress: () => Navigator.of(context).pop(),
+                            child: FIcon(FAssets.icons.x),
+                          ),
+                        ],
+                      ),
+                      description != null ? (description!) : SizedBox(),
+                    ],
+                  ),
                 ),
-              ),
-              FDivider(
-                style: context.theme.dividerStyles.horizontalStyle.copyWith(
-                  padding: const EdgeInsets.only(bottom: 2),
+                FDivider(
+                  style: context.theme.dividerStyles.horizontalStyle.copyWith(
+                    padding: const EdgeInsets.only(bottom: 2),
+                  ),
                 ),
-              ),
-              Expanded(child: SingleChildScrollView(child: body)),
-            ],
+                Expanded(child: SingleChildScrollView(child: body)),
+              ],
+            ),
           ),
         ),
       ),

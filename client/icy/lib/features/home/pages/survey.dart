@@ -52,14 +52,11 @@ class Survey extends StatelessWidget {
         ),
       ),
       description: FProgress(value: 2 / 3),
-      body: Expanded(
-        flex: 1,
-        child: Container(
-          height: AppConstants().screenSize(context).height,
-          width: double.infinity,
-          color: Colors.amber,
-          child: Center(child: Text("")),
-        ),
+      body: Container(
+        height: AppConstants().screenSize(context).height,
+        width: double.infinity,
+        color: Colors.amber,
+        child: Center(child: Text("test")),
       ),
     );
   }

@@ -9,7 +9,7 @@ import 'package:icy/features/authentication/widgets/random_avatar.dart';
 import 'package:icy/tabs.dart';
 
 class SignupScreen extends StatefulWidget {
-  SignupScreen({super.key});
+  const SignupScreen({super.key});
 
   @override
   State<SignupScreen> createState() => _SignupScreenState();
