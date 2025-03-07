@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:icy/abstractions/utils/extensions/navigation_extensions.dart';
 import 'package:icy/abstractions/widgets/modal_wrapper.dart';
 import 'package:icy/features/authentication/state/bloc/auth_bloc.dart';
 import 'package:icy/features/notifications/bloc/notifications_bloc.dart';
@@ -68,48 +69,43 @@ class NotificationService {
     // Close the dialog
     Navigator.of(context).pop();
 
-    // Handle navigation based on notification type
-    switch (notification.type) {
-      case 'survey':
-        // Navigate to surveys
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Opening survey: ${notification.title}')),
-        );
-        break;
-      case 'achievement':
-        // Navigate to achievements
-        _navigateToTab(context, 'Achievements');
-        break;
-      case 'team':
-        // Navigate to team screen or show team dialog
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Team feature coming soon')));
-        break;
-      case 'challenge':
-        // Navigate to challenges
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Opening challenge: ${notification.title}')),
-        );
-        break;
-      default:
-        // Default action
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Action for ${notification.type} not implemented yet',
-            ),
-          ),
-        );
-    }
-  }
+    // Using the context extension already defined in your project
+    // This leverages your existing navigation architecture
+    try {
+      // Map notification types to tab names in your application
+      String tabName;
+      switch (notification.type) {
+        case 'survey':
+          tabName = "Home";
+          break;
+        case 'achievement':
+          tabName = "Achievements";
+          break;
+        case 'team':
+          tabName = "Home";
+          break;
+        case 'challenge':
+          tabName = "Home";
+          break;
+        case 'weekly':
+          tabName = "Home";
+          break;
+        default:
+          tabName = "Home";
+      }
 
-  // Helper method to navigate to a specific tab
-  void _navigateToTab(BuildContext context, String tabName) {
-    // Get the current tab index
-    // This is a simplified version - in a real app, you would use a navigation service
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Navigating to $tabName tab')));
+      // Use your existing navigation extension
+      context.navigateToTab(tabName);
+
+      // Show feedback to the user
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Opening ${notification.title}')));
+    } catch (e) {
+      print('Navigation error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Cannot navigate to this content: $e')),
+      );
+    }
   }
 }

@@ -32,10 +32,14 @@ class AuthRepository {
       final List<UserModel> users = await _loadUsers();
 
       // In a real app, password would be hashed and properly compared
-      final UserModel? user = users.firstWhere(
-        (user) => user.email == email,
-        orElse: () => null as UserModel,
-      );
+      // Fix: Use proper null handling with try-catch
+      UserModel? user;
+      try {
+        user = users.firstWhere((user) => user.email == email);
+      } catch (_) {
+        // User not found
+        return null;
+      }
 
       if (user != null) {
         // Save auth info to local storage for persistence
