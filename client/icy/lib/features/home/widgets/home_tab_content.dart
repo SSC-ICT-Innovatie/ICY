@@ -17,33 +17,32 @@ class HomeTabContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Always wrap the content with proper constraints
-    return WidgetUtils.safeHeight(
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16.0),
-            child: Text(title, style: Theme.of(context).textTheme.titleLarge),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+          child: Text(
+            title,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          Expanded(
-            // Use Expanded to fill available space but respect parent constraints
-            child:
-                items != null && items!.isNotEmpty && itemBuilder != null
-                    ? ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: items!.length,
-                      itemBuilder:
-                          (context, index) => itemBuilder!(items![index]),
-                    )
-                    : Center(
-                      child:
-                          emptyPlaceholder ?? const Text("No items available"),
-                    ),
-          ),
-        ],
-      ),
-      height: 400, // Adjust as needed
+        ),
+        items != null && items!.isNotEmpty && itemBuilder != null
+            ? ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: items!.length,
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              itemBuilder: (context, index) => itemBuilder!(items![index]),
+            )
+            : Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: emptyPlaceholder ?? const Text("No items available"),
+              ),
+            ),
+      ],
     );
   }
 }

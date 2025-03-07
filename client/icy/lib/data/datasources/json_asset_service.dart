@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
 
+//! replace with backend when in prodcution
 /// Service for loading JSON data from asset files
 class JsonAssetService {
   static final JsonAssetService _instance = JsonAssetService._internal();
