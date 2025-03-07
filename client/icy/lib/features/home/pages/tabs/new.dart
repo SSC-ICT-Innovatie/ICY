@@ -5,78 +5,54 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:icy/abstractions/utils/constants.dart';
 import 'package:icy/features/home/pages/survey.dart';
+import 'package:icy/data/models/survey_model.dart';
+import 'package:icy/features/home/widgets/survey_card.dart';
 
 class NewSurvey extends StatelessWidget {
-  const NewSurvey({super.key});
+  final List<SurveyModel> surveys;
+
+  const NewSurvey({Key? key, this.surveys = const []}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: FTileGroup.builder(
-        count: 50,
-        tileBuilder: (context, index) {
-          final surveyThumnail = "https://picsum.photos/200/300?random=$index";
-          return FTile(
-            title: Text("Survey $index"),
-            subtitle: Text("Description of survey $index"),
-            prefixIcon: Hero(
-              tag: surveyThumnail,
-              child: Container(
-                height: 50,
-                width: 50,
-                decoration: BoxDecoration(
-                  color: context.theme.colorScheme.primary,
-                  image: DecorationImage(
-                    // laat een icon zien in plaats van een afbeelding als er geen afbeelding is
-                    image: NetworkImage(surveyThumnail),
-                    fit: BoxFit.cover,
-                  ),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
+    if (surveys.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Icon(Icons.check_circle_outline, size: 48, color: Colors.grey),
+            SizedBox(height: 16),
+            Text(
+              "No new surveys available today",
+              style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
-            suffixIcon: FButton.icon(
-              onPress: () {},
-              child: FIcon(FAssets.icons.chevronRight),
+            Text(
+              "Check back later for more surveys",
+              style: TextStyle(fontSize: 14, color: Colors.grey),
             ),
-            onPress: () {
-              if (Platform.isIOS) {
-                if (AppConstants().hasNotch(context)) {
-                  showCupertinoSheet(
-                    context: context,
-                    pageBuilder: (context) => Survey(img: surveyThumnail),
-                  );
-                } else {
-                  // For older iPhones without notch and android, use a different modal approach
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Survey(img: surveyThumnail),
-                    ),
-                  );
-                }
-              } else {
-                // Android and other platforms
-                showModalBottomSheet(
-                  constraints: BoxConstraints(
-                    maxHeight: AppConstants().screenSize(context).height / 1,
-                  ),
-                  context: context,
-                  isScrollControlled: true,
-                  useSafeArea: true,
-                  enableDrag: true,
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(8),
-                    ),
-                  ),
-                  builder: (context) => Survey(img: surveyThumnail),
-                );
-              }
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: surveys.length,
+      itemBuilder: (context, index) {
+        final survey = surveys[index];
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: SurveyCard(
+            survey: survey,
+            onTap: () {
+              // Handle survey selection
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Opening survey: ${survey.title}')),
+              );
             },
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }

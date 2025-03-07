@@ -5,13 +5,20 @@ import 'package:icy/data/repositories/auth_repository.dart';
 import 'package:icy/data/repositories/marketplace_repository.dart';
 import 'package:icy/features/authentication/services/auth_cache_service.dart';
 import 'package:icy/features/authentication/state/bloc/auth_bloc.dart';
+import 'package:icy/features/home/bloc/home_bloc.dart';
+import 'package:icy/features/home/repositories/home_repository.dart';
 import 'package:icy/features/marketplace/bloc/marketplace_bloc.dart';
+import 'package:icy/features/notifications/bloc/notifications_bloc.dart';
+import 'package:icy/features/notifications/repository/notifications_repository.dart';
 import 'package:icy/tabs.dart';
 
 class DependencyInjector {
   // Create repositories
   final AuthRepository authRepository = AuthRepository();
   final MarketplaceRepository marketplaceRepository = MarketplaceRepository();
+  final NotificationsRepository notificationsRepository =
+      NotificationsRepository();
+  final HomeRepository homeRepository = HomeRepository();
 
   DependencyInjector();
 
@@ -23,6 +30,10 @@ class DependencyInjector {
         RepositoryProvider<MarketplaceRepository>(
           create: (context) => marketplaceRepository,
         ),
+        RepositoryProvider<NotificationsRepository>(
+          create: (context) => notificationsRepository,
+        ),
+        RepositoryProvider<HomeRepository>(create: (context) => homeRepository),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -53,6 +64,23 @@ class DependencyInjector {
                 marketplaceRepository: marketplaceRepo,
                 authBloc: authBloc,
               );
+            },
+          ),
+
+          // Create NotificationsBloc
+          BlocProvider<NotificationsBloc>(
+            create: (context) {
+              return NotificationsBloc(
+                notificationsRepository:
+                    context.read<NotificationsRepository>(),
+              );
+            },
+          ),
+
+          // Create HomeBloc
+          BlocProvider<HomeBloc>(
+            create: (context) {
+              return HomeBloc(homeRepository: context.read<HomeRepository>());
             },
           ),
 

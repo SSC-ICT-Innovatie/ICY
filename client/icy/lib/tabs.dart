@@ -40,7 +40,7 @@ List<IcyTab> injectNavigationTabs(BuildContext context) {
       accessRule: () => !AuthCacheService().isLoggedIn,
     ),
 
-    // App content tabs (only visible when logged in)
+    // App content tabs (only visible when the person has logged in)
     IcyTab(
       showInTabBar: isLoggedIn,
       icon: FAssets.icons.house,
@@ -62,8 +62,7 @@ List<IcyTab> injectNavigationTabs(BuildContext context) {
       icon: FAssets.icons.store,
       title: "Marketplace",
       content:
-          MarketplaceScreen(), // Use our MarketplaceScreen instead of placeholder
-      // Use the cached value for access rules
+          MarketplaceScreen(), 
       accessRule: () => AuthCacheService().isLoggedIn,
     ),
     IcyTab(

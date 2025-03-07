@@ -21,7 +21,6 @@ class MarketplaceRepositoryImpl implements MarketplaceRepository {
       return MarketplaceData.fromJson(jsonData);
     } catch (e) {
       print('Error loading marketplace data: $e');
-      // Return empty data structure instead of null to prevent null exceptions
       return MarketplaceData(categories: [], items: [], purchaseHistory: []);
     }
   }
@@ -42,30 +41,40 @@ class MarketplaceRepositoryImpl implements MarketplaceRepository {
         userPurchases.map((purchase) async {
           if (purchase.name != null) return purchase;
 
-          // If the purchase doesn't have a name, try to find the item and get its name
-          final item = marketplaceData.items.firstWhere(
-            (item) => item.id == purchase.itemId,
-            orElse: () => null as MarketplaceItem,
-          );
-
-          if (item != null) {
-            // Create a new purchase with the item name
-            return PurchaseHistoryItem(
-              id: purchase.id,
-              userId: purchase.userId,
-              itemId: purchase.itemId,
-              purchaseDate: purchase.purchaseDate,
-              expiryDate: purchase.expiryDate,
-              used: purchase.used,
-              redeemCode: purchase.redeemCode,
-              status: purchase.status,
-              permanent: purchase.permanent,
-              active: purchase.active,
-              name: item.name,
+          // FIX: Handle potential null with a default value creation
+          MarketplaceItem? item;
+          try {
+            item = marketplaceData.items.firstWhere(
+              (item) => item.id == purchase.itemId,
+            );
+          } catch (_) {
+            // Create a default item if not found
+            item = MarketplaceItem(
+              id: "unknown",
+              categoryId: "unknown",
+              name: "Unknown Item",
+              description: "Item not found",
+              image: "https://placehold.co/400x300?text=Unknown",
+              price: 0,
+              available: false,
+              featured: false,
             );
           }
 
-          return purchase;
+          // Create a new purchase with the item name
+          return PurchaseHistoryItem(
+            id: purchase.id,
+            userId: purchase.userId,
+            itemId: purchase.itemId,
+            purchaseDate: purchase.purchaseDate,
+            expiryDate: purchase.expiryDate,
+            used: purchase.used,
+            redeemCode: purchase.redeemCode,
+            status: purchase.status,
+            permanent: purchase.permanent,
+            active: purchase.active,
+            name: item.name,
+          );
         }),
       );
     } catch (e) {
@@ -79,12 +88,12 @@ class MarketplaceRepositoryImpl implements MarketplaceRepository {
     try {
       // Get the item information
       final marketplaceData = await getMarketplaceData();
-      final item = marketplaceData.items.firstWhere(
-        (item) => item.id == itemId,
-        orElse: () => null as MarketplaceItem,
-      );
 
-      if (item == null) {
+      // FIX: Use try-catch instead of orElse that might return null
+      MarketplaceItem? item;
+      try {
+        item = marketplaceData.items.firstWhere((item) => item.id == itemId);
+      } catch (_) {
         throw Exception('Item not found');
       }
 
@@ -105,12 +114,6 @@ class MarketplaceRepositoryImpl implements MarketplaceRepository {
         return false;
       }
 
-      // In a real implementation, we would:
-      // 1. Subtract coins from user account
-      // 2. Create a purchase record
-      // 3. Update inventory count
-      // 4. Handle approval flow if needed
-
       // For now, we'll just simulate a successful purchase
       return true;
     } catch (e) {
@@ -121,8 +124,6 @@ class MarketplaceRepositoryImpl implements MarketplaceRepository {
 
   // Helper method to get user data
   Future<UserModel?> _getUserData(String userId) async {
-    // In a real implementation, this would come from a user repository
-    // For now, we'll just return a fixed user
     try {
       return await _localStorageService.getAuthUser();
     } catch (e) {

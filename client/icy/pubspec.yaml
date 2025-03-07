@@ -36,12 +36,16 @@ dev_dependencies:
 
   flutter_lints: ^5.0.0
 
-
 flutter:
-
-
   uses-material-design: true
-
   assets:
     - assets/
     - assets/animations/tabs/
+    - lib/data/marketplace.json
+    - lib/data/users.json
+    - lib/data/user_data.json
+    - lib/data/surveys.json
+    - lib/data/teams.json
+    - lib/data/badges_challenges.json
+    - lib/data/levels_rewards.json
+    - lib/data/app_config.json
