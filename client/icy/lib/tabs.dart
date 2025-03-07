@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:icy/abstractions/navigation/services/icy_tab_registerar.dart';
+import 'package:icy/features/achievements/achievements.dart';
 import 'package:icy/features/authentication/screens/login.dart';
 import 'package:icy/features/authentication/screens/signup.dart';
 import 'package:icy/features/authentication/services/auth_cache_service.dart';
@@ -50,15 +51,7 @@ List<IcyTab> injectNavigationTabs(BuildContext context) {
       showInTabBar: isLoggedIn,
       icon: FAssets.icons.trophy,
       title: "Achievements",
-      content: Container(
-        color: Colors.blue,
-        child: Center(
-          child: Text(
-            "SEARCH SCREEN",
-            style: TextStyle(fontSize: 24, color: Colors.white),
-          ),
-        ),
-      ),
+      content: AchievementPage(),
       // Use the cached value for access rules
       accessRule: () => AuthCacheService().isLoggedIn,
     ),

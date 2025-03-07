@@ -57,6 +57,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.2"
+  border_progress_indicator:
+    dependency: "direct main"
+    description:
+      name: border_progress_indicator
+      sha256: "94ea76e435b560857b0ebb46bb73aadb7117a0de231ffa4a00affd521c1b6f76"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.3"
   characters:
     dependency: transitive
     description:

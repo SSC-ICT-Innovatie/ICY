@@ -1,0 +1,55 @@
+{
+  "appVersion": "1.0.0",
+  "apiEndpoints": {
+    "base": "https://api.example.com/v1",
+    "auth": "/auth",
+    "users": "/users",
+    "surveys": "/surveys",
+    "teams": "/teams",
+    "marketplace": "/marketplace"
+  },
+  "defaultSettings": {
+    "language": "nl",
+    "theme": "light",
+    "notifications": true,
+    "dailyReminderTime": "09:00"
+  },
+  "features": {
+    "marketplace": true,
+    "teams": true,
+    "challenges": true,
+    "friends": true,
+    "streaks": true,
+    "darkMode": true,
+    "notifications": true,
+    "weeklyReport": true
+  },
+  "timings": {
+    "dailySurveyReset": "07:00",
+    "weeklyLeaderboardReset": "Monday:00:00",
+    "streakResetHour": 23,
+    "reminderBefore": 3600,
+    "sessionTimeout": 1800
+  },
+  "gamification": {
+    "enableBadges": true,
+    "enableLevels": true,
+    "enableChallenges": true,
+    "enableAchievements": true,
+    "enableRewards": true,
+    "maxLevel": 10,
+    "coinsEnabled": true
+  },
+  "content": {
+    "welcomeMessage": "Welkom bij de ICY app! Vul dagelijks enquêtes in, verdien beloningen en help je organisatie te verbeteren.",
+    "surveyEmptyState": "Er zijn momenteel geen nieuwe enquêtes beschikbaar. Kom later terug!",
+    "achievementsEmptyState": "Je hebt nog geen prestaties behaald. Begin met het invullen van enquêtes!",
+    "marketplaceEmptyState": "Je hebt nog niet genoeg munten om iets te kopen. Vul enquêtes in om munten te verdienen!"
+  },
+  "localStorageKeys": {
+    "authToken": "icy_auth_token",
+    "userId": "icy_user_id",
+    "userPreferences": "icy_user_prefs",
+    "language": "icy_language"
+  }
+}

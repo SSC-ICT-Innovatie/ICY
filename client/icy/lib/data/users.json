@@ -1,0 +1,64 @@
+{
+  "users": [
+    {
+      "id": "user123",
+      "username": "jansmit",
+      "email": "jan.smit@bedrijf.nl",
+      "fullName": "Jan Smit",
+      "password": "hashed_password_here",
+      "avatar": "https://placehold.co/400x400?text=JanSmit",
+      "department": "IT Innovatie",
+      "role": "user"
+    },
+    {
+      "id": "user124",
+      "username": "emmadejong",
+      "email": "emma.dejong@bedrijf.nl",
+      "fullName": "Emma de Jong",
+      "password": "hashed_password_here",
+      "avatar": "https://placehold.co/400x400?text=EmmaDeJong",
+      "department": "IT Innovatie",
+      "role": "team_lead"
+    },
+    {
+      "id": "user125",
+      "username": "markbakker",
+      "email": "mark.bakker@bedrijf.nl",
+      "fullName": "Mark Bakker",
+      "password": "hashed_password_here",
+      "avatar": "https://placehold.co/400x400?text=MarkBakker",
+      "department": "IT Innovatie",
+      "role": "user"
+    },
+    {
+      "id": "user126",
+      "username": "saravisser",
+      "email": "sara.visser@bedrijf.nl",
+      "fullName": "Sara Visser",
+      "password": "hashed_password_here",
+      "avatar": "https://placehold.co/400x400?text=SaraVisser",
+      "department": "IT Innovatie",
+      "role": "user"
+    },
+    {
+      "id": "user127",
+      "username": "lisabruin",
+      "email": "lisa.bruin@bedrijf.nl",
+      "fullName": "Lisa Bruin",
+      "password": "hashed_password_here",
+      "avatar": "https://placehold.co/400x400?text=LisaBruin",
+      "department": "HR",
+      "role": "user"
+    },
+    {
+      "id": "admin001",
+      "username": "admin",
+      "email": "admin@bedrijf.nl",
+      "fullName": "Systeem Beheerder",
+      "password": "admin_hashed_password_here",
+      "avatar": "https://placehold.co/400x400?text=Admin",
+      "department": "IT Beheer",
+      "role": "admin"
+    }
+  ]
+}

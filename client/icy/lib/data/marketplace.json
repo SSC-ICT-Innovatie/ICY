@@ -1,0 +1,139 @@
+{
+  "categories": [
+    {
+      "id": "cat_rewards",
+      "name": "Beloningen",
+      "icon": "card_giftcard"
+    },
+    {
+      "id": "cat_avatars",
+      "name": "Avatars",
+      "icon": "face"
+    },
+    {
+      "id": "cat_themes",
+      "name": "App Thema's",
+      "icon": "palette"
+    },
+    {
+      "id": "cat_company",
+      "name": "Bedrijfsvoordelen",
+      "icon": "business"
+    }
+  ],
+  "items": [
+    {
+      "id": "item_001",
+      "categoryId": "cat_rewards",
+      "name": "Koffiebon",
+      "description": "Gratis koffie in het bedrijfscafé",
+      "image": "https://placehold.co/400x300?text=Koffiebon",
+      "price": 100,
+      "available": true,
+      "featured": true,
+      "quantity": 15,
+      "expiryDays": 30
+    },
+    {
+      "id": "item_002",
+      "categoryId": "cat_rewards",
+      "name": "Lunchbon",
+      "description": "Gratis lunch in de bedrijfskantine",
+      "image": "https://placehold.co/400x300?text=Lunchbon",
+      "price": 250,
+      "available": true,
+      "featured": true,
+      "quantity": 10,
+      "expiryDays": 30
+    },
+    {
+      "id": "item_003",
+      "categoryId": "cat_rewards",
+      "name": "Bioscoopkaartje",
+      "description": "Gratis bioscoopkaartje voor lokale bioscoop",
+      "image": "https://placehold.co/400x300?text=Bioscoopkaartje",
+      "price": 500,
+      "available": true,
+      "featured": false,
+      "quantity": 5,
+      "expiryDays": 60
+    },
+    {
+      "id": "item_004",
+      "categoryId": "cat_avatars",
+      "name": "Superhelden Avatar Pakket",
+      "description": "Exclusieve superhelden-thema avatars",
+      "image": "https://placehold.co/400x300?text=Superhelden",
+      "price": 150,
+      "available": true,
+      "featured": false,
+      "permanent": true
+    },
+    {
+      "id": "item_005",
+      "categoryId": "cat_themes",
+      "name": "Donkere Modus Thema",
+      "description": "Stijlvol donker thema voor de app",
+      "image": "https://placehold.co/400x300?text=DonkerThema",
+      "price": 200,
+      "available": true,
+      "featured": true,
+      "permanent": true
+    },
+    {
+      "id": "item_006",
+      "categoryId": "cat_company",
+      "name": "Thuiswerkdag",
+      "description": "Eén dag goedgekeurd thuiswerken",
+      "image": "https://placehold.co/400x300?text=Thuiswerk",
+      "price": 1000,
+      "available": true,
+      "featured": true,
+      "quantity": 3,
+      "approvalRequired": true
+    },
+    {
+      "id": "item_007",
+      "categoryId": "cat_company",
+      "name": "Carrière Mentorsessie",
+      "description": "30 minuten sessie met een senior leider",
+      "image": "https://placehold.co/400x300?text=Mentorsessie",
+      "price": 750,
+      "available": true,
+      "featured": false,
+      "quantity": 2,
+      "approvalRequired": true
+    }
+  ],
+  "purchaseHistory": [
+    {
+      "id": "purchase_001",
+      "userId": "user123",
+      "itemId": "item_001",
+      "purchaseDate": "2025-02-15T11:30:00Z",
+      "expiryDate": "2025-03-17T11:30:00Z",
+      "used": false,
+      "redeemCode": "KOFFIE123456",
+      "status": "active"
+    },
+    {
+      "id": "purchase_002",
+      "userId": "user123",
+      "itemId": "item_005",
+      "purchaseDate": "2025-01-20T14:45:00Z",
+      "permanent": true,
+      "active": true,
+      "status": "active"
+    },
+    {
+      "id": "purchase_003",
+      "userId": "user124",
+      "itemId": "item_003",
+      "purchaseDate": "2025-02-20T16:30:00Z",
+      "expiryDate": "2025-04-21T16:30:00Z",
+      "used": true,
+      "redeemCode": "BIOS789012",
+      "status": "used"
+    }
+  ]
+}

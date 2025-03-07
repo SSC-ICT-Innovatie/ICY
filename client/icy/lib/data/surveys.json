@@ -1,0 +1,264 @@
+{
+  "surveys": [
+    {
+      "id": "survey_001",
+      "title": "Dagelijkse Uitdaging",
+      "description": "3 snelle vragen over de werkomgeving",
+      "questions": [
+        {
+          "id": "q1",
+          "text": "Hoe tevreden ben je vandaag met je werkomgeving?",
+          "type": "rating",
+          "options": [1, 2, 3, 4, 5]
+        },
+        {
+          "id": "q2",
+          "text": "Wat vind je het meest productieve aspect van je werkplek?",
+          "type": "multiple_choice",
+          "options": ["Rustige omgeving", "Ergonomische opstelling", "Technologische hulpmiddelen", "Nabijheid van collega's", "Anders"]
+        },
+        {
+          "id": "q3",
+          "text": "Heb je suggesties om de werkomgeving te verbeteren?",
+          "type": "text",
+          "optional": true
+        }
+      ],
+      "estimatedTime": "2 min",
+      "reward": {
+        "xp": 50,
+        "coins": 15
+      },
+      "createdAt": "2025-03-07T07:00:00Z",
+      "expiresAt": "2025-03-07T23:59:59Z",
+      "tags": ["dagelijks", "werkplek"],
+      "targetDepartments": ["all"]
+    },
+    {
+      "id": "survey_002",
+      "title": "Teamsamenwerking",
+      "description": "Help ons te begrijpen hoe teams samenwerken",
+      "questions": [
+        {
+          "id": "q1",
+          "text": "Hoe effectief communiceert je team?",
+          "type": "rating",
+          "options": [1, 2, 3, 4, 5]
+        },
+        {
+          "id": "q2",
+          "text": "Welke samenwerkingstools gebruik je het meest?",
+          "type": "multiple_choice",
+          "options": ["Email", "Teams/Slack", "Vergaderingen", "Projectbeheertools", "Anders"]
+        },
+        {
+          "id": "q3",
+          "text": "Hoe vaak heb je teamoverleg?",
+          "type": "single_choice",
+          "options": ["Dagelijks", "Meerdere keren per week", "Wekelijks", "Maandelijks", "Zelden"]
+        },
+        {
+          "id": "q4",
+          "text": "Voel je je gehoord tijdens teamoverleg?",
+          "type": "rating",
+          "options": [1, 2, 3, 4, 5]
+        },
+        {
+          "id": "q5",
+          "text": "Heb je suggesties om de teamsamenwerking te verbeteren?",
+          "type": "text",
+          "optional": true
+        }
+      ],
+      "estimatedTime": "4 min",
+      "reward": {
+        "xp": 75,
+        "coins": 25
+      },
+      "createdAt": "2025-03-07T07:00:00Z",
+      "expiresAt": "2025-03-10T23:59:59Z",
+      "tags": ["wekelijks", "samenwerking"],
+      "targetDepartments": ["all"]
+    },
+    {
+      "id": "survey_003",
+      "title": "Maandelijkse Afdelingsbeoordeling",
+      "description": "Deel je gedachten over de prestaties van je afdeling",
+      "questions": [
+        {
+          "id": "q1",
+          "text": "Hoe beoordeel je de algehele productiviteit van je afdeling?",
+          "type": "rating",
+          "options": [1, 2, 3, 4, 5]
+        },
+        {
+          "id": "q2",
+          "text": "Worden deadlines over het algemeen gehaald?",
+          "type": "rating",
+          "options": [1, 2, 3, 4, 5]
+        },
+        {
+          "id": "q3",
+          "text": "Hoe is de samenwerking tussen teamleden?",
+          "type": "rating",
+          "options": [1, 2, 3, 4, 5]
+        },
+        {
+          "id": "q4",
+          "text": "Voel je je ondersteund door je leidinggevende?",
+          "type": "rating",
+          "options": [1, 2, 3, 4, 5]
+        },
+        {
+          "id": "q5",
+          "text": "Worden je ideeën en suggesties gewaardeerd?",
+          "type": "rating",
+          "options": [1, 2, 3, 4, 5]
+        },
+        {
+          "id": "q6",
+          "text": "Wat gaat er goed binnen je afdeling?",
+          "type": "text"
+        },
+        {
+          "id": "q7",
+          "text": "Wat kan er verbeterd worden binnen je afdeling?",
+          "type": "text"
+        },
+        {
+          "id": "q8",
+          "text": "Aanvullende opmerkingen of suggesties",
+          "type": "text",
+          "optional": true
+        }
+      ],
+      "estimatedTime": "7 min",
+      "reward": {
+        "xp": 120,
+        "coins": 40
+      },
+      "createdAt": "2025-03-01T08:00:00Z",
+      "expiresAt": "2025-03-15T23:59:59Z",
+      "tags": ["maandelijks", "afdeling"],
+      "targetDepartments": ["all"]
+    },
+    {
+      "id": "survey_000",
+      "title": "Uitdaging van Gisteren",
+      "description": "Vragen over werkplek hulpmiddelen",
+      "questions": [
+        {
+          "id": "q1",
+          "text": "Heb je alle benodigde tools voor je werk?",
+          "type": "yes_no"
+        },
+        {
+          "id": "q2",
+          "text": "Welke tool gebruik je het meest?",
+          "type": "text"
+        },
+        {
+          "id": "q3",
+          "text": "Welke nieuwe tool zou je werk verbeteren?",
+          "type": "text",
+          "optional": true
+        }
+      ],
+      "estimatedTime": "2 min",
+      "reward": {
+        "xp": 50,
+        "coins": 15
+      },
+      "createdAt": "2025-03-06T07:00:00Z",
+      "expiresAt": "2025-03-06T23:59:59Z",
+      "tags": ["dagelijks", "hulpmiddelen"],
+      "targetDepartments": ["all"],
+      "archived": true
+    }
+  ],
+  "responses": [
+    {
+      "id": "resp_000123",
+      "surveyId": "survey_000",
+      "userId": "user123",
+      "completedAt": "2025-03-06T10:15:00Z",
+      "answers": [
+        {
+          "questionId": "q1",
+          "answer": "ja"
+        },
+        {
+          "questionId": "q2",
+          "answer": "Microsoft Teams"
+        },
+        {
+          "questionId": "q3",
+          "answer": "Een betere projectmanagementtool"
+        }
+      ]
+    },
+    {
+      "id": "resp_003124",
+      "surveyId": "survey_003",
+      "userId": "user124",
+      "completedAt": "2025-03-05T14:30:00Z",
+      "answers": [
+        {
+          "questionId": "q1",
+          "answer": 4
+        },
+        {
+          "questionId": "q2",
+          "answer": 5
+        },
+        {
+          "questionId": "q3",
+          "answer": 4
+        },
+        {
+          "questionId": "q4",
+          "answer": 5
+        },
+        {
+          "questionId": "q5",
+          "answer": 4
+        },
+        {
+          "questionId": "q6",
+          "answer": "De communicatie en samenwerking gaan erg goed."
+        },
+        {
+          "questionId": "q7",
+          "answer": "We kunnen beter worden in het plannen van lange-termijn doelen."
+        },
+        {
+          "questionId": "q8",
+          "answer": ""
+        }
+      ]
+    }
+  ],
+  "userProgress": [
+    {
+      "userId": "user123",
+      "surveyId": "survey_003",
+      "completed": 3,
+      "totalQuestions": 8,
+      "lastUpdated": "2025-03-06T15:45:00Z",
+      "answers": [
+        {
+          "questionId": "q1",
+          "answer": 3
+        },
+        {
+          "questionId": "q2",
+          "answer": 4
+        },
+        {
+          "questionId": "q3",
+          "answer": 4
+        }
+      ]
+    }
+  ]
+}

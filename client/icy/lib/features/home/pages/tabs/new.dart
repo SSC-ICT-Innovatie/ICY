@@ -21,20 +21,17 @@ class NewSurvey extends StatelessWidget {
             subtitle: Text("Description of survey $index"),
             prefixIcon: Hero(
               tag: surveyThumnail,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(360),
-                child: Container(
-                  height: 50,
-                  width: 50,
-                  decoration: BoxDecoration(
-                    color: context.theme.colorScheme.primary,
-                    image: DecorationImage(
-                      // laat een icon zien in plaats van een afbeelding als er geen afbeelding is
-                      image: NetworkImage(surveyThumnail),
-                      fit: BoxFit.cover,
-                    ),
-                    borderRadius: BorderRadius.circular(8),
+              child: Container(
+                height: 50,
+                width: 50,
+                decoration: BoxDecoration(
+                  color: context.theme.colorScheme.primary,
+                  image: DecorationImage(
+                    // laat een icon zien in plaats van een afbeelding als er geen afbeelding is
+                    image: NetworkImage(surveyThumnail),
+                    fit: BoxFit.cover,
                   ),
+                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
             ),
