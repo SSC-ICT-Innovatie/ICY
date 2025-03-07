@@ -6,6 +6,8 @@ import 'package:icy/features/authentication/screens/login.dart';
 import 'package:icy/features/authentication/screens/signup.dart';
 import 'package:icy/features/authentication/services/auth_cache_service.dart';
 import 'package:icy/features/home/screens/home_screen.dart';
+import 'package:icy/features/marketplace/screens/marketplace_screen.dart';
+import 'package:icy/features/profile/screens/profile_screen.dart';
 
 // Function that dynamically checks login status using the current context
 bool hasLoggedIn(BuildContext context) {
@@ -59,15 +61,8 @@ List<IcyTab> injectNavigationTabs(BuildContext context) {
       showInTabBar: isLoggedIn,
       icon: FAssets.icons.store,
       title: "Marketplace",
-      content: Container(
-        color: Colors.orange,
-        child: Center(
-          child: Text(
-            "Marketplace",
-            style: TextStyle(fontSize: 24, color: Colors.white),
-          ),
-        ),
-      ),
+      content:
+          MarketplaceScreen(), // Use our MarketplaceScreen instead of placeholder
       // Use the cached value for access rules
       accessRule: () => AuthCacheService().isLoggedIn,
     ),
@@ -75,15 +70,7 @@ List<IcyTab> injectNavigationTabs(BuildContext context) {
       showInTabBar: isLoggedIn,
       icon: FAssets.icons.user,
       title: "Profile",
-      content: Container(
-        color: Colors.orange,
-        child: Center(
-          child: Text(
-            "Profile",
-            style: TextStyle(fontSize: 24, color: Colors.white),
-          ),
-        ),
-      ),
+      content: ProfileScreen(),
       // Use the cached value for access rules
       accessRule: () => AuthCacheService().isLoggedIn,
     ),
