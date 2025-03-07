@@ -35,24 +35,29 @@ class NewSurvey extends StatelessWidget {
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: surveys.length,
-      itemBuilder: (context, index) {
-        final survey = surveys[index];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: SurveyCard(
-            survey: survey,
-            onTap: () {
-              // Handle survey selection
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Opening survey: ${survey.title}')),
-              );
-            },
-          ),
-        );
-      },
+    // Use a Container with a specified height to avoid the unbounded height error
+    return Container(
+      // This ensures the ListView has a bounded height
+      height: MediaQuery.of(context).size.height,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: surveys.length,
+        itemBuilder: (context, index) {
+          final survey = surveys[index];
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: SurveyCard(
+              survey: survey,
+              onTap: () {
+                // Handle survey selection
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Opening survey: ${survey.title}')),
+                );
+              },
+            ),
+          );
+        },
+      ),
     );
   }
 }

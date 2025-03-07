@@ -5,6 +5,7 @@ import 'package:icy/abstractions/widgets/modal_wrapper.dart';
 import 'package:icy/features/authentication/state/bloc/auth_bloc.dart';
 import 'package:icy/features/notifications/bloc/notifications_bloc.dart';
 import 'package:icy/features/notifications/models/notification_model.dart';
+import 'package:icy/features/notifications/repository/notifications_repository.dart';
 import 'package:icy/features/notifications/widgets/notifications_dialog.dart';
 
 class NotificationService {
@@ -24,13 +25,22 @@ class NotificationService {
 
     final userId = authState.user.id;
 
-    // Load notifications before showing dialog
-    context.read<NotificationsBloc>().add(LoadNotifications(userId: userId));
+    // Create a local NotificationsBloc specifically for the dialog
+    final notificationsRepository = NotificationsRepository();
+    final notificationsBloc = NotificationsBloc(
+      notificationsRepository: notificationsRepository,
+    );
 
-    // Show the dialog using the modal wrapper
+    // Load notifications
+    notificationsBloc.add(LoadNotifications(userId: userId));
+
+    // Show the dialog using the modal wrapper with the BlocProvider
     ModalWrapper.showModal(
       context: context,
-      child: NotificationsDialog(userId: userId),
+      child: BlocProvider<NotificationsBloc>.value(
+        value: notificationsBloc,
+        child: NotificationsDialog(userId: userId),
+      ),
     );
   }
 

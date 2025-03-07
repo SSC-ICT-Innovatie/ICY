@@ -50,83 +50,89 @@ class _MarketplaceScreenState extends State<MarketplaceScreen>
           final user = authState.user;
           final coins = user.stats?.totalCoins ?? 0;
 
-          return BlocConsumer<MarketplaceBloc, MarketplaceState>(
-            listener: (context, state) {
-              if (state is MarketplaceError) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.message),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              } else if (state is MarketplacePurchaseError) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.message),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            },
-            builder: (context, state) {
-              if (state is MarketplaceInitial || state is MarketplaceLoading) {
-                return const Center(child: CircularProgressIndicator());
-              }
-
-              if (state is MarketplaceLoaded) {
-                return Column(
-                  children: [
-                    // Coins display
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.yellow.shade100,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.monetization_on, color: Colors.yellow),
-                          const SizedBox(width: 4),
-                          Text(
-                            '$coins munten',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
+          return Material(
+            type: MaterialType.transparency,
+            child: BlocConsumer<MarketplaceBloc, MarketplaceState>(
+              listener: (context, state) {
+                if (state is MarketplaceError) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(state.message),
+                      backgroundColor: Colors.red,
                     ),
-
-                    // Tab bar
-                    TabBar(
-                      controller: _tabController,
-                      tabs: const [
-                        Tab(text: 'Winkel'),
-                        Tab(text: 'Mijn Aankopen'),
-                      ],
+                  );
+                } else if (state is MarketplacePurchaseError) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(state.message),
+                      backgroundColor: Colors.red,
                     ),
+                  );
+                }
+              },
+              builder: (context, state) {
+                if (state is MarketplaceInitial ||
+                    state is MarketplaceLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-                    // Tab content
-                    Expanded(
-                      child: TabBarView(
+                if (state is MarketplaceLoaded) {
+                  return Column(
+                    children: [
+                      // Coins display
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        margin: const EdgeInsets.symmetric(vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.yellow.shade100,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.monetization_on, color: Colors.yellow),
+                            const SizedBox(width: 4),
+                            Text(
+                              '$coins munten',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Tab bar
+                      TabBar(
                         controller: _tabController,
-                        children: [
-                          // Store tab
-                          _buildStoreTab(state),
-
-                          // Purchases tab
-                          PurchaseHistoryTab(purchases: state.userPurchases),
+                        tabs: const [
+                          Tab(text: 'Winkel'),
+                          Tab(text: 'Mijn Aankopen'),
                         ],
                       ),
-                    ),
-                  ],
-                );
-              }
 
-              return const Center(
-                child: Text('Er ging iets mis. Probeer het later opnieuw.'),
-              );
-            },
+                      // Tab content
+                      Expanded(
+                        child: TabBarView(
+                          controller: _tabController,
+                          children: [
+                            // Store tab
+                            _buildStoreTab(state),
+
+                            // Purchases tab
+                            PurchaseHistoryTab(purchases: state.userPurchases),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                }
+
+                return const Center(
+                  child: Text('Er ging iets mis. Probeer het later opnieuw.'),
+                );
+              },
+            ),
           );
         },
       ),

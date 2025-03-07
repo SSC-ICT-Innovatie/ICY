@@ -321,20 +321,39 @@ class _HomeScreenState extends State<HomeScreen> {
                           tabs: [
                             FTabEntry(
                               label: const Text("Today"),
-                              content: NewSurvey(
-                                surveys:
-                                    homeState is HomeLoaded
-                                        ? homeState.dailySurveys
-                                        : [],
+                              content: SizedBox(
+                                height:
+                                    200, // Use a reasonable fixed height instead of infinite
+                                child: Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      NewSurvey(
+                                        surveys:
+                                            homeState is HomeLoaded
+                                                ? homeState.dailySurveys
+                                                : [],
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
                             ),
                             const FTabEntry(
                               label: Text("Ongoing"),
-                              content: OngoingSurvey(),
+                              content: SizedBox(
+                                height: double.infinity,
+                                child: OngoingSurvey(),
+                              ),
                             ),
                             const FTabEntry(
                               label: Text("Results"),
-                              content: SurveyResults(),
+                              content: SizedBox(
+                                height: double.infinity,
+                                child: SurveyResults(),
+                              ),
                             ),
                           ],
                           initialIndex: 0,
