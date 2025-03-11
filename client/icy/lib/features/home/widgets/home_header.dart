@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:icy/features/notifications/widgets/notifications_button.dart';
 
 class HomeHeader extends StatelessWidget {
-  final dynamic user; // Change to dynamic to avoid type errors
+  final dynamic user;
   final Color primaryColor;
 
   const HomeHeader({Key? key, required this.user, required this.primaryColor})
@@ -13,7 +12,7 @@ class HomeHeader extends StatelessWidget {
     final Color secondaryColor = Colors.amber.shade500;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
       decoration: BoxDecoration(
         // Amber gradient for the header
         gradient: LinearGradient(
@@ -23,51 +22,42 @@ class HomeHeader extends StatelessWidget {
         ),
       ),
       child: SafeArea(
+        bottom: false, // Don't pad the bottom since we're in a flexible space
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Title & Notification Row
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Icy",
-                  style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                // Survey notification button
-                const NotificationsButton(),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-
+            // Title & Notification Row - now it's part of the AppBar so we can hide it
+            const SizedBox(height: 50), // Space for the AppBar title
             // Enhanced Gamification Container
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                children: [
-                  // Gamification metrics row
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Streak Counter
-                      _buildStreakCounter(user),
-                      // XP Points
-                      _buildXpCounter(user),
-                    ],
-                  ),
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 16,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Gamification metrics row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Streak Counter
+                        _buildStreakCounter(user),
+                        // XP Points
+                        _buildXpCounter(user),
+                      ],
+                    ),
 
-                  const SizedBox(height: 12),
-                  // Team competition element
-                  _buildTeamCompetition(),
-                ],
+                    const SizedBox(height: 12),
+                    // Team competition element
+                    _buildTeamCompetition(),
+                  ],
+                ),
               ),
             ),
           ],

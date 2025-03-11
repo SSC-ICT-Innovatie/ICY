@@ -1,9 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:forui/forui.dart';
-import 'package:icy/abstractions/navigation/widgets/modal_wrapper.dart';
-import 'package:icy/core/utils/widget_utils.dart';
+import 'package:forui/widgets/scaffold.dart';
 import 'package:icy/features/authentication/state/bloc/auth_bloc.dart';
 import 'package:icy/features/home/bloc/home_bloc.dart';
 import 'package:icy/features/home/widgets/daily_challenge_card.dart';
@@ -45,9 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
         final Color primaryColor = Colors.amber.shade700;
 
         return FScaffold(
-          // Extract header to a separate widget
-          header: HomeHeader(user: user, primaryColor: primaryColor),
-
+          contentPad: false,
           content: RefreshIndicator(
             onRefresh: () async {
               _loadHomeData();
@@ -55,16 +51,49 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             child: BlocBuilder<HomeBloc, HomeState>(
               builder: (context, homeState) {
-                return Scrollbar(
-                  child: Column(
-                    children: [
-                      // Extract daily challenge to a separate widget
-                      DailyChallengeCard(primaryColor: primaryColor),
+                return CustomScrollView(
+                  slivers: [
+                    // SliverAppBar with HomeHeader
+                    SliverAppBar(
+                      backgroundColor: context.theme.colorScheme.primary,
+                      expandedHeight: 200.0,
+                      pinned: true,
+                      flexibleSpace: FlexibleSpaceBar(
+                        background: HomeHeader(
+                          user: user,
+                          primaryColor: primaryColor,
+                        ),
+                      ),
 
-                      // Extract tab section to a separate widget
-                      const Expanded(child: HomeTabSection()),
-                    ],
-                  ),
+                      title: Padding(
+                        padding: context.theme.scaffoldStyle.contentPadding,
+                        child: Text(
+                          'Icy',
+                          style: context
+                              .theme
+                              .headerStyle
+                              .rootStyle
+                              .titleTextStyle
+                              .copyWith(color: Colors.white),
+                        ),
+                      ),
+                      titleSpacing: 0,
+                      centerTitle: false,
+                    ),
+
+                    SliverToBoxAdapter(
+                      child: DailyChallengeCard(
+                        primaryColor: primaryColor,
+                        onTap: () {},
+                      ),
+                    ),
+
+                    // SliverFillRemaining for the tab section content
+                    SliverFillRemaining(
+                      hasScrollBody: true,
+                      child: HomeTabSection(),
+                    ),
+                  ],
                 );
               },
             ),

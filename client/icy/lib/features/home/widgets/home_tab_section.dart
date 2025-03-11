@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:forui/forui.dart';
 import 'package:icy/abstractions/navigation/widgets/modal_wrapper.dart';
 import 'package:icy/features/home/bloc/home_bloc.dart';
-import 'package:icy/features/home/pages/tabs/new.dart';
+import 'package:icy/features/home/pages/tabs/today.dart';
 import 'package:icy/features/home/pages/tabs/ongoing_survey.dart';
 import 'package:icy/features/home/pages/tabs/results.dart';
 
@@ -72,26 +72,17 @@ class _HomeTabSectionState extends State<HomeTabSection> {
                   });
                 },
                 children: [
-                  // Today tab
-                  SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        NewSurvey(
-                          surveys:
-                              homeState is HomeLoaded
-                                  ? homeState.dailySurveys
-                                  : [],
-                        ),
-                      ],
-                    ),
+                  // Today tab - use SliverList compatible widget
+                  NewSurvey(
+                    surveys:
+                        homeState is HomeLoaded ? homeState.dailySurveys : [],
                   ),
 
                   // Ongoing tab
-                  const SingleChildScrollView(child: OngoingSurvey()),
+                  const OngoingSurvey(),
 
                   // Results tab
-                  const SingleChildScrollView(child: SurveyResults()),
+                  const SurveyResults(),
                 ],
               ),
             ),

@@ -1,14 +1,6 @@
-import 'dart:io';
-
-import 'package:border_progress_indicator/border_progress_indicator.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
-import 'package:icy/abstractions/utils/constants.dart';
-import 'package:icy/features/home/pages/survey.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:icy/features/authentication/state/bloc/auth_bloc.dart';
-import 'package:icy/features/home/bloc/home_bloc.dart';
 
 class OngoingSurvey extends StatelessWidget {
   const OngoingSurvey({super.key});
@@ -20,7 +12,7 @@ class OngoingSurvey extends StatelessWidget {
       return const Center(child: Text('Please log in to view ongoing surveys'));
     }
 
-    // We'll get ongoing surveys from user profile once implemented
+    // here too, get ongoing surveys from user profile once implemented
     // For now, show placeholder
     return Center(
       child: Column(

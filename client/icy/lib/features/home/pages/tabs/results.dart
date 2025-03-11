@@ -1,10 +1,4 @@
-import 'dart:io';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
-import 'package:icy/abstractions/utils/constants.dart';
-import 'package:icy/features/home/pages/survey.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:icy/features/authentication/state/bloc/auth_bloc.dart';
 
@@ -18,7 +12,7 @@ class SurveyResults extends StatelessWidget {
       return const Center(child: Text('Please log in to view survey results'));
     }
 
-    // We'll get completed surveys from user profile once implemented
+    //get completed surveys from user profile once implemented
     // For now, show placeholder
     return Center(
       child: Column(

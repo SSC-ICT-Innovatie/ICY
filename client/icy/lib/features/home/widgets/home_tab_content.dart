@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../core/utils/widget_utils.dart';
 
 class HomeTabContent extends StatelessWidget {
   final String title;
@@ -8,12 +7,12 @@ class HomeTabContent extends StatelessWidget {
   final Widget? emptyPlaceholder;
 
   const HomeTabContent({
-    Key? key,
+    super.key,
     required this.title,
     this.items,
     this.itemBuilder,
     this.emptyPlaceholder,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

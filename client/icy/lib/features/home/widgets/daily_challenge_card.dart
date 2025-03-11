@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
-import 'package:icy/data/models/challenge_model.dart';
 
 class DailyChallengeCard extends StatelessWidget {
   final Color primaryColor;
   final VoidCallback? onTap;
 
-  const DailyChallengeCard({Key? key, required this.primaryColor, this.onTap})
-    : super(key: key);
+  const DailyChallengeCard({super.key, required this.primaryColor, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +35,11 @@ class DailyChallengeCard extends StatelessWidget {
                 children: const [
                   Text(
                     "Daily Challenge Available",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.black,
+                    ),
                   ),
                   Text(
                     "3 quick questions • Complete for 50 XP",

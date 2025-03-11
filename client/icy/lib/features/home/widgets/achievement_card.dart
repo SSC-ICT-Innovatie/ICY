@@ -6,8 +6,7 @@ import 'package:intl/intl.dart';
 class AchievementCard extends StatelessWidget {
   final AchievementModel achievement;
 
-  const AchievementCard({Key? key, required this.achievement})
-    : super(key: key);
+  const AchievementCard({super.key, required this.achievement});
 
   @override
   Widget build(BuildContext context) {
