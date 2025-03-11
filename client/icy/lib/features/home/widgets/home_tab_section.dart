@@ -31,29 +31,34 @@ class _HomeTabSectionState extends State<HomeTabSection> {
       builder: (context, homeState) {
         return Column(
           children: [
-            // Tab header with buttons
+            // Tab header with radio buttons
             SizedBox(
               height: 50,
               child: Row(
                 children: [
                   Expanded(
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      children: [
-                        _buildTabButton(0, "Today", _currentTabIndex == 0),
-                        const SizedBox(width: 8),
-                        _buildTabButton(1, "Ongoing", _currentTabIndex == 1),
-                        const SizedBox(width: 8),
-                        _buildTabButton(2, "Results", _currentTabIndex == 2),
-                        const SizedBox(width: 16),
-                        FButton(
-                          onPress: () => _showAllContent(context, homeState),
-                          label: const Text("See All"),
-                          style: FButtonStyle.ghost,
-                          prefix: FIcon(FAssets.icons.layoutDashboard),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            _buildTabButton(0, "Today"),
+                            const SizedBox(width: 8),
+                            _buildTabButton(1, "Ongoing"),
+                            const SizedBox(width: 8),
+                            _buildTabButton(2, "Results"),
+                            const SizedBox(width: 16),
+                            FButton(
+                              onPress:
+                                  () => _showAllContent(context, homeState),
+                              label: const Text("See All"),
+                              style: FButtonStyle.secondary,
+                              prefix: FIcon(FAssets.icons.layoutDashboard),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 ],
@@ -92,21 +97,31 @@ class _HomeTabSectionState extends State<HomeTabSection> {
     );
   }
 
-  // Function to build tab buttons
-  Widget _buildTabButton(int index, String label, bool isSelected) {
-    return FButton(
-      onPress: () {
-        setState(() {
-          _currentTabIndex = index;
-          _pageController.animateToPage(
-            index,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-          );
-        });
-      },
-      style: isSelected ? FButtonStyle.primary : FButtonStyle.secondary,
-      label: Text(label),
+  // Function to build tab radio buttons
+  Widget _buildTabButton(int index, String label) {
+    // Each tab needs its own radio with a boolean value
+    final bool isSelected = _currentTabIndex == index;
+
+    return SizedBox(
+      width: 100,
+      child: FRadio(
+        label: Wrap(children: [Text(label)]),
+        value: isSelected, // Always true as per the API
+
+        onChange: (value) {
+          if (value == true) {
+            // Only react to selection, not deselection
+            setState(() {
+              _currentTabIndex = index;
+              _pageController.animateToPage(
+                index,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+              );
+            });
+          }
+        },
+      ),
     );
   }
 
