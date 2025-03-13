@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:forui/forui.dart';
@@ -50,13 +53,13 @@ class MarketplaceScreen extends StatelessWidget {
                 children: [
                   Text('Error: ${state.message}'),
                   const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
+                  FButton(
+                    onPress: () {
                       context.read<MarketplaceBloc>().add(
                         const LoadMarketplace(),
                       );
                     },
-                    child: const Text('Try Again'),
+                    label: const Text('Try Again'),
                   ),
                 ],
               ),
@@ -68,7 +71,7 @@ class MarketplaceScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(),
+                  CircularProgressIndicator.adaptive(),
                   SizedBox(height: 16),
                   Text('Processing your purchase...'),
                 ],
@@ -90,6 +93,8 @@ class MarketplaceScreen extends StatelessWidget {
     BuildContext context,
     MarketplaceLoaded state,
   ) {
+    final theme = FTheme.of(context);
+
     return RefreshIndicator.adaptive(
       onRefresh: () async {
         context.read<MarketplaceBloc>().add(const LoadMarketplace());
@@ -118,7 +123,9 @@ class MarketplaceScreen extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 0),
                 child: Text(
                   'Featured',
-                  style: Theme.of(context).textTheme.titleLarge,
+                  style: theme.typography.xl.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
@@ -140,7 +147,9 @@ class MarketplaceScreen extends StatelessWidget {
                 state.categories
                     .firstWhere((c) => c.id == state.selectedCategoryId)
                     .name,
-                style: Theme.of(context).textTheme.titleLarge,
+                style: theme.typography.xl.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
@@ -157,10 +166,13 @@ class MarketplaceScreen extends StatelessWidget {
                             Icon(
                               Icons.inventory_2_outlined,
                               size: 64,
-                              color: Colors.grey[400],
+                              color: theme.colorScheme.mutedForeground,
                             ),
                             const SizedBox(height: 16),
-                            const Text('No items available in this category'),
+                            Text(
+                              'No items available in this category',
+                              style: theme.typography.base,
+                            ),
                           ],
                         ),
                       ),
@@ -211,23 +223,36 @@ class MarketplaceScreen extends StatelessWidget {
                   ).isAfter(DateTime.now()))),
     );
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder:
-          (context) => MarketplaceItemDetail(
-            item: item,
-            alreadyPurchased: alreadyPurchased,
-            onPurchase: () {
-              Navigator.pop(context);
-              context.read<MarketplaceBloc>().add(
-                PurchaseItem(itemId: item.id),
-              );
-            },
-          ),
-    );
+    if (!Platform.isIOS) {
+      showDialog(
+        context: context,
+        builder:
+            (context) => MarketplaceItemDetail(
+              item: item,
+              alreadyPurchased: alreadyPurchased,
+              onPurchase: () {
+                Navigator.pop(context);
+                context.read<MarketplaceBloc>().add(
+                  PurchaseItem(itemId: item.id),
+                );
+              },
+            ),
+      );
+    } else {
+      showCupertinoSheet(
+        context: context,
+        pageBuilder:
+            (context) => MarketplaceItemDetail(
+              item: item,
+              alreadyPurchased: alreadyPurchased,
+              onPurchase: () {
+                Navigator.pop(context);
+                context.read<MarketplaceBloc>().add(
+                  PurchaseItem(itemId: item.id),
+                );
+              },
+            ),
+      );
+    }
   }
 }
