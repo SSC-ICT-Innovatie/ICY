@@ -1,9 +1,8 @@
 import 'dart:io';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:forui/forui.dart';
+import 'package:icy/abstractions/navigation/utils/modal_utils.dart';
 import 'package:icy/data/models/marketplace_model.dart';
 import 'package:icy/features/authentication/state/bloc/auth_bloc.dart';
 import 'package:icy/features/marketplace/bloc/marketplace_bloc.dart';
@@ -223,36 +222,18 @@ class MarketplaceScreen extends StatelessWidget {
                   ).isAfter(DateTime.now()))),
     );
 
-    if (!Platform.isIOS) {
-      showDialog(
-        context: context,
-        builder:
-            (context) => MarketplaceItemDetail(
-              item: item,
-              alreadyPurchased: alreadyPurchased,
-              onPurchase: () {
-                Navigator.pop(context);
-                context.read<MarketplaceBloc>().add(
-                  PurchaseItem(itemId: item.id),
-                );
-              },
-            ),
-      );
-    } else {
-      showCupertinoSheet(
-        context: context,
-        pageBuilder:
-            (context) => MarketplaceItemDetail(
-              item: item,
-              alreadyPurchased: alreadyPurchased,
-              onPurchase: () {
-                Navigator.pop(context);
-                context.read<MarketplaceBloc>().add(
-                  PurchaseItem(itemId: item.id),
-                );
-              },
-            ),
-      );
-    }
+    // Use our state-preserving modal helper instead of direct showDialog/showCupertinoSheet
+    showStatePreservingModal(
+      context: context,
+      isDialog: !Platform.isIOS,
+      content: MarketplaceItemDetail(
+        item: item,
+        alreadyPurchased: alreadyPurchased,
+        onPurchase: () {
+          Navigator.pop(context);
+          context.read<MarketplaceBloc>().add(PurchaseItem(itemId: item.id));
+        },
+      ),
+    );
   }
 }
