@@ -26,29 +26,53 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      themeMode: ThemeMode.system,
       debugShowCheckedModeBanner: false,
-      home: FTheme(
-        data:
-            AppConstants().isLight(context)
-                ? FThemes.orange.light
-                : FThemes.orange.dark,
-        child: DependencyInjector().injectStateIntoApp(
-          const AuthStateListener(child: IceNavigation()),
-        ),
+      home: DependencyInjector().injectStateIntoApp(
+        const AuthStateListener(child: IceNavigation()),
       ),
+      builder:
+          (context, child) => FTheme(
+            data:
+                AppConstants().isLight(context)
+                    ? FThemes.orange.light.copyWith(
+                      scaffoldStyle: context.theme.scaffoldStyle.copyWith(
+                        backgroundColor: Colors.white,
+                      ),
+                      cardStyle: context.theme.cardStyle.copyWith(
+                        contentStyle: context.theme.cardStyle.contentStyle
+                            .copyWith(padding: EdgeInsets.zero),
+                      ),
+                    )
+                    : FThemes.orange.dark.copyWith(
+                      scaffoldStyle: context.theme.scaffoldStyle.copyWith(
+                        backgroundColor: Colors.grey.shade900,
+                      ),
+                      cardStyle: context.theme.cardStyle.copyWith(
+                        decoration: context.theme.cardStyle.decoration.copyWith(
+                          color: Colors.grey.shade800,
+                          border: Border.all(color: Colors.grey.shade900),
+                        ),
+                        contentStyle: context.theme.cardStyle.contentStyle
+                            .copyWith(padding: EdgeInsets.zero),
+                      ),
+                    ),
+            child: child!,
+          ),
     );
   }
 }
 
 class AuthStateListener extends StatelessWidget {
   final Widget child;
-  
+
   const AuthStateListener({required this.child, super.key});
-  
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
-      listenWhen: (previous, current) => previous.runtimeType != current.runtimeType,
+      listenWhen:
+          (previous, current) => previous.runtimeType != current.runtimeType,
       listener: (context, state) {
         // Refresh navigation when auth state changes
         if (state is AuthSuccess || state is AuthInitial) {

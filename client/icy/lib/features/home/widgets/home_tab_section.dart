@@ -136,35 +136,34 @@ class _HomeTabSectionState extends State<HomeTabSection> {
 
   // Show content in iOS style modal
   void _showIOSAllContent(BuildContext context, HomeState homeState) {
-    showCupertinoModalPopup(
+    showCupertinoSheet(
       context: context,
-      builder:
+      pageBuilder:
           (context) => ModalWrapper(
+            title: "All Surveys",
             body: Column(
               children: [
                 // Content
                 Expanded(
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildSectionHeader("Today"),
-                          NewSurvey(
-                            surveys:
-                                homeState is HomeLoaded
-                                    ? homeState.dailySurveys
-                                    : [],
-                          ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSectionHeader("Today"),
+                        NewSurvey(
+                          surveys:
+                              homeState is HomeLoaded
+                                  ? homeState.dailySurveys
+                                  : [],
+                        ),
 
-                          _buildSectionHeader("Ongoing"),
-                          const OngoingSurvey(),
+                        _buildSectionHeader("Ongoing"),
+                        const OngoingSurvey(),
 
-                          _buildSectionHeader("Results"),
-                          const SurveyResults(),
-                        ],
-                      ),
+                        _buildSectionHeader("Results"),
+                        const SurveyResults(),
+                      ],
                     ),
                   ),
                 ),
