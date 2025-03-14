@@ -36,13 +36,17 @@ class MarketplaceScreen extends StatelessWidget {
       ),
       content: BlocBuilder<MarketplaceBloc, MarketplaceState>(
         builder: (context, state) {
-          if (state is MarketplaceInitial) {
-            // Trigger loading of marketplace data
-            context.read<MarketplaceBloc>().add(const LoadMarketplace());
+          if (state is MarketplaceLoading) {
             return const Center(child: CircularProgressIndicator.adaptive());
           }
 
-          if (state is MarketplaceLoading) {
+          if (state is MarketplaceLoaded) {
+            return _buildMarketplaceContent(context, state);
+          }
+
+          if (state is MarketplaceInitial) {
+            // Trigger loading of marketplace data
+            context.read<MarketplaceBloc>().add(const LoadMarketplace());
             return const Center(child: CircularProgressIndicator.adaptive());
           }
 
@@ -77,10 +81,6 @@ class MarketplaceScreen extends StatelessWidget {
                 ],
               ),
             );
-          }
-
-          if (state is MarketplaceLoaded) {
-            return _buildMarketplaceContent(context, state);
           }
 
           return const Center(child: Text('Something went wrong'));
@@ -239,9 +239,9 @@ class MarketplaceScreen extends StatelessWidget {
             ),
       );
     } else {
-      showCupertinoSheet(
+      showCupertinoModalPopup(
         context: context,
-        pageBuilder:
+        builder:
             (context) => MarketplaceItemDetail(
               item: item,
               alreadyPurchased: alreadyPurchased,

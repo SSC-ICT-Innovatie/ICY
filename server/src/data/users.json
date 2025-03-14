@@ -1,0 +1,44 @@
+{
+  "users": [
+    {
+      "username": "jansmit",
+      "email": "jan.smit@bedrijf.nl",
+      "fullName": "Jan Smit",
+      "avatar": "https://placehold.co/400x400?text=JanSmit",
+      "department": "IT Innovatie",
+      "role": "user"
+    },
+    {
+      "username": "emmadejong",
+      "email": "emma.dejong@bedrijf.nl",
+      "fullName": "Emma de Jong",
+      "avatar": "https://placehold.co/400x400?text=EmmaDeJong",
+      "department": "IT Innovatie",
+      "role": "team_lead"
+    },
+    {
+      "username": "markbakker",
+      "email": "mark.bakker@bedrijf.nl",
+      "fullName": "Mark Bakker",
+      "avatar": "https://placehold.co/400x400?text=MarkBakker",
+      "department": "IT Innovatie",
+      "role": "user"
+    },
+    {
+      "username": "saravisser",
+      "email": "sara.visser@bedrijf.nl",
+      "fullName": "Sara Visser",
+      "avatar": "https://placehold.co/400x400?text=SaraVisser",
+      "department": "IT Innovatie",
+      "role": "user"
+    },
+    {
+      "username": "lisabruin",
+      "email": "lisa.bruin@bedrijf.nl",
+      "fullName": "Lisa Bruin",
+      "avatar": "https://placehold.co/400x400?text=LisaBruin",
+      "department": "HR",
+      "role": "user"
+    }
+  ]
+}

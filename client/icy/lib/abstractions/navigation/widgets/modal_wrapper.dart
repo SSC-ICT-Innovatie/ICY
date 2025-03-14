@@ -4,7 +4,6 @@ import 'package:blurrycontainer/blurrycontainer.dart';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:icy/abstractions/utils/constants.dart';
-import 'package:icy/dependency_injector.dart';
 
 class ModalWrapper extends StatelessWidget {
   final Widget body;

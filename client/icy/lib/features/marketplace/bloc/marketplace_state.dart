@@ -4,7 +4,7 @@ abstract class MarketplaceState extends Equatable {
   const MarketplaceState();
 
   @override
-  List<Object?> get props => [];
+  List<Object> get props => [];
 }
 
 class MarketplaceInitial extends MarketplaceState {}
@@ -14,42 +14,28 @@ class MarketplaceLoading extends MarketplaceState {}
 class MarketplaceLoaded extends MarketplaceState {
   final List<MarketplaceCategory> categories;
   final List<MarketplaceItem> items;
-  final List<PurchaseHistoryItem> userPurchases;
+  final List<MarketplaceItem> filteredItems;
+  final List<MarketplaceItem> featuredItems;
   final String selectedCategoryId;
+  final List<PurchaseHistoryItem> userPurchases;
 
   const MarketplaceLoaded({
     required this.categories,
     required this.items,
-    required this.userPurchases,
+    required this.filteredItems,
+    required this.featuredItems,
     required this.selectedCategoryId,
+    required this.userPurchases,
   });
 
-  List<MarketplaceItem> get filteredItems =>
-      items.where((item) => item.categoryId == selectedCategoryId).toList();
-
-  List<MarketplaceItem> get featuredItems =>
-      items.where((item) => item.featured).toList();
-
-  MarketplaceLoaded copyWith({
-    List<MarketplaceCategory>? categories,
-    List<MarketplaceItem>? items,
-    List<PurchaseHistoryItem>? userPurchases,
-    String? selectedCategoryId,
-  }) {
-    return MarketplaceLoaded(
-      categories: categories ?? this.categories,
-      items: items ?? this.items,
-      userPurchases: userPurchases ?? this.userPurchases,
-      selectedCategoryId: selectedCategoryId ?? this.selectedCategoryId,
-    );
-  }
-
   @override
-  List<Object?> get props => [
+  List<Object> get props => [
     categories,
     items,
-    userPurchases,
+    filteredItems,
+    featuredItems,
     selectedCategoryId,
+    userPurchases,
   ];
 }
 
@@ -59,16 +45,17 @@ class MarketplaceError extends MarketplaceState {
   const MarketplaceError({required this.message});
 
   @override
-  List<Object?> get props => [message];
+  List<Object> get props => [message];
 }
 
 class MarketplacePurchasing extends MarketplaceState {}
 
+// Update the props method here to return List<Object> instead of List<Object?>
 class MarketplacePurchaseError extends MarketplaceState {
   final String message;
 
   const MarketplacePurchaseError({required this.message});
 
   @override
-  List<Object?> get props => [message];
+  List<Object> get props => [message]; // Change from List<Object?> to List<Object>
 }

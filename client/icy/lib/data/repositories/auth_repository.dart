@@ -1,60 +1,28 @@
-import 'dart:convert';
-
-import 'package:flutter/services.dart';
 import 'package:icy/data/models/user_model.dart';
 import 'package:icy/data/datasources/local_storage_service.dart';
+import 'package:icy/abstractions/utils/api_constants.dart';
+import 'package:icy/services/api_service.dart';
 
 class AuthRepository {
   final LocalStorageService _localStorageService;
+  final ApiService _apiService;
 
-  AuthRepository({LocalStorageService? localStorageService})
-    : _localStorageService = localStorageService ?? LocalStorageService();
-
-  // Load users from JSON file
-  Future<List<UserModel>> _loadUsers() async {
-    try {
-      final String jsonString = await rootBundle.loadString(
-        'lib/data/users.json',
-      );
-      final Map<String, dynamic> jsonData = json.decode(jsonString);
-      final List<dynamic> usersJson = jsonData['users'];
-
-      return usersJson.map((userJson) => UserModel.fromJson(userJson)).toList();
-    } catch (e) {
-      print('Error loading users: $e');
-      return [];
-    }
-  }
+  AuthRepository({
+    LocalStorageService? localStorageService,
+    ApiService? apiService,
+  }) : _localStorageService = localStorageService ?? LocalStorageService(),
+       _apiService = apiService ?? ApiService();
 
   // Login with email and password
   Future<UserModel?> login(String email, String password) async {
     try {
-      final List<UserModel> users = await _loadUsers();
+      final response = await _apiService.login(email, password);
 
-      // In a real app, password would be hashed and properly compared
-      // Fix: Use proper null handling with try-catch
-      UserModel? user;
-      try {
-        user = users.firstWhere((user) => user.email == email);
-      } catch (_) {
-        // User not found
-        return null;
-      }
+      if (response['success'] == true && response['user'] != null) {
+        final user = UserModel.fromJson(response['user']);
 
-      if (user != null) {
         // Save auth info to local storage for persistence
         await _localStorageService.saveAuthUser(user);
-
-        // Load user profile data
-        final userProfile = await _loadUserProfile(user.id);
-        if (userProfile != null) {
-          // Combine user auth data with profile data
-          return user.copyWith(
-            level: userProfile.level,
-            stats: userProfile.stats,
-            preferences: userProfile.preferences,
-          );
-        }
 
         return user;
       }
@@ -74,32 +42,24 @@ class AuthRepository {
     String avatarId,
   ) async {
     try {
-      final List<UserModel> existingUsers = await _loadUsers();
-
-      // Check if email already exists
-      final bool emailExists = existingUsers.any((user) => user.email == email);
-      if (emailExists) {
-        throw Exception('Email already exists');
-      }
-
-      // Create new user (in a real app, this would be saved to backend)
-      final UserModel newUser = UserModel(
-        id: 'user_${DateTime.now().millisecondsSinceEpoch}',
-        username: email.split('@')[0],
-        email: email,
-        fullName: name,
-        avatar: 'https://placehold.co/400x400?text=$name',
-        department: 'Nieuwe Gebruiker',
-        role: 'user',
+      final response = await _apiService.register(
+        name,
+        email,
+        password,
+        'Nieuwe Gebruiker', // Default department for new users
+        avatarId,
       );
 
-      // Save to local storage for persistence
-      await _localStorageService.saveAuthUser(newUser);
+      if (response['success'] == true && response['user'] != null) {
+        final user = UserModel.fromJson(response['user']);
 
-      // Create default profile for new user
-      // In a real app, this would be done on the backend
+        // Save to local storage for persistence
+        await _localStorageService.saveAuthUser(user);
 
-      return newUser;
+        return user;
+      }
+
+      return null;
     } catch (e) {
       print('Signup error: $e');
       return null;
@@ -108,36 +68,34 @@ class AuthRepository {
 
   // Logout user
   Future<void> logout() async {
+    await _apiService.logout();
     await _localStorageService.clearAuthUser();
   }
 
   // Check if user is logged in
   Future<UserModel?> getCurrentUser() async {
-    return await _localStorageService.getAuthUser();
-  }
+    // First check local storage
+    UserModel? cachedUser = await _localStorageService.getAuthUser();
 
-  // Load user profile data from user_data.json
-  Future<UserProfileModel?> _loadUserProfile(String userId) async {
-    try {
-      final String jsonString = await rootBundle.loadString(
-        'lib/data/user_data.json',
-      );
-      final Map<String, dynamic> jsonData = json.decode(jsonString);
-
-      final List<dynamic> userDataList = jsonData['user_data'];
-      final dynamic userData = userDataList.firstWhere(
-        (data) => data['userId'] == userId,
-        orElse: () => null,
-      );
-
-      if (userData != null) {
-        return UserProfileModel.fromJson(userData);
+    // If we have a cached user and API service has a token, verify with server
+    if (cachedUser != null) {
+      try {
+        final response = await _apiService.get(
+          ApiConstants.currentUserEndpoint,
+        );
+        if (response['success'] == true && response['data'] != null) {
+          // Update cached user with fresh data
+          final freshUserData = UserModel.fromJson(response['data']);
+          await _localStorageService.saveAuthUser(freshUserData);
+          return freshUserData;
+        }
+      } catch (e) {
+        // If server verification fails, still return cached user
+        // but print error for debugging
+        print('Error fetching current user from server: $e');
       }
-
-      return null;
-    } catch (e) {
-      print('Error loading user profile: $e');
-      return null;
     }
+
+    return cachedUser;
   }
 }

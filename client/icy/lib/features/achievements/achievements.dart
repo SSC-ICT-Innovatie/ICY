@@ -1,175 +1,114 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:forui/forui.dart';
-import 'package:icy/data/models/achievement_model.dart';
-import 'package:icy/features/authentication/state/bloc/auth_bloc.dart';
+import 'package:icy/features/achievements/widgets/achievement_card.dart';
+import 'package:icy/features/achievements/widgets/challenge_card.dart';
 import 'package:icy/features/home/bloc/home_bloc.dart';
 
-class AchievementPage extends StatelessWidget {
-  const AchievementPage({super.key});
+class Achievements extends StatelessWidget {
+  const Achievements({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Load achievements when the page is shown
-    _loadAchievements(context);
-
-    return FScaffold(
-      header: FHeader(title: const Text('Achievements')),
-      content: BlocBuilder<HomeBloc, HomeState>(
-        builder: (context, state) {
-          if (state is HomeLoading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is HomeLoaded) {
-            return _buildAchievementsList(context, state.recentAchievements);
-          } else if (state is HomeError) {
-            return Center(child: Text("Error: ${state.message}"));
-          }
-          // Initial state or when there's no data
+    return BlocBuilder<HomeBloc, HomeState>(
+      builder: (context, state) {
+        if (state is HomeLoading) {
           return const Center(child: CircularProgressIndicator());
-        },
-      ),
-    );
-  }
+        }
 
-  void _loadAchievements(BuildContext context) {
-    final authState = context.read<AuthBloc>().state;
-    if (authState is AuthSuccess) {
-      context.read<HomeBloc>().add(LoadHomeData(userId: authState.user.id));
-    }
-  }
+        if (state is HomeLoaded) {
+          // Get data from state
+          final recentAchievements = state.recentAchievements;
+          final challenges = state.activeChallenges;
 
-  Widget _buildAchievementsList(
-    BuildContext context,
-    List<AchievementModel> achievements,
-  ) {
-    if (achievements.isEmpty) {
-      return Center(
-        child: Text(
-          'No achievements earned yet. Complete surveys and challenges to earn them!',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.grey[600]),
-        ),
-      );
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: achievements.length,
-      itemBuilder: (context, index) {
-        final achievement = achievements[index];
-        return _buildAchievementCard(context, achievement);
-      },
-    );
-  }
-
-  Widget _buildAchievementCard(
-    BuildContext context,
-    AchievementModel achievement,
-  ) {
-    final color = _hexToColor(achievement.color);
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Achievement icon
-            Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(
-                _getIconData(achievement.icon),
-                color: color,
-                size: 30,
-              ),
-            ),
-            const SizedBox(width: 16),
-
-            // Achievement details
-            Expanded(
+          return SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    achievement.title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
+                  // Recent achievements section
+                  if (recentAchievements.isNotEmpty) ...[
+                    Text(
+                      'Recent Achievements',
+                      style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(achievement.description),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        _formatDate(achievement.timestamp),
-                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      height: 180,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: recentAchievements.length,
+                        itemBuilder: (context, index) {
+                          final achievement = recentAchievements[index];
+                          return AchievementCard(
+                            title: achievement.achievementId.title,
+                            description: achievement.achievementId.description,
+                            icon: achievement.achievementId.icon,
+                            color: achievement.achievementId.color,
+                            onTap: () {},
+                          );
+                        },
                       ),
-                      Text(
-                        achievement.reward,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
-                        ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+
+                  // Active challenges section
+                  if (challenges.isNotEmpty) ...[
+                    Text(
+                      'Active Challenges',
+                      style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                        fontWeight: FontWeight.bold,
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 16),
+                    ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: challenges.length.clamp(
+                        0,
+                        3,
+                      ), // Show at most 3
+                      separatorBuilder:
+                          (context, index) => const SizedBox(height: 8),
+                      itemBuilder: (context, index) {
+                        final challenge = challenges[index];
+                        return ChallengeCard(
+                          title: challenge.title,
+                          description: challenge.description,
+                          icon: challenge.icon,
+                          color: challenge.color,
+                          reward:
+                              '${challenge.reward.xp} XP, ${challenge.reward.coins} Coins',
+                          progress: 0.3, // This would come from user progress
+                          onTap: () {},
+                        );
+                      },
+                    ),
+                  ],
+
+                  // Empty state
+                  if (recentAchievements.isEmpty && challenges.isEmpty)
+                    const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(32.0),
+                        child: Text('No achievements or challenges yet'),
+                      ),
+                    ),
                 ],
               ),
             ),
-          ],
-        ),
-      ),
+          );
+        }
+
+        if (state is HomeError) {
+          return Center(child: Text('Error: ${state.message}'));
+        }
+
+        return const Center(child: Text('No data available'));
+      },
     );
-  }
-
-  String _formatDate(String timestamp) {
-    final date = DateTime.parse(timestamp);
-    return '${date.day}/${date.month}/${date.year}';
-  }
-
-  Color _hexToColor(String hexString) {
-    final buffer = StringBuffer();
-    if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
-    buffer.write(hexString.replaceFirst('#', ''));
-    try {
-      return Color(int.parse(buffer.toString(), radix: 16));
-    } catch (e) {
-      return Colors.blue;
-    }
-  }
-
-  IconData _getIconData(String iconName) {
-    switch (iconName) {
-      case 'check_circle':
-        return Icons.check_circle;
-      case 'local_fire_department':
-        return Icons.local_fire_department;
-      case 'people':
-        return Icons.people;
-      case 'groups':
-        return Icons.groups;
-      case 'rate_review':
-        return Icons.rate_review;
-      case 'emoji_events':
-        return Icons.emoji_events;
-      case 'calendar_today':
-        return Icons.calendar_today;
-      case 'bolt':
-        return Icons.bolt;
-      case 'lightbulb':
-        return Icons.lightbulb;
-      default:
-        return Icons.star;
-    }
   }
 }

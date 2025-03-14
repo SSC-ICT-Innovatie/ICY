@@ -1,72 +1,106 @@
-import 'dart:convert';
-import 'package:flutter/services.dart';
-import 'package:icy/data/datasources/json_asset_service.dart';
 import 'package:icy/features/notifications/models/notification_model.dart';
 
 class NotificationsRepository {
-  final JsonAssetService _jsonAssetService;
+  // Use a list of mutable notification data
+  final List<Map<String, dynamic>> _mockNotificationsData = [
+    {
+      'id': '1',
+      'title': 'New Survey Available',
+      'message': 'A new daily survey is available for completion.',
+      'timestamp': DateTime.now().subtract(const Duration(hours: 2)),
+      'read': false,
+      'type': NotificationType.survey,
+      'actionId': 'survey_1',
+      'actionUrl': '/surveys/daily',
+    },
+    {
+      'id': '2',
+      'title': 'Badge Earned',
+      'message': 'Congratulations! You earned the "Survey Pioneer" badge.',
+      'timestamp': DateTime.now().subtract(const Duration(days: 1)),
+      'read': true,
+      'type': NotificationType.achievement,
+      'actionId': 'badge_1',
+      'actionUrl': '/achievements/badges',
+    },
+    {
+      'id': '3',
+      'title': 'Team Update',
+      'message': 'Your team has moved up in the rankings!',
+      'timestamp': DateTime.now().subtract(const Duration(days: 2)),
+      'read': false,
+      'type': NotificationType.team,
+      'actionId': 'team_update',
+      'actionUrl': '/teams/my-team',
+    },
+  ];
 
-  NotificationsRepository({JsonAssetService? jsonAssetService})
-    : _jsonAssetService = jsonAssetService ?? JsonAssetService();
-
-  Future<List<NotificationModel>> getNotificationsForUser(String userId) async {
-    try {
-      // Load user data from JSON
-      final userData = await _jsonAssetService.loadJson(
-        'lib/data/user_data.json',
-      );
-      final userDataList = userData['user_data'] as List;
-
-      // Find the user's data with safer null handling
-      Map<String, dynamic>? userRecord;
-      try {
-        userRecord =
-            userDataList.firstWhere((user) => user['userId'] == userId)
-                as Map<String, dynamic>;
-      } catch (_) {
-        // User not found
-        return [];
-      }
-
-      if (userRecord == null) {
-        return [];
-      }
-
-      // Extract and convert notifications - safely accessing with null check
-      final notificationsList = userRecord['notifications'] as List? ?? [];
-      return notificationsList
-          .map(
-            (json) => NotificationModel.fromJson(json as Map<String, dynamic>),
-          )
-          .toList();
-    } catch (e) {
-      print('Error getting notifications: $e');
-      return [];
-    }
+  // Convert the mutable data to immutable NotificationModel objects
+  List<NotificationModel> get _mockNotifications {
+    return _mockNotificationsData
+        .map(
+          (data) => NotificationModel(
+            id: data['id'],
+            title: data['title'],
+            message: data['message'],
+            timestamp: data['timestamp'],
+            read: data['read'],
+            type: data['type'],
+            actionId: data['actionId'],
+            actionUrl: data['actionUrl'],
+          ),
+        )
+        .toList();
   }
 
-  Future<bool> markNotificationAsRead(
-    String userId,
-    String notificationId,
-  ) async {
-    try {
-      // In a real backend implementation, this would update the database
-      // For now, we'll just simulate success
-      return true;
-    } catch (e) {
-      print('Error marking notification as read: $e');
-      return false;
-    }
+  // Will be replaced with API calls in the future
+  Future<List<NotificationModel>> getNotifications() async {
+    // Simulate API delay
+    await Future.delayed(const Duration(milliseconds: 500));
+    return _mockNotifications;
   }
 
-  Future<bool> clearAllNotifications(String userId) async {
-    try {
-      // In a real backend implementation, this would update the database
-      // For now, we'll just simulate success
+  // Added alias for compatibility
+  Future<List<NotificationModel>> getNotificationsForUser() async {
+    return getNotifications();
+  }
+
+  Future<bool> markAsRead(String notificationId) async {
+    final index = _mockNotificationsData.indexWhere(
+      (data) => data['id'] == notificationId,
+    );
+    if (index != -1) {
+      _mockNotificationsData[index]['read'] = true;
       return true;
-    } catch (e) {
-      print('Error clearing notifications: $e');
-      return false;
     }
+    return false;
+  }
+
+  // Added alias for compatibility
+  Future<bool> markNotificationAsRead(String notificationId) async {
+    return markAsRead(notificationId);
+  }
+
+  Future<bool> markAllAsRead() async {
+    for (var data in _mockNotificationsData) {
+      data['read'] = true;
+    }
+    return true;
+  }
+
+  Future<bool> deleteNotification(String notificationId) async {
+    final beforeLength = _mockNotificationsData.length;
+    _mockNotificationsData.removeWhere((data) => data['id'] == notificationId);
+    return _mockNotificationsData.length < beforeLength;
+  }
+
+  // Added alias for compatibility
+  Future<bool> clearAllNotifications() async {
+    _mockNotificationsData.clear();
+    return true;
+  }
+
+  Future<int> getUnreadCount() async {
+    return _mockNotificationsData.where((data) => !data['read']).length;
   }
 }

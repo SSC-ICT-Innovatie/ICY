@@ -2,14 +2,14 @@ class SurveyModel {
   final String id;
   final String title;
   final String description;
-  final int questions;
+  final List<SurveyQuestion> questions;
   final String estimatedTime;
   final SurveyReward reward;
-  final String? expiresAt;
+  final String createdAt;
+  final String expiresAt;
   final List<String> tags;
-  final int? completed;
-  final double? progress;
-  final String? completedAt;
+  final List<String> targetDepartments;
+  final bool archived;
 
   SurveyModel({
     required this.id,
@@ -18,83 +18,76 @@ class SurveyModel {
     required this.questions,
     required this.estimatedTime,
     required this.reward,
-    this.expiresAt,
+    required this.createdAt,
+    required this.expiresAt,
     required this.tags,
-    this.completed,
-    this.progress,
-    this.completedAt,
+    required this.targetDepartments,
+    this.archived = false,
   });
 
   factory SurveyModel.fromJson(Map<String, dynamic> json) {
-    try {
-      // Handle tags safely
-      List<String> parsedTags = [];
-      if (json['tags'] != null) {
-        parsedTags =
-            (json['tags'] as List).map((tag) => tag.toString()).toList();
-      }
-
-      // Handle questions that could be either int or List
-      int questionCount;
-      if (json['questions'] is int) {
-        questionCount = json['questions'] as int;
-      } else if (json['questions'] is List) {
-        questionCount = (json['questions'] as List).length;
-      } else {
-        questionCount = 0; // Default if neither type matches
-      }
-
-      return SurveyModel(
-        id: json['id'] as String? ?? 'unknown',
-        title: json['title'] as String? ?? 'Untitled Survey',
-        description: json['description'] as String? ?? 'No description',
-        questions: questionCount,
-        estimatedTime: json['estimatedTime'] as String? ?? 'Unknown',
-        reward:
-            json['reward'] != null
-                ? SurveyReward.fromJson(json['reward'] as Map<String, dynamic>)
-                : SurveyReward(xp: 0, coins: 0), // Default values
-        expiresAt: json['expiresAt'] as String?,
-        tags: parsedTags,
-        completed: json['completed'] as int?,
-        progress:
-            json['progress'] != null
-                ? (json['progress'] as num).toDouble()
-                : null,
-        completedAt: json['completedAt'] as String?,
-      );
-    } catch (e) {
-      print('Error parsing SurveyModel from JSON: $e');
-      // Return a default model when parsing fails
-      return SurveyModel(
-        id: 'error',
-        title: 'Error Loading Survey',
-        description: 'There was an error loading this survey',
-        questions: 0,
-        estimatedTime: 'Unknown',
-        reward: SurveyReward(xp: 0, coins: 0),
-        tags: [],
-      );
-    }
+    return SurveyModel(
+      id: json['_id'] ?? json['id'] ?? '',
+      title: json['title'],
+      description: json['description'],
+      questions:
+          (json['questions'] as List)
+              .map((q) => SurveyQuestion.fromJson(q))
+              .toList(),
+      estimatedTime: json['estimatedTime'],
+      reward: SurveyReward.fromJson(json['reward']),
+      createdAt: json['createdAt'],
+      expiresAt: json['expiresAt'],
+      tags: List<String>.from(json['tags'] ?? []),
+      targetDepartments: List<String>.from(json['targetDepartments'] ?? []),
+      archived: json['archived'] ?? false,
+    );
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = {
-      'id': id,
-      'title': title,
-      'description': description,
-      'questions': questions,
-      'estimatedTime': estimatedTime,
-      'reward': reward.toJson(),
-      'tags': tags,
-    };
+  // Convert from Survey type to SurveyModel
+  factory SurveyModel.fromSurvey(Survey survey) {
+    return SurveyModel(
+      id: survey.id,
+      title: survey.title,
+      description: survey.description,
+      questions: survey.questions,
+      estimatedTime: survey.estimatedTime,
+      reward: survey.reward,
+      createdAt: survey.createdAt,
+      expiresAt: survey.expiresAt,
+      tags: survey.tags,
+      targetDepartments: survey.targetDepartments,
+      archived: survey.archived,
+    );
+  }
+}
 
-    if (expiresAt != null) data['expiresAt'] = expiresAt;
-    if (completed != null) data['completed'] = completed;
-    if (progress != null) data['progress'] = progress;
-    if (completedAt != null) data['completedAt'] = completedAt;
+// Re-export for backwards compatibility
+typedef Survey = SurveyModel;
 
-    return data;
+class SurveyQuestion {
+  final String id;
+  final String text;
+  final String type;
+  final List<dynamic> options;
+  final bool optional;
+
+  SurveyQuestion({
+    required this.id,
+    required this.text,
+    required this.type,
+    required this.options,
+    this.optional = false,
+  });
+
+  factory SurveyQuestion.fromJson(Map<String, dynamic> json) {
+    return SurveyQuestion(
+      id: json['id'],
+      text: json['text'],
+      type: json['type'],
+      options: json['options'] ?? [],
+      optional: json['optional'] ?? false,
+    );
   }
 }
 
@@ -105,13 +98,58 @@ class SurveyReward {
   SurveyReward({required this.xp, required this.coins});
 
   factory SurveyReward.fromJson(Map<String, dynamic> json) {
-    return SurveyReward(
-      xp: (json['xp'] as num).toInt(),
-      coins: (json['coins'] as num).toInt(),
+    return SurveyReward(xp: json['xp'], coins: json['coins']);
+  }
+}
+
+class SurveyProgress {
+  final String userId;
+  final String surveyId;
+  final int completed;
+  final int totalQuestions;
+  final String lastUpdated;
+  final List<SurveyAnswer> answers;
+
+  SurveyProgress({
+    required this.userId,
+    required this.surveyId,
+    required this.completed,
+    required this.totalQuestions,
+    required this.lastUpdated,
+    required this.answers,
+  });
+
+  factory SurveyProgress.fromJson(Map<String, dynamic> json) {
+    return SurveyProgress(
+      userId: json['userId'],
+      surveyId: json['surveyId'],
+      completed: json['completed'],
+      totalQuestions: json['totalQuestions'],
+      lastUpdated: json['lastUpdated'],
+      answers:
+          json['answers'] != null
+              ? (json['answers'] as List)
+                  .map((a) => SurveyAnswer.fromJson(a))
+                  .toList()
+              : [],
     );
   }
+}
 
-  Map<String, dynamic> toJson() {
-    return {'xp': xp, 'coins': coins};
+class SurveyAnswer {
+  final String questionId;
+  final dynamic answer;
+
+  SurveyAnswer({required this.questionId, required this.answer});
+
+  factory SurveyAnswer.fromJson(Map<String, dynamic> json) {
+    return SurveyAnswer(questionId: json['questionId'], answer: json['answer']);
   }
+}
+
+class SurveyDetail {
+  final Survey survey;
+  final SurveyProgress? progress;
+
+  SurveyDetail({required this.survey, this.progress});
 }

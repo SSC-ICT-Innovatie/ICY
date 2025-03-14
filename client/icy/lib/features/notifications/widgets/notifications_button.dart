@@ -1,60 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:forui/forui.dart';
-import 'package:icy/features/authentication/state/bloc/auth_bloc.dart';
 import 'package:icy/features/notifications/bloc/notifications_bloc.dart';
 import 'package:icy/features/notifications/services/notification_service.dart';
 
 class NotificationsButton extends StatelessWidget {
-  const NotificationsButton({Key? key}) : super(key: key);
+  final bool showBadge;
+
+  const NotificationsButton({super.key, this.showBadge = false});
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthBloc, AuthState>(
-      builder: (context, authState) {
-        if (authState is! AuthSuccess) {
-          return const SizedBox.shrink();
-        }
-
-        final userId = authState.user.id;
-
-        // Load the notifications to get the unread count
-        context.read<NotificationsBloc>().add(
-          LoadNotifications(userId: userId),
-        );
-
-        return BlocBuilder<NotificationsBloc, NotificationsState>(
-          builder: (context, notifState) {
-            // Determine if there are unread notifications
-            final hasUnread =
-                notifState is NotificationsLoaded && notifState.unreadCount > 0;
-
-            return IconButton(
-              icon: Stack(
-                children: [
-                  FIcon(FAssets.icons.bell),
-                  if (hasUnread)
-                    Positioned(
-                      top: 0,
-                      right: 0,
-                      child: Container(
-                        width: 8,
-                        height: 8,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.red,
-                        ),
-                      ),
-                    ),
-                ],
+    return IconButton(
+      icon: Stack(
+        children: [
+          const Icon(Icons.notifications_outlined),
+          if (showBadge)
+            Positioned(
+              right: 0,
+              top: 0,
+              child: Container(
+                padding: const EdgeInsets.all(1),
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+                constraints: const BoxConstraints(minWidth: 10, minHeight: 10),
               ),
-              onPressed: () {
-                // Use the notification service to show the dialog
-                NotificationService().showNotificationsDialog(context);
-              },
-            );
-          },
-        );
+            ),
+        ],
+      ),
+      onPressed: () {
+        // Load notifications when button is tapped
+        context.read<NotificationsBloc>().add(const LoadNotifications());
+
+        // Show notifications dialog
+        NotificationService().showNotificationsDialog(context);
       },
     );
   }

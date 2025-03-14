@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:icy/abstractions/navigation/services/icy_tab_registerar.dart';
-import 'package:icy/features/achievements/achievements.dart';
+import 'package:icy/features/achievements/screens/achievement_page.dart';
 import 'package:icy/features/authentication/screens/login.dart';
 import 'package:icy/features/authentication/screens/signup.dart';
 import 'package:icy/features/authentication/services/auth_cache_service.dart';
@@ -61,8 +61,7 @@ List<IcyTab> injectNavigationTabs(BuildContext context) {
       showInTabBar: isLoggedIn,
       icon: FAssets.icons.store,
       title: "Marketplace",
-      content:
-          MarketplaceScreen(), 
+      content: MarketplaceScreen(),
       accessRule: () => AuthCacheService().isLoggedIn,
     ),
     IcyTab(

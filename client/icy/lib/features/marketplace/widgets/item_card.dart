@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
 import 'package:icy/data/models/marketplace_model.dart';
 
 class MarketplaceItemCard extends StatelessWidget {
   final MarketplaceItem item;
   final VoidCallback onTap;
 
-  const MarketplaceItemCard({Key? key, required this.item, required this.onTap})
-    : super(key: key);
+  const MarketplaceItemCard({
+    super.key,
+    required this.item,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -1,134 +1,111 @@
-import 'dart:convert';
-import 'package:flutter/services.dart';
-import 'package:icy/data/datasources/local_storage_service.dart';
+import 'package:icy/abstractions/utils/api_constants.dart';
 import 'package:icy/data/models/marketplace_model.dart';
-import 'package:icy/data/models/user_model.dart';
-import 'package:icy/data/repositories/marketplace_repository.dart';
+import 'package:icy/features/marketplace/repository/marketplace_repository.dart';
+import 'package:icy/services/api_service.dart';
 
 class MarketplaceRepositoryImpl implements MarketplaceRepository {
-  final LocalStorageService _localStorageService;
+  final ApiService _apiService;
 
-  MarketplaceRepositoryImpl({LocalStorageService? localStorageService})
-    : _localStorageService = localStorageService ?? LocalStorageService();
-
-  @override
-  Future<MarketplaceData> getMarketplaceData() async {
-    try {
-      final String jsonString = await rootBundle.loadString(
-        'lib/data/marketplace.json',
-      );
-      final Map<String, dynamic> jsonData = json.decode(jsonString);
-      return MarketplaceData.fromJson(jsonData);
-    } catch (e) {
-      print('Error loading marketplace data: $e');
-      return MarketplaceData(categories: [], items: [], purchaseHistory: []);
-    }
-  }
+  MarketplaceRepositoryImpl({required ApiService apiService})
+    : _apiService = apiService;
 
   @override
-  Future<List<PurchaseHistoryItem>> getUserPurchases(String userId) async {
+  Future<List<MarketplaceCategory>> getCategories() async {
     try {
-      final marketplaceData = await getMarketplaceData();
-
-      // Filter purchases by user ID
-      final userPurchases =
-          marketplaceData.purchaseHistory
-              .where((purchase) => purchase.userId == userId)
-              .toList();
-
-      // Enrich purchase data with item information where name is missing
-      return Future.wait(
-        userPurchases.map((purchase) async {
-          if (purchase.name != null) return purchase;
-
-          // FIX: Handle potential null with a default value creation
-          MarketplaceItem? item;
-          try {
-            item = marketplaceData.items.firstWhere(
-              (item) => item.id == purchase.itemId,
-            );
-          } catch (_) {
-            // Create a default item if not found
-            item = MarketplaceItem(
-              id: "unknown",
-              categoryId: "unknown",
-              name: "Unknown Item",
-              description: "Item not found",
-              image: "https://placehold.co/400x300?text=Unknown",
-              price: 0,
-              available: false,
-              featured: false,
-            );
-          }
-
-          // Create a new purchase with the item name
-          return PurchaseHistoryItem(
-            id: purchase.id,
-            userId: purchase.userId,
-            itemId: purchase.itemId,
-            purchaseDate: purchase.purchaseDate,
-            expiryDate: purchase.expiryDate,
-            used: purchase.used,
-            redeemCode: purchase.redeemCode,
-            status: purchase.status,
-            permanent: purchase.permanent,
-            active: purchase.active,
-            name: item.name,
-          );
-        }),
+      final response = await _apiService.get(
+        ApiConstants.marketplaceCategoriesEndpoint,
       );
+
+      if (response['success'] == true && response['data'] != null) {
+        return (response['data'] as List)
+            .map((categoryJson) => MarketplaceCategory.fromJson(categoryJson))
+            .toList();
+      }
+      return [];
     } catch (e) {
-      print('Error getting user purchases: $e');
+      print('Error fetching categories: $e');
       return [];
     }
   }
 
   @override
-  Future<bool> purchaseItem(String userId, String itemId) async {
+  Future<List<MarketplaceItem>> getItems({
+    String? categoryId,
+    bool? featured,
+  }) async {
     try {
-      // Get the item information
-      final marketplaceData = await getMarketplaceData();
+      String endpoint = ApiConstants.marketplaceItemsEndpoint;
 
-      // FIX: Use try-catch instead of orElse that might return null
-      MarketplaceItem? item;
-      try {
-        item = marketplaceData.items.firstWhere((item) => item.id == itemId);
-      } catch (_) {
-        throw Exception('Item not found');
+      // Add query parameters if needed
+      if (categoryId != null || featured != null) {
+        endpoint += '?';
+        if (categoryId != null) {
+          endpoint += 'categoryId=$categoryId';
+          if (featured != null) endpoint += '&';
+        }
+        if (featured != null) endpoint += 'featured=$featured';
       }
 
-      // Check if the item is available
-      if (!item.available) {
-        return false;
-      }
+      final response = await _apiService.get(endpoint);
 
-      // Get user information including coins
-      final UserModel? user = await _getUserData(userId);
-      if (user == null || user.stats == null) {
-        throw Exception('User data not available');
+      if (response['success'] == true && response['data'] != null) {
+        return (response['data'] as List)
+            .map((itemJson) => MarketplaceItem.fromJson(itemJson))
+            .toList();
       }
+      return [];
+    } catch (e) {
+      print('Error fetching items: $e');
+      return [];
+    }
+  }
 
-      // Check if user has enough coins
-      final userCoins = user.stats!.totalCoins;
-      if (userCoins < item.price) {
-        return false;
+  @override
+  Future<List<PurchaseHistoryItem>> getUserPurchases() async {
+    try {
+      final response = await _apiService.get(
+        ApiConstants.marketplacePurchasesEndpoint,
+      );
+
+      if (response['success'] == true && response['data'] != null) {
+        return (response['data'] as List)
+            .map((purchaseJson) => PurchaseHistoryItem.fromJson(purchaseJson))
+            .toList();
       }
+      return [];
+    } catch (e) {
+      print('Error fetching user purchases: $e');
+      return [];
+    }
+  }
 
-      // For now, we'll just simulate a successful purchase
-      return true;
+  @override
+  Future<bool> purchaseItem(String itemId) async {
+    try {
+      final response = await _apiService.post(
+        '${ApiConstants.marketplaceItemsEndpoint}/$itemId/purchase',
+        {},
+      );
+
+      return response['success'] == true;
     } catch (e) {
       print('Error purchasing item: $e');
       return false;
     }
   }
 
-  // Helper method to get user data
-  Future<UserModel?> _getUserData(String userId) async {
+  @override
+  Future<bool> redeemPurchase(String purchaseId) async {
     try {
-      return await _localStorageService.getAuthUser();
+      final response = await _apiService.post(
+        '${ApiConstants.marketplacePurchasesEndpoint}/$purchaseId/redeem',
+        {},
+      );
+
+      return response['success'] == true;
     } catch (e) {
-      print('Error getting user data: $e');
-      return null;
+      print('Error redeeming purchase: $e');
+      return false;
     }
   }
 }

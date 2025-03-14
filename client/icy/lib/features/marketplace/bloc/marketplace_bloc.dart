@@ -1,86 +1,139 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:icy/data/models/marketplace_model.dart';
-import 'package:icy/data/repositories/marketplace_repository.dart';
-import 'package:icy/features/authentication/state/bloc/auth_bloc.dart';
+import 'package:icy/features/marketplace/repository/marketplace_repository.dart';
+import 'package:icy/abstractions/utils/network_util.dart';
 
 part 'marketplace_event.dart';
 part 'marketplace_state.dart';
 
 class MarketplaceBloc extends Bloc<MarketplaceEvent, MarketplaceState> {
   final MarketplaceRepository _marketplaceRepository;
-  final AuthBloc _authBloc;
 
-  MarketplaceBloc({
-    required MarketplaceRepository marketplaceRepository,
-    required AuthBloc authBloc,
-  }) : _marketplaceRepository = marketplaceRepository,
-       _authBloc = authBloc,
-       super(MarketplaceInitial()) {
-    // Load marketplace data
-    on<LoadMarketplace>((event, emit) async {
-      emit(MarketplaceLoading());
-      try {
-        final marketplaceData =
-            await _marketplaceRepository.getMarketplaceData();
+  MarketplaceBloc({required MarketplaceRepository marketplaceRepository})
+    : _marketplaceRepository = marketplaceRepository,
+      super(MarketplaceInitial()) {
+    on<LoadMarketplace>(_onLoadMarketplace);
+    on<ChangeCategory>(_onChangeCategory);
+    on<PurchaseItem>(_onPurchaseItem);
+  }
 
-        // Get user purchases if logged in
-        List<PurchaseHistoryItem> userPurchases = [];
-        if (_authBloc.state is AuthSuccess) {
-          final userId = (_authBloc.state as AuthSuccess).user.id;
-          userPurchases = await _marketplaceRepository.getUserPurchases(userId);
-        }
+  Future<void> _onLoadMarketplace(
+    LoadMarketplace event,
+    Emitter<MarketplaceState> emit,
+  ) async {
+    emit(MarketplaceLoading());
+    try {
+      // First check network connectivity
+      final hasConnection = await NetworkUtil.isApiAvailable();
 
+      if (!hasConnection) {
         emit(
-          MarketplaceLoaded(
-            categories: marketplaceData.categories,
-            items: marketplaceData.items,
-            userPurchases: userPurchases,
-            selectedCategoryId:
-                event.categoryId ?? marketplaceData.categories.first.id,
+          MarketplaceError(
+            message:
+                'No network connection. Please check your connection and try again.',
           ),
         );
-      } catch (e) {
-        emit(MarketplaceError(message: 'Failed to load marketplace: $e'));
+        return;
       }
-    });
 
-    // Change category
-    on<ChangeCategory>((event, emit) {
-      if (state is MarketplaceLoaded) {
-        final currentState = state as MarketplaceLoaded;
-        emit(currentState.copyWith(selectedCategoryId: event.categoryId));
+      // Get categories
+      final categories = await _marketplaceRepository.getCategories();
+
+      if (categories.isEmpty) {
+        emit(
+          MarketplaceError(
+            message: 'Unable to load marketplace data. Please try again later.',
+          ),
+        );
+        return;
       }
-    });
 
-    // Purchase item
-    on<PurchaseItem>((event, emit) async {
-      if (state is MarketplaceLoaded && _authBloc.state is AuthSuccess) {
-        emit(MarketplacePurchasing());
+      // Select the first category by default
+      final firstCategoryId = categories.isNotEmpty ? categories.first.id : '';
 
-        try {
-          final userId = (_authBloc.state as AuthSuccess).user.id;
-          final success = await _marketplaceRepository.purchaseItem(
-            userId,
-            event.itemId,
+      // Get items for the category
+      final items = await _marketplaceRepository.getItems();
+
+      // Filter items by category
+      final filteredItems =
+          items.where((item) => item.categoryId == firstCategoryId).toList();
+
+      // Get featured items
+      final featuredItems = items.where((item) => item.featured).toList();
+
+      // Get user purchases
+      final userPurchases = await _marketplaceRepository.getUserPurchases();
+
+      emit(
+        MarketplaceLoaded(
+          categories: categories,
+          items: items,
+          filteredItems: filteredItems,
+          featuredItems: featuredItems,
+          selectedCategoryId: firstCategoryId,
+          userPurchases: userPurchases,
+        ),
+      );
+    } catch (error) {
+      emit(
+        MarketplaceError(message: 'Something went wrong: ${error.toString()}'),
+      );
+    }
+  }
+
+  void _onChangeCategory(ChangeCategory event, Emitter<MarketplaceState> emit) {
+    if (state is MarketplaceLoaded) {
+      final currentState = state as MarketplaceLoaded;
+
+      // Filter items by selected category
+      final filteredItems =
+          currentState.items
+              .where((item) => item.categoryId == event.categoryId)
+              .toList();
+
+      emit(
+        MarketplaceLoaded(
+          categories: currentState.categories,
+          items: currentState.items,
+          filteredItems: filteredItems,
+          featuredItems: currentState.featuredItems,
+          selectedCategoryId: event.categoryId,
+          userPurchases: currentState.userPurchases,
+        ),
+      );
+    }
+  }
+
+  Future<void> _onPurchaseItem(
+    PurchaseItem event,
+    Emitter<MarketplaceState> emit,
+  ) async {
+    if (state is MarketplaceLoaded) {
+      // First set purchasing state
+      emit(MarketplacePurchasing());
+
+      try {
+        // Purchase item via repository
+        final success = await _marketplaceRepository.purchaseItem(event.itemId);
+
+        if (success) {
+          // Reload marketplace data to get updated items and user purchases
+          add(const LoadMarketplace());
+        } else {
+          emit(
+            MarketplaceError(
+              message: 'Failed to purchase item. Please try again.',
+            ),
           );
-
-          if (success) {
-            // Reload marketplace data after purchase
-            add(LoadMarketplace());
-          } else {
-            emit(
-              MarketplacePurchaseError(
-                message: 'Purchase failed. Insufficient coins.',
-              ),
-            );
-            // Go back to loaded state after error
-            add(LoadMarketplace());
-          }
-        } catch (e) {
-          emit(MarketplaceError(message: 'Purchase error: $e'));
         }
+      } catch (error) {
+        emit(
+          MarketplaceError(
+            message: 'Error purchasing item: ${error.toString()}',
+          ),
+        );
       }
-    });
+    }
   }
 }

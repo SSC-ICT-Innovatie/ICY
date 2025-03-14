@@ -5,18 +5,31 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:icy/abstractions/navigation/screens/navigation.dart';
 import 'package:icy/abstractions/navigation/state/navigation_cubit.dart';
 import 'package:icy/abstractions/utils/constants.dart';
+import 'package:icy/abstractions/utils/db_migration_util.dart';
 import 'package:icy/dependency_injector.dart';
 import 'package:icy/features/authentication/state/bloc/auth_bloc.dart';
+import 'package:icy/services/api_service.dart';
 import 'package:icy/tabs.dart';
 import 'package:path_provider/path_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize HydratedBloc for state persistence
   HydratedBloc.storage = await HydratedStorage.build(
     storageDirectory: HydratedStorageDirectory(
       (await getTemporaryDirectory()).path,
     ),
   );
+
+  // Initialize API service
+  final apiService = ApiService();
+  await apiService.init();
+
+  // Check if we need to migrate data
+  final dbMigrationUtil = DbMigrationUtil(apiService: apiService);
+  await dbMigrationUtil.migrateIfNeeded();
+
   runApp(MyApp());
 }
 

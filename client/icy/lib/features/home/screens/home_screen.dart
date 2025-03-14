@@ -24,10 +24,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _loadHomeData() {
-    final authState = context.read<AuthBloc>().state;
-    if (authState is AuthSuccess) {
-      context.read<HomeBloc>().add(LoadHomeData(userId: authState.user.id));
-    }
+    // Use LoadHome event instead of LoadHomeData for API compatibility
+    context.read<HomeBloc>().add(const LoadHome());
   }
 
   @override

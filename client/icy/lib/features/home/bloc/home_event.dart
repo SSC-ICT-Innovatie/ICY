@@ -7,11 +7,16 @@ abstract class HomeEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class LoadHomeData extends HomeEvent {
-  final String userId;
+class LoadHome extends HomeEvent {
+  const LoadHome();
+}
 
-  const LoadHomeData({required this.userId});
+// For backwards compatibility
+class LoadHomeData extends LoadHome {
+  final String? userId;
+
+  const LoadHomeData({this.userId});
 
   @override
-  List<Object> get props => [userId];
+  List<Object> get props => [userId ?? ''];
 }
