@@ -1,0 +1,9 @@
+targets:
+  $default:
+    builders:
+      mockito|mockBuilder:
+        generate_for:
+          - test/auth/auth_repository_test.dart
+          - test/notifications/notifications_bloc_test.dart
+          - test/widgets/notification_button_test.dart
+          - test/widgets/notification_button_test_simple.dart

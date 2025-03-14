@@ -11,7 +11,11 @@ class NotificationsDialog extends StatefulWidget {
   final VoidCallback? onClose;
   final Function(String, String)? onNotificationTap;
 
-  const NotificationsDialog({super.key, this.onClose, this.onNotificationTap});
+  const NotificationsDialog({
+    super.key, 
+    this.onClose, 
+    this.onNotificationTap,
+  });
 
   @override
   State<NotificationsDialog> createState() => _NotificationsDialogState();
