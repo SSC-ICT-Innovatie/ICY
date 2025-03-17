@@ -1,7 +1,11 @@
 const express = require('express');
+const router = express.Router();
 const {
   login,
   register,
+  requestVerificationCode,
+  verifyEmailCode,
+  uploadAvatar,
   refreshToken,
   logout,
   getCurrentUser
@@ -9,11 +13,11 @@ const {
 const { protect } = require('../middleware/authMiddleware');
 const asyncHandler = require('express-async-handler');
 
-const router = express.Router();
-
 // Public routes
 router.post('/login', login);
-router.post('/register', register);
+router.post('/request-verification', requestVerificationCode);
+router.post('/verify-email-code', verifyEmailCode);
+router.post('/register', uploadAvatar, register);
 router.post('/refresh-token', refreshToken);
 
 // Protected routes

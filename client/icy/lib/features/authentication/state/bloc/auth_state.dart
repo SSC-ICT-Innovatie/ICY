@@ -1,19 +1,19 @@
 part of 'auth_bloc.dart';
 
 @immutable
-sealed class AuthState {}
+abstract class AuthState {}
 
-final class AuthInitial extends AuthState {}
+class AuthInitial extends AuthState {}
 
-final class AuthLoading extends AuthState {}
+class AuthLoading extends AuthState {}
 
-final class AuthSuccess extends AuthState {
+class AuthSuccess extends AuthState {
   final UserModel user;
 
   AuthSuccess({required this.user});
 
   factory AuthSuccess.fromJson(Map<String, dynamic> json) {
-    return AuthSuccess(user: UserModel.fromJson(json["user"]));
+    return AuthSuccess(user: UserModel.fromJson(json['user']));
   }
 
   Map<String, dynamic> toJson() {
@@ -21,13 +21,13 @@ final class AuthSuccess extends AuthState {
   }
 }
 
-final class AuthFailure extends AuthState {
+class AuthFailure extends AuthState {
   final String message;
 
   AuthFailure(this.message);
 }
 
-final class LogoutFailure extends AuthState {
+class LogoutFailure extends AuthState {
   final String message;
 
   LogoutFailure(this.message);

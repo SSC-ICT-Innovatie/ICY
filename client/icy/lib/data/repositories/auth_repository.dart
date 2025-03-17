@@ -31,27 +31,66 @@ class AuthRepository {
       return null;
     } catch (e) {
       print('Login error: $e');
-      return null;
+      rethrow; // Rethrow to let the UI layer handle it
     }
   }
 
-  // Register a new user with optional profile image
+  // Request verification code
+  Future<bool> requestVerificationCode(String email) async {
+    try {
+      final response = await _apiService.requestVerificationCode(email);
+      return response['success'] == true;
+    } catch (e) {
+      print('Error requesting verification code: $e');
+      rethrow;
+    }
+  }
+
+  // Verify email code
+  Future<bool> verifyEmailCode(String email, String code) async {
+    try {
+      final response = await _apiService.verifyEmailCode(email, code);
+      return response['success'] == true;
+    } catch (e) {
+      print('Error verifying email code: $e');
+      rethrow;
+    }
+  }
+
+  // Register a new user with profile image and verification code
   Future<UserModel?> signup(
     String name,
     String email,
     String password,
     String avatarId, {
     File? profileImage,
+    String? verificationCode,
   }) async {
     try {
-      final response = await _apiService.register(
-        name,
-        email,
-        password,
-        'Nieuwe Gebruiker', // Default department for new users
-        avatarId,
-        profileImage, // Pass the profile image to the API service
-      );
+      Map<String, dynamic> response;
+
+      if (verificationCode != null) {
+        // Use verification flow
+        response = await _apiService.register(
+          name,
+          email,
+          password,
+          'ICT', // Default department
+          avatarId,
+          verificationCode,
+          profileImage,
+        );
+      } else {
+        // Use normal signup flow without verification
+        response = await _apiService.simpleRegister(
+          name,
+          email,
+          password,
+          'ICT', // Default department
+          avatarId,
+          profileImage,
+        );
+      }
 
       if (response['success'] == true && response['user'] != null) {
         final user = UserModel.fromJson(response['user']);
@@ -65,14 +104,18 @@ class AuthRepository {
       return null;
     } catch (e) {
       print('Signup error: $e');
-      return null;
+      rethrow; // Rethrow to let the UI layer handle it
     }
   }
 
   // Logout user
   Future<void> logout() async {
-    await _apiService.logout();
-    await _localStorageService.clearAuthUser();
+    try {
+      await _apiService.logout();
+    } finally {
+      // Always clear local storage, even if API logout fails
+      await _localStorageService.clearAuthUser();
+    }
   }
 
   // Check if user is logged in

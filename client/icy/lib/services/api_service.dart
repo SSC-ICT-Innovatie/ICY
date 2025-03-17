@@ -64,8 +64,113 @@ class ApiService {
     }
   }
 
-  // Register
+  // Request verification code
+  Future<Map<String, dynamic>> requestVerificationCode(String email) async {
+    try {
+      final response = await http.post(
+        Uri.parse(ApiConstants.baseUrl + '/auth/request-verification'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email}),
+      );
+
+      return _handleResponse(response);
+    } catch (e) {
+      print('Error requesting verification code: $e');
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  // Verify email code
+  Future<Map<String, dynamic>> verifyEmailCode(
+    String email,
+    String code,
+  ) async {
+    try {
+      final response = await http.post(
+        Uri.parse(ApiConstants.baseUrl + '/auth/verify-email-code'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email, 'code': code}),
+      );
+
+      return _handleResponse(response);
+    } catch (e) {
+      print('Error verifying email code: $e');
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  // Register with verification code and optional profile image
   Future<Map<String, dynamic>> register(
+    String name,
+    String email,
+    String password,
+    String department,
+    String? avatarId,
+    String verificationCode,
+    File? profileImage,
+  ) async {
+    try {
+      print('Registering user: $email, name: $name, department: $department');
+
+      if (profileImage == null) {
+        // Standard JSON registration without image
+        final response = await http.post(
+          Uri.parse(ApiConstants.baseUrl + ApiConstants.registerEndpoint),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'fullName': name,
+            'email': email,
+            'password': password,
+            'department': department,
+            'username': email.split('@')[0], // Generate username from email
+            'verificationCode': verificationCode,
+            if (avatarId != null) 'avatarId': avatarId,
+          }),
+        );
+
+        final data = _handleResponse(response);
+        _handleRegistrationResponse(response, data);
+        return data;
+      } else {
+        // Multipart form for image upload
+        var request = http.MultipartRequest(
+          'POST',
+          Uri.parse(ApiConstants.baseUrl + ApiConstants.registerEndpoint),
+        );
+
+        // Add text fields
+        request.fields['fullName'] = name;
+        request.fields['email'] = email;
+        request.fields['password'] = password;
+        request.fields['department'] = department;
+        request.fields['username'] = email.split('@')[0];
+        request.fields['verificationCode'] = verificationCode;
+        if (avatarId != null) request.fields['avatarId'] = avatarId;
+
+        // Add the image file
+        var imageFile = await http.MultipartFile.fromPath(
+          'profileImage',
+          profileImage.path,
+          filename: basename(profileImage.path),
+        );
+        request.files.add(imageFile);
+
+        // Send the request
+        var streamedResponse = await request.send();
+        var response = await http.Response.fromStream(streamedResponse);
+
+        final data = jsonDecode(response.body);
+        _handleRegistrationResponse(response, data);
+        return data;
+      }
+    } catch (e) {
+      print('Registration exception: $e');
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  // Simplified registration without verification code
+  Future<Map<String, dynamic>> simpleRegister(
     String name,
     String email,
     String password,
@@ -74,7 +179,9 @@ class ApiService {
     File? profileImage,
   ) async {
     try {
-      print('Registering user: $email, name: $name, department: $department');
+      print(
+        'Simple registering user: $email, name: $name, department: $department',
+      );
 
       if (profileImage == null) {
         // Standard JSON registration without image

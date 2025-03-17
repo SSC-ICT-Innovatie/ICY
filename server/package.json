@@ -6,32 +6,35 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
+    "test": "mocha tests/**/*.test.js",
     "seed": "node src/scripts/seedDatabase.js",
-    "user-wizard": "node src/scripts/userWizard.js",
-    "test": "jest"
+    "lint": "eslint src/**/*.js",
+    "setup": "bash scripts/setup.sh"
   },
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
-    "dotenv": "^16.3.1",
-    "express": "^4.18.2",
-    "express-rate-limit": "^7.1.5",
-    "helmet": "^7.1.0",
-    "joi": "^17.11.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-async-handler": "^1.2.0",
+    "express-rate-limit": "^6.7.0",
+    "helmet": "^6.2.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.0.3",
+    "mongodb-memory-server": "^10.1.4",
+    "mongoose": "^7.8.6",
     "morgan": "^1.10.0",
-    "nodemailer": "^6.9.7",
-    "redis": "^4.6.11",
-    "winston": "^3.11.0",
-    "mongodb-memory-server": "^8.13.0"
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.10.0",
+    "redis": "^4.7.0",
+    "winston": "^3.17.0"
   },
   "devDependencies": {
-    "jest": "^29.7.0",
-    "nodemon": "^3.0.2",
-    "supertest": "^6.3.3"
+    "chai": "^4.3.7",
+    "chai-http": "^4.3.0",
+    "eslint": "^8.38.0",
+    "mocha": "^10.2.0",
+    "nodemon": "^2.0.22",
+    "sinon": "^15.0.3"
   },
   "engines": {
     "node": ">=16.0.0"

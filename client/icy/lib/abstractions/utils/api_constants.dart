@@ -16,6 +16,9 @@ class ApiConstants {
   static const String refreshTokenEndpoint = '/auth/refresh-token';
   static const String logoutEndpoint = '/auth/logout';
   static const String currentUserEndpoint = '/auth/me';
+  static const String requestVerificationEndpoint =
+      '/auth/request-verification';
+  static const String verifyEmailCodeEndpoint = '/auth/verify-email-code';
 
   // User endpoints
   static const String usersEndpoint = '/users';

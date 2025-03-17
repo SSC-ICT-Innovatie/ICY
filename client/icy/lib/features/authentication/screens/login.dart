@@ -21,6 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // Keep track of error message state
   String? _errorMessage;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -29,10 +30,42 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  void _showErrorDialog(String message) {
+    showAdaptiveDialog(
+      context: context,
+      builder:
+          (context) => FDialog(
+            direction: Axis.horizontal,
+            title: const Text('Login Error'),
+            body: Text(message),
+            actions: [
+              FButton(
+                style: FButtonStyle.outline,
+                label: const Text('OK'),
+                onPress: () => Navigator.of(context).pop(),
+              ),
+            ],
+          ),
+    );
+  }
+
+  void _login() {
+    if (_formKey.currentState?.validate() ?? false) {
+      setState(() {
+        _isLoading = true;
+        _errorMessage = null;
+      });
+
+      context.read<AuthBloc>().add(
+        AuthLogin(email: _email.text, password: _password.text),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return FScaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       header: FHeader(
         title: Text("Login"),
         actions: [
@@ -48,18 +81,28 @@ class _LoginScreenState extends State<LoginScreen> {
       content: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthSuccess) {
-            // Clear any error message
+            // Clear error message and loading state
             setState(() {
               _errorMessage = null;
+              _isLoading = false;
             });
 
             final navCubit = context.read<NavigationCubit>();
             // Refresh tabs with new auth state
             navCubit.refreshTabs(injectNavigationTabs(context));
           } else if (state is AuthFailure) {
-            // Update error message state instead of showing SnackBar
+            // Show error dialog instead of inline message
+            _showErrorDialog(state.message);
             setState(() {
-              _errorMessage = state.message;
+              _isLoading = false;
+            });
+          } else if (state is AuthLoading) {
+            setState(() {
+              _isLoading = true;
+            });
+          } else {
+            setState(() {
+              _isLoading = false;
             });
           }
         },
@@ -70,7 +113,28 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Error message display
+                  const SizedBox(height: 32),
+                  // App logo or branding
+                  Center(
+                    child: Icon(
+                      Icons.eco_outlined,
+                      size: 80,
+                      color: context.theme.colorScheme.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const Center(
+                    child: Text(
+                      "ICY Application",
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 48),
+
+                  // Error message display (optional backup)
                   if (_errorMessage != null)
                     Container(
                       padding: const EdgeInsets.all(12),
@@ -82,8 +146,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.error_outline, color: Colors.red),
-                          SizedBox(width: 8),
+                          const Icon(Icons.error_outline, color: Colors.red),
+                          const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               _errorMessage!,
@@ -94,59 +158,53 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
 
-                  state is AuthLoading
-                      ? Center(child: CircularProgressIndicator.adaptive())
-                      : Form(
-                        key: _formKey,
-                        child: FTileGroup(
-                          children: [
-                            FTile(
-                              title: Text("Email"),
-                              subtitle: FTextField.email(
-                                controller: _email,
-                                autocorrect: false,
-                                label: SizedBox(),
-                                validator: ValidationConstants.validateEmail,
-                              ),
-                            ),
-                            FTile(
-                              title: Text("Password"),
-                              subtitle: FTextField.password(
-                                controller: _password,
-                                autocorrect: false,
-                                label: SizedBox(),
-                                validator: ValidationConstants.validatePassword,
-                              ),
-                            ),
-                            FTile(
-                              title: FButton(
-                                onPress: () {
-                                  if (_formKey.currentState?.validate() ??
-                                      false) {
-                                    context.read<AuthBloc>().add(
-                                      AuthLogin(
-                                        email: _email.text,
-                                        password: _password.text,
-                                      ),
-                                    );
-                                  }
-                                },
-                                label: Text("Login"),
-                              ),
-                            ),
-                          ],
+                  Form(
+                    key: _formKey,
+                    child: FTileGroup(
+                      children: [
+                        FTile(
+                          title: const Text("Email"),
+                          subtitle: FTextField.email(
+                            controller: _email,
+                            autocorrect: false,
+                            label: const SizedBox(),
+                            hint: "Enter your email",
+                            validator: ValidationConstants.validateEmail,
+                          ),
                         ),
-                      ),
+                        FTile(
+                          title: const Text("Password"),
+                          subtitle: FTextField.password(
+                            controller: _password,
+                            autocorrect: false,
+                            label: const SizedBox(),
+                            hint: "Enter your password",
+                            validator: ValidationConstants.validatePassword,
+                          ),
+                        ),
+                        FTile(
+                          title: FButton(
+                            onPress: _isLoading ? null : _login,
+                            label:
+                                _isLoading
+                                    ? const CircularProgressIndicator.adaptive()
+                                    : const Text("Login"),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
 
+                  const SizedBox(height: 24),
                   FButton(
                     style: FButtonStyle.ghost,
                     onPress: () {
-                      // Navigate to login screen
+                      // Navigate to signup screen
                       context.read<NavigationCubit>().changeVisibleTabByIndex(
                         1,
                       );
                     },
-                    label: const Text("Already have an account? Login"),
+                    label: const Text("Don't have an account? Register now"),
                   ),
                   const SizedBox(height: 16),
                 ],

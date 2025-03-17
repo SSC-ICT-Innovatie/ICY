@@ -13,3 +13,18 @@
 {"level":"error","message":"Not authorized to access this route - /api/v1/achievements/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 11:18:00"}
 {"level":"error","message":"Invalid email or password - /api/v1/auth/login - POST - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 11:24:38"}
 {"level":"error","message":"User with this email already exists - /api/v1/auth/register - POST - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 11:37:17"}
+{"level":"error","message":"Invalid email or password - /api/v1/auth/login - POST - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 12:22:09"}
+{"level":"info","message":"Using in-memory MongoDB for development/testing","service":"icy-server","timestamp":"2025-03-17 12:33:00"}
+{"level":"info","message":"Redis connection skipped based on environment setting","service":"icy-server","timestamp":"2025-03-17 12:33:00"}
+{"level":"info","message":"Server running in development mode on port 5001","service":"icy-server","timestamp":"2025-03-17 12:33:00"}
+{"level":"info","message":"Connected to in-memory MongoDB","service":"icy-server","timestamp":"2025-03-17 12:33:03"}
+{"level":"error","message":"Invalid email or password - /api/v1/auth/login - POST - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 12:47:13"}
+{"level":"error","message":"Invalid email or password - /api/v1/auth/login - POST - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 12:47:21"}
+{"level":"error","message":"Auth Error (Error): User not found, Token preview: eyJhbGci..., URL: /api/v1/surveys/daily","service":"icy-server","timestamp":"2025-03-17 12:48:46"}
+{"level":"error","message":"Not authorized to access this route - /api/v1/surveys/daily - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 12:48:46"}
+{"level":"error","message":"Auth Error (Error): User not found, Token preview: eyJhbGci..., URL: /api/v1/surveys","service":"icy-server","timestamp":"2025-03-17 12:48:46"}
+{"level":"error","message":"Not authorized to access this route - /api/v1/surveys - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 12:48:46"}
+{"level":"error","message":"Auth Error (Error): User not found, Token preview: eyJhbGci..., URL: /api/v1/achievements/challenges","service":"icy-server","timestamp":"2025-03-17 12:48:46"}
+{"level":"error","message":"Not authorized to access this route - /api/v1/achievements/challenges - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 12:48:46"}
+{"level":"error","message":"Auth Error (Error): User not found, Token preview: eyJhbGci..., URL: /api/v1/achievements/achievements/recent","service":"icy-server","timestamp":"2025-03-17 12:48:46"}
+{"level":"error","message":"Not authorized to access this route - /api/v1/achievements/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 12:48:46"}
