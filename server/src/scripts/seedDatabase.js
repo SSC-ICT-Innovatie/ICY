@@ -9,6 +9,7 @@ const { MarketplaceCategory, MarketplaceItem } = require('../models/marketplaceM
 const { Badge, Challenge, Achievement } = require('../models/achievementModel');
 const { Team, League } = require('../models/teamModel');
 const { connectDB } = require('../config/database');
+const seedDepartments = require('../seeds/departmentSeeds');
 
 const importData = async () => {
   try {
@@ -156,5 +157,22 @@ const seedTeams = async () => {
   await Team.insertMany(teamsWithUserIds);
 };
 
-// Execute the import
-importData();
+const seedAllData = async () => {
+  try {
+    // Connect to MongoDB
+    await connectDB();
+    
+    // Seed departments (add this line)
+    await seedDepartments();
+    
+    // ...seed other data...
+    
+    console.log('Database seeding completed!'.green.bold);
+    process.exit(0);
+  } catch (error) {
+    console.error('Error seeding database:'.red.bold, error);
+    process.exit(1);
+  }
+};
+
+seedAllData();

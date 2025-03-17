@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:icy/core/utils/color_utils.dart';
 
 class HomeHeader extends StatelessWidget {
   final dynamic user;
   final Color primaryColor;
 
-  const HomeHeader({Key? key, required this.user, required this.primaryColor})
-    : super(key: key);
+  const HomeHeader({super.key, required this.user, required this.primaryColor});
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +36,8 @@ class HomeHeader extends StatelessWidget {
                   horizontal: 16,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.15),
+                  // Fix deprecated withOpacity
+                  color: ColorUtils.applyOpacity(Colors.black, 0.15),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(

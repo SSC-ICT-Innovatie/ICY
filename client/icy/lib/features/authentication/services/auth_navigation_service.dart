@@ -20,36 +20,35 @@ class AuthNavigationService {
 
   // Static method to handle logout and navigation
   static void logoutAndNavigate(BuildContext context) {
+    // Store references before the async gap
+    final authBloc = context.read<AuthBloc>();
+    final navCubit = context.read<NavigationCubit>();
+    final tabs = injectNavigationTabs(context);
+
     // Show confirmation dialog
     showAdaptiveDialog(
       context: context,
       builder:
-          (context) => AlertDialog(
+          (dialogContext) => AlertDialog(
             title: const Text('Logout Confirmation'),
             content: const Text('Are you sure you want to log out?'),
             actions: [
               TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
+                onPressed: () => Navigator.of(dialogContext).pop(false),
                 child: const Text('Cancel'),
               ),
               TextButton(
-                onPressed: () => Navigator.of(context).pop(true),
+                onPressed: () => Navigator.of(dialogContext).pop(true),
                 child: const Text('Logout'),
               ),
             ],
           ),
     ).then((confirmed) {
       if (confirmed == true) {
-        // Dispatch logout event
-        context.read<AuthBloc>().add(Logout());
-
-        // Navigate to login tab
-        context.read<NavigationCubit>().changeVisibleTabByIndex(0);
-
-        // Refresh tabs for auth state change
-        context.read<NavigationCubit>().refreshTabs(
-          injectNavigationTabs(context),
-        );
+        // Use stored references instead of context
+        authBloc.add(Logout());
+        navCubit.changeVisibleTabByIndex(0);
+        navCubit.refreshTabs(tabs);
       }
     });
   }

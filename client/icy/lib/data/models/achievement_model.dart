@@ -1,3 +1,4 @@
+
 class AchievementModel {
   final String id;
   final String title;
@@ -19,13 +20,13 @@ class AchievementModel {
 
   factory AchievementModel.fromJson(Map<String, dynamic> json) {
     return AchievementModel(
-      id: json['id'],
-      title: json['title'],
-      description: json['description'],
-      reward: json['reward'],
-      timestamp: json['timestamp'],
-      icon: json['icon'],
-      color: json['color'],
+      id: json['id'] ?? json['_id'] ?? '',
+      title: json['title'] ?? '',
+      description: json['description'] ?? '',
+      icon: json['icon'] ?? 'star',
+      color: json['color'] ?? '#4CAF50',
+      reward: json['reward'] ?? '0 XP',
+      timestamp: json['timestamp'] ?? DateTime.now().toIso8601String(),
     );
   }
 
@@ -34,10 +35,10 @@ class AchievementModel {
       'id': id,
       'title': title,
       'description': description,
-      'reward': reward,
-      'timestamp': timestamp,
       'icon': icon,
       'color': color,
+      'reward': reward,
+      'timestamp': timestamp,
     };
   }
 }
@@ -63,14 +64,26 @@ class Badge {
 
   factory Badge.fromJson(Map<String, dynamic> json) {
     return Badge(
-      id: json['_id'] ?? json['id'],
-      title: json['title'],
-      description: json['description'],
-      icon: json['icon'],
-      color: json['color'],
-      xpReward: json['xpReward'],
-      conditions: json['conditions'],
+      id: json['id'] ?? json['_id'] ?? '',
+      title: json['title'] ?? '',
+      description: json['description'] ?? '',
+      icon: json['icon'] ?? 'star',
+      color: json['color'] ?? '#4CAF50',
+      xpReward: json['xpReward'] ?? 0,
+      conditions: json['conditions'] ?? {},
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'icon': icon,
+      'color': color,
+      'xpReward': xpReward,
+      'conditions': conditions,
+    };
   }
 }
 
@@ -128,11 +141,9 @@ class Challenge {
   final String color;
   final ChallengeReward reward;
   final Map<String, dynamic> conditions;
-  final bool repeatable;
-  final int? cooldownDays;
-  final String? startDate;
-  final String? endDate;
   final bool active;
+  final bool repeatable;
+  final String? expiresAt;
 
   Challenge({
     required this.id,
@@ -142,44 +153,94 @@ class Challenge {
     required this.color,
     required this.reward,
     required this.conditions,
-    required this.repeatable,
-    this.cooldownDays,
-    this.startDate,
-    this.endDate,
     required this.active,
+    required this.repeatable,
+    this.expiresAt,
   });
 
   factory Challenge.fromJson(Map<String, dynamic> json) {
     return Challenge(
-      id: json['_id'] ?? json['id'],
-      title: json['title'],
-      description: json['description'],
-      icon: json['icon'],
-      color: json['color'],
-      reward: ChallengeReward.fromJson(json['reward']),
-      conditions: json['conditions'],
-      repeatable: json['repeatable'],
-      cooldownDays: json['cooldownDays'],
-      startDate: json['startDate'],
-      endDate: json['endDate'],
+      id: json['id'] ?? json['_id'] ?? '',
+      title: json['title'] ?? '',
+      description: json['description'] ?? '',
+      icon: json['icon'] ?? 'trophy',
+      color: json['color'] ?? '#4CAF50',
+      reward: ChallengeReward.fromJson(json['reward'] ?? {}),
+      conditions: json['conditions'] ?? {},
       active: json['active'] ?? true,
+      repeatable: json['repeatable'] ?? false,
+      expiresAt: json['expiresAt'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'icon': icon,
+      'color': color,
+      'reward': reward.toJson(),
+      'conditions': conditions,
+      'active': active,
+      'repeatable': repeatable,
+      if (expiresAt != null) 'expiresAt': expiresAt,
+    };
+  }
+}
+
+class UserChallenge {
+  final String id;
+  final String userId;
+  final Challenge challenge;
+  final double progress;
+  final bool completed;
+  final String? completedAt;
+
+  UserChallenge({
+    required this.id,
+    required this.userId,
+    required this.challenge,
+    required this.progress,
+    required this.completed,
+    this.completedAt,
+  });
+
+  factory UserChallenge.fromJson(Map<String, dynamic> json) {
+    return UserChallenge(
+      id: json['id'] ?? json['_id'] ?? '',
+      userId: json['userId'] ?? '',
+      challenge: Challenge.fromJson(json['challenge'] ?? {}),
+      progress: (json['progress'] ?? 0.0).toDouble(),
+      completed: json['completed'] ?? false,
+      completedAt: json['completedAt'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'userId': userId,
+      'challenge': challenge.toJson(),
+      'progress': progress,
+      'completed': completed,
+      if (completedAt != null) 'completedAt': completedAt,
+    };
   }
 }
 
 class ChallengeReward {
   final int xp;
   final int coins;
-  final String? badge;
 
-  ChallengeReward({required this.xp, required this.coins, this.badge});
+  ChallengeReward({required this.xp, required this.coins});
 
   factory ChallengeReward.fromJson(Map<String, dynamic> json) {
-    return ChallengeReward(
-      xp: json['xp'],
-      coins: json['coins'],
-      badge: json['badge'],
-    );
+    return ChallengeReward(xp: json['xp'] ?? 0, coins: json['coins'] ?? 0);
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'xp': xp, 'coins': coins};
   }
 }
 
@@ -191,6 +252,7 @@ class Achievement {
   final String icon;
   final String color;
   final String type;
+  final String timestamp;
 
   Achievement({
     required this.id,
@@ -200,22 +262,36 @@ class Achievement {
     required this.icon,
     required this.color,
     required this.type,
+    required this.timestamp,
   });
 
   factory Achievement.fromJson(Map<String, dynamic> json) {
     return Achievement(
-      id: json['_id'] ?? json['id'],
-      title: json['title'],
-      description: json['description'],
-      reward: json['reward'],
-      icon: json['icon'],
-      color: json['color'],
-      type: json['type'],
+      id: json['id'] ?? json['_id'] ?? '',
+      title: json['title'] ?? '',
+      description: json['description'] ?? '',
+      type: json['type'] ?? 'badge',
+      icon: json['icon'] ?? 'star',
+      color: json['color'] ?? '#4CAF50',
+      reward: json['reward'] ?? '0 XP',
+      timestamp: json['timestamp'] ?? DateTime.now().toIso8601String(),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'type': type,
+      'icon': icon,
+      'color': color,
+      'reward': reward,
+      'timestamp': timestamp,
+    };
   }
 }
 
-// Rename this class to avoid ambiguity with UserModel
 class AchievementUser {
   final String id;
   final String userId;
@@ -239,5 +315,111 @@ class AchievementUser {
   }
 }
 
-// Use alias for backward compatibility
-typedef UserAchievement = AchievementUser;
+class UserAchievement {
+  final String id;
+  final String userId;
+  final Achievement achievementId;
+  final String earnedAt;
+  final int xpAwarded;
+
+  UserAchievement({
+    required this.id,
+    required this.userId,
+    required this.achievementId,
+    required this.earnedAt,
+    required this.xpAwarded,
+  });
+
+  factory UserAchievement.fromJson(Map<String, dynamic> json) {
+    return UserAchievement(
+      id: json['id'] ?? json['_id'] ?? '',
+      userId: json['userId'] ?? '',
+      achievementId: Achievement.fromJson(json['achievementId'] ?? {}),
+      earnedAt: json['earnedAt'] ?? DateTime.now().toIso8601String(),
+      xpAwarded: json['xpAwarded'] ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'userId': userId,
+      'achievementId': achievementId.toJson(),
+      'earnedAt': earnedAt,
+      'xpAwarded': xpAwarded,
+    };
+  }
+}
+
+class UserBadges {
+  final List<EarnedBadge> earned;
+  final List<InProgressBadge> inProgress;
+
+  UserBadges({required this.earned, required this.inProgress});
+
+  factory UserBadges.fromJson(Map<String, dynamic> json) {
+    final earnedList = (json['earned'] ?? []) as List;
+    final inProgressList = (json['inProgress'] ?? []) as List;
+
+    return UserBadges(
+      earned: earnedList.map((badge) => EarnedBadge.fromJson(badge)).toList(),
+      inProgress:
+          inProgressList
+              .map((badge) => InProgressBadge.fromJson(badge))
+              .toList(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'earned': earned.map((badge) => badge.toJson()).toList(),
+      'inProgress': inProgress.map((badge) => badge.toJson()).toList(),
+    };
+  }
+}
+
+class EarnedBadge {
+  final Map<String, dynamic> badgeId;
+  final String dateEarned;
+  final int xpAwarded;
+
+  EarnedBadge({
+    required this.badgeId,
+    required this.dateEarned,
+    required this.xpAwarded,
+  });
+
+  factory EarnedBadge.fromJson(Map<String, dynamic> json) {
+    return EarnedBadge(
+      badgeId: json['badgeId'] ?? {},
+      dateEarned: json['dateEarned'] ?? DateTime.now().toIso8601String(),
+      xpAwarded: json['xpAwarded'] ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'badgeId': badgeId,
+      'dateEarned': dateEarned,
+      'xpAwarded': xpAwarded,
+    };
+  }
+}
+
+class InProgressBadge {
+  final Map<String, dynamic> badgeId;
+  final double progress;
+
+  InProgressBadge({required this.badgeId, required this.progress});
+
+  factory InProgressBadge.fromJson(Map<String, dynamic> json) {
+    return InProgressBadge(
+      badgeId: json['badgeId'] ?? {},
+      progress: (json['progress'] ?? 0.0).toDouble(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'badgeId': badgeId, 'progress': progress};
+  }
+}

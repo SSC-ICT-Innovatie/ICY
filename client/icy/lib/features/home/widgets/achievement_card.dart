@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:icy/data/models/achievement_model.dart';
+import 'package:icy/core/utils/color_utils.dart';
 import 'package:intl/intl.dart';
 
 class AchievementCard extends StatelessWidget {
@@ -30,7 +31,7 @@ class AchievementCard extends StatelessWidget {
               ),
               Text(
                 achievement.reward,
-                style: TextStyle(
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Colors.green,
                 ),
@@ -40,10 +41,9 @@ class AchievementCard extends StatelessWidget {
         ],
       ),
       prefixIcon: Container(
-        width: 40,
-        height: 40,
+        padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: ColorUtils.applyOpacity(color, 0.1),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(_getIconData(achievement.icon), color: color),
@@ -52,35 +52,21 @@ class AchievementCard extends StatelessWidget {
   }
 
   Color _hexToColor(String hexString) {
-    final buffer = StringBuffer();
-    if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
-    buffer.write(hexString.replaceFirst('#', ''));
-    try {
-      return Color(int.parse(buffer.toString(), radix: 16));
-    } catch (e) {
-      return Colors.blue;
-    }
+    return ColorUtils.hexToColor(hexString);
   }
 
   IconData _getIconData(String iconName) {
     switch (iconName) {
       case 'check_circle':
         return Icons.check_circle;
-      case 'local_fire_department':
-        return Icons.local_fire_department;
-      case 'people':
-      case 'groups':
-        return Icons.people;
-      case 'rate_review':
-        return Icons.rate_review;
+      case 'star':
+        return Icons.star;
       case 'emoji_events':
         return Icons.emoji_events;
-      case 'calendar_today':
-        return Icons.calendar_today;
-      case 'bolt':
-        return Icons.bolt;
-      case 'lightbulb':
-        return Icons.lightbulb;
+      case 'military_tech':
+        return Icons.military_tech;
+      case 'local_fire_department':
+        return Icons.local_fire_department;
       default:
         return Icons.star;
     }

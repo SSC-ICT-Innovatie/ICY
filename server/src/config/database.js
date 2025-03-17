@@ -1,79 +1,69 @@
 const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
 const logger = require('../utils/logger');
 
-let mongoServer;
-
+/**
+ * Connect to MongoDB database with improved error handling
+ * @returns {Promise<mongoose.Connection>} - MongoDB connection
+ */
 const connectDB = async () => {
-  try {
-    // Check if we should skip MongoDB connection (for testing)
-    if (process.env.SKIP_MONGODB === 'true') {
-      logger.info('MongoDB connection skipped based on environment setting');
-      return;
-    }
+  const maxRetries = 3;
+  let retries = 0;
+  let connected = false;
 
-    // Check if we should use in-memory MongoDB (for development/testing)
-    if (process.env.USE_MEMORY_DB === 'true') {
-      logger.info('Using in-memory MongoDB for development/testing');
-      mongoServer = await MongoMemoryServer.create();
-      const uri = mongoServer.getUri();
+  // Get the MongoDB URI from environment variables
+  const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/icy_app';
+
+  while (!connected && retries < maxRetries) {
+    try {
+      logger.info(`Connecting to MongoDB (Attempt ${retries + 1}/${maxRetries})...`);
       
-      await mongoose.connect(uri, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
+      // Connect to MongoDB
+      const conn = await mongoose.connect(mongoURI, {
+        // For Mongoose 6+, these are now the defaults
+        // useNewUrlParser: true,
+        // useUnifiedTopology: true,
+        serverSelectionTimeoutMS: 5000 // Short timeout for faster feedback
       });
+
+      connected = true;
+      logger.info(`MongoDB Connected: ${conn.connection.host}`);
       
-      logger.info('Connected to in-memory MongoDB');
-      return;
-    }
+      // Return the connection for reference
+      return conn.connection;
+    } catch (error) {
+      retries += 1;
+      logger.error(`MongoDB connection attempt ${retries} failed: ${error.message}`, { error });
+      
+      if (retries < maxRetries) {
+        // Wait exponentially longer between each retry
+        const waitTime = Math.pow(2, retries) * 1000;
+        logger.info(`Retrying in ${waitTime / 1000} seconds...`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+      } else {
+        logger.error(`All ${maxRetries} MongoDB connection attempts failed.`);
+        
+        // Provide helpful information for users
+        const helpText = `
+=== MongoDB Connection Troubleshooting ===
 
-    // Regular MongoDB connection
-    logger.info('Connecting to MongoDB...');
-    await mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    
-    logger.info('Connected to MongoDB');
-  } catch (error) {
-    logger.error(`Error connecting to MongoDB: ${error.message}`);
-    
-    // Try memory server as fallback if main connection fails
-    if (!mongoServer && process.env.NODE_ENV === 'development') {
-      logger.info('Trying to connect to in-memory MongoDB as fallback...');
-      try {
-        mongoServer = await MongoMemoryServer.create();
-        const uri = mongoServer.getUri();
+1. For local development:
+   • Make sure MongoDB is installed: brew list mongodb-community
+   • Start MongoDB locally: brew services start mongodb-community
+   • Check MongoDB status: brew services list
+
+2. Using MongoDB Atlas:
+   • Sign up at https://www.mongodb.com/cloud/atlas/register
+   • Create a free cluster
+   • Get your connection string and update MONGODB_URI in .env
+
+Current connection string: ${mongoURI}
+`;
+        logger.info(helpText);
         
-        await mongoose.connect(uri, {
-          useNewUrlParser: true,
-          useUnifiedTopology: true,
-        });
-        
-        logger.info('Connected to in-memory MongoDB (fallback)');
-      } catch (fallbackError) {
-        logger.error(`Failed to connect to fallback MongoDB: ${fallbackError.message}`);
-        process.exit(1);
-      }
-    } else {
-      // In production, we should exit if MongoDB connection fails
-      if (process.env.NODE_ENV === 'production') {
-        process.exit(1);
+        throw new Error(`Failed to connect to MongoDB after ${maxRetries} attempts`);
       }
     }
   }
 };
 
-const disconnectDB = async () => {
-  try {
-    await mongoose.disconnect();
-    if (mongoServer) {
-      await mongoServer.stop();
-    }
-    logger.info('Disconnected from MongoDB');
-  } catch (error) {
-    logger.error(`Error disconnecting from MongoDB: ${error.message}`);
-  }
-};
-
-module.exports = { connectDB, disconnectDB };
+module.exports = connectDB;

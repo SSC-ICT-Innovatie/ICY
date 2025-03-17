@@ -4,6 +4,61 @@
 
 ICY is a cross-platform mobile application built with Flutter, following a BLoC (Business Logic Component) pattern architecture. The backend is built with Node.js and Express, using MongoDB as the database.
 
+## System Architecture
+
+### High-Level Architecture
+
+```mermaid
+graph TD
+    Client[Flutter Client App]
+    Server[Node.js Server]
+    Database[(MongoDB)]
+    
+    Client <--> Server
+    Server <--> Database
+    
+    subgraph "Client Side"
+        Client --> UILayer[UI Layer]
+        Client --> BlocLayer[BLoC Layer]
+        Client --> DataLayer[Data Layer]
+        Client --> RepositoryLayer[Repository Layer]
+    end
+    
+    subgraph "Server Side"
+        Server --> Routes[API Routes]
+        Server --> Controllers[Controllers]
+        Server --> Services[Services]
+        Server --> Models[Data Models]
+        Server --> Middleware[Middleware]
+    end
+```
+
+### Client-Server Communication Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant UI as UI Components
+    participant BLoC as BLoC State Management
+    participant Repo as Repository
+    participant API as API Service
+    participant Server as Node.js Server
+    participant DB as MongoDB
+    
+    User->>UI: Interacts with app
+    UI->>BLoC: Dispatches Event
+    BLoC->>Repo: Calls repository method
+    Repo->>API: Makes API request
+    API->>Server: HTTP Request
+    Server->>DB: Database query
+    DB->>Server: Query results
+    Server->>API: HTTP Response
+    API->>Repo: Returns response data
+    Repo->>BLoC: Returns processed data
+    BLoC->>UI: Emits new State
+    UI->>User: Updates display
+```
+
 ## Architecture Layers
 
 ### Frontend Architecture (Flutter)
@@ -43,6 +98,88 @@ The backend follows an MVC-like pattern:
 5. **Middleware**: Request preprocessing (authentication, validation, etc.)
 6. **Utils**: Helper functions and utilities
 
+## Key Components and Their Relationships
+
+### Client Components
+
+```mermaid
+classDiagram
+    class AuthBloc {
+        +AuthState state
+        +emit(AuthState)
+        +login(email, password)
+        +signup(userDetails)
+        +logout()
+    }
+    
+    class UserModel {
+        +id: String
+        +name: String
+        +email: String
+        +avatar: String
+        +department: String
+    }
+    
+    class AuthRepository {
+        +login(email, password)
+        +signup(userDetails)
+        +getCurrentUser()
+        +logout()
+    }
+    
+    class ApiService {
+        +get(endpoint)
+        +post(endpoint, data)
+        +put(endpoint, data)
+        +delete(endpoint)
+    }
+    
+    AuthBloc --> AuthRepository : uses
+    AuthRepository --> ApiService : uses
+    AuthRepository --> UserModel : creates/returns
+```
+
+### Server Components
+
+```mermaid
+classDiagram
+    class AuthController {
+        +login(req, res)
+        +signup(req, res)
+        +verifyEmail(req, res)
+        +logout(req, res)
+    }
+    
+    class UserModel {
+        +email: String
+        +password: String
+        +fullName: String
+        +department: String
+        +role: String
+    }
+    
+    class AuthMiddleware {
+        +protect(req, res, next)
+        +authorize(roles)
+    }
+    
+    class DepartmentModel {
+        +name: String
+        +description: String
+        +active: Boolean
+    }
+    
+    class DepartmentController {
+        +getDepartments(req, res)
+        +createDepartment(req, res)
+        +updateDepartment(req, res)
+    }
+    
+    AuthController --> UserModel : uses
+    DepartmentController --> DepartmentModel : uses
+    AuthMiddleware --> UserModel : verifies
+```
+
 ## Data Flow
 
 1. User interacts with the UI
@@ -54,39 +191,19 @@ The backend follows an MVC-like pattern:
 7. Response flows back to the UI through the same layers
 8. UI updates based on new State from BLoC
 
-## Architecture Diagram
+## API Endpoints Overview
 
-```mermaid
-flowchart TD
-    User[User] --> UI[UI Layer]
-    
-    subgraph Frontend
-        UI --> Events[Events]
-        Events --> BLoCs[BLoCs]
-        BLoCs --> States[States]
-        States --> UI
-        
-        BLoCs --> Repositories[Repositories]
-        
-        subgraph DataLayer
-            Repositories --> ApiClient[API Client]
-            Repositories --> LocalStorage[Local Storage]
-        end
-    end
-    
-    ApiClient --> API[API Gateway]
-    
-    subgraph Backend
-        API --> Routes[Routes]
-        Routes --> Controllers[Controllers]
-        Controllers --> Services[Services]
-        
-        Services --> Models[Models]
-        Models --> Database[(MongoDB)]
-        
-        Middleware[Middleware] --> Routes
-    end
-```
+| Endpoint | Method | Description | Authentication |
+|----------|--------|-------------|----------------|
+| `/api/v1/auth/login` | POST | User login | No |
+| `/api/v1/auth/register` | POST | User registration | No |
+| `/api/v1/auth/verify-email` | POST | Email verification | No |
+| `/api/v1/departments` | GET | Get all departments | No |
+| `/api/v1/departments/:id` | GET | Get department by ID | No |
+| `/api/v1/departments` | POST | Create department | Yes (Admin) |
+| `/api/v1/surveys` | GET | Get all surveys | Yes |
+| `/api/v1/achievements/badges` | GET | Get all badges | Yes |
+| `/api/v1/marketplace/items` | GET | Get marketplace items | Yes |
 
 ## Key Technologies
 

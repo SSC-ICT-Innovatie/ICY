@@ -3,7 +3,8 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const { getRedisClient } = require('../config/redis');
 
-router.get('/health', async (req, res) => {
+// Simple health check endpoint
+router.get('/health', (req, res) => {
   const health = {
     status: 'ok',
     timestamp: new Date().toISOString(),

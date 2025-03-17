@@ -14,6 +14,8 @@
 - Wachtwoord herstellen
 - Gebruikersprofiel bijwerken
 - Persoonlijke gegevens bekijken en bewerken
+- Afdeling selecteren tijdens registratie
+- E-mailadres verifiëren
 
 ### Enquête Functionaliteit
 - Beschikbare enquêtes bekijken
@@ -55,6 +57,14 @@
 - Badges en uitdagingen configureren
 - Marktplaatsitems beheren
 - Systeemanalyses bekijken
+- Afdelingen beheren
+
+## Afdelingsbeheer
+- Alle afdelingen weergeven
+- Nieuwe afdelingen toevoegen
+- Afdelingen bewerken
+- Afdelingen deactiveren
+- Gebruikers aan afdelingen koppelen
 
 ## Gebruiksscenario Relaties
 
@@ -76,6 +86,8 @@ flowchart TD
     Register[Registreren]
     ResetPwd[Wachtwoord Herstellen]
     Profile[Profiel Beheren]
+    Verify[E-mail Verifiëren]
+    SelectDept[Afdeling Selecteren]
     
     %% Enquête Gebruiksscenario's
     Surveys[Enquêtes]
@@ -111,7 +123,15 @@ flowchart TD
     ManageUsers[Gebruikers Beheren]
     ManageSurveys[Enquêtes Beheren]
     ManageBadges[Prestaties Beheren]
+    ManageDepts[Afdelingen Beheren]
     SystemAnalytics[Systeemanalyse]
+    
+    %% Afdelingsbeheer Gebruiksscenario's
+    DeptMgmt[Afdelingsbeheer]
+    ListDepts[Afdelingen Weergeven]
+    AddDept[Afdeling Toevoegen]
+    EditDept[Afdeling Bewerken]
+    DeactivateDept[Afdeling Deactiveren]
     
     %% Relaties
     User --> Auth
@@ -126,12 +146,15 @@ flowchart TD
     
     Admin --> TeamLead
     Admin --> AdminFunc
+    Admin --> DeptMgmt
     
     %% Gedetailleerde relaties
     Auth --> Login
     Auth --> Register
     Auth --> ResetPwd
     Auth --> Profile
+    Auth --> Verify
+    Auth --> SelectDept
     
     Surveys --> ViewSurveys
     Surveys --> CompleteSurveys
@@ -155,5 +178,11 @@ flowchart TD
     AdminFunc --> ManageUsers
     AdminFunc --> ManageSurveys
     AdminFunc --> ManageBadges
+    AdminFunc --> ManageDepts
     AdminFunc --> SystemAnalytics
+    
+    DeptMgmt --> ListDepts
+    DeptMgmt --> AddDept
+    DeptMgmt --> EditDept
+    DeptMgmt --> DeactivateDept
 ```

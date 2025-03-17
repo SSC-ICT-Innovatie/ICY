@@ -1,10 +1,15 @@
 import 'dart:io';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:forui/forui.dart';
 import 'package:icy/abstractions/navigation/state/navigation_cubit.dart';
+import 'package:icy/abstractions/utils/constants.dart';
 import 'package:icy/abstractions/utils/validation_constants.dart';
+import 'package:icy/data/models/department_model.dart';
+import 'package:icy/data/repositories/department_repository.dart';
 import 'package:icy/features/authentication/state/bloc/auth_bloc.dart';
+import 'package:icy/data/repositories/auth_repository.dart';
 import 'package:icy/tabs.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -21,15 +26,56 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController _password = TextEditingController();
   final TextEditingController _verificationCode = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  final _authRepository = AuthRepository();
+  final _departmentRepository = DepartmentRepository();
+
   bool _isLoading = false;
+  bool _codeRequested = false;
+  bool _codeVerified = false;
+  String? _verificationError;
   File? _profileImage;
   final ImagePicker _picker = ImagePicker();
+
+  // Department selection
+  String _selectedDepartment = 'ICT';
+  List<Department> _departments = [];
+  bool _loadingDepartments = true;
+  // Add a scroll controller for the picker
+  late FixedExtentScrollController _departmentScrollController;
 
   @override
   void initState() {
     super.initState();
     // Add listener to update UI when name changes
     _name.addListener(_onNameChanged);
+
+    // Initialize the department scroll controller
+    _departmentScrollController = FixedExtentScrollController(initialItem: 0);
+
+    // Load departments from backend
+    _loadDepartments();
+  }
+
+  Future<void> _loadDepartments() async {
+    setState(() {
+      _loadingDepartments = true;
+    });
+
+    try {
+      final departments = await _departmentRepository.getDepartments();
+      setState(() {
+        _departments = departments;
+        if (departments.isNotEmpty) {
+          _selectedDepartment = departments.first.name;
+        }
+        _loadingDepartments = false;
+      });
+    } catch (e) {
+      print('Error loading departments: $e');
+      setState(() {
+        _loadingDepartments = false;
+      });
+    }
   }
 
   @override
@@ -39,6 +85,8 @@ class _SignupScreenState extends State<SignupScreen> {
     _email.dispose();
     _password.dispose();
     _verificationCode.dispose();
+    // Dispose the controller
+    _departmentScrollController.dispose();
     super.dispose();
   }
 
@@ -82,6 +130,7 @@ class _SignupScreenState extends State<SignupScreen> {
   void _showVerificationDialog() {
     showAdaptiveDialog(
       context: context,
+      barrierDismissible: false,
       builder:
           (context) => FDialog(
             direction: Axis.horizontal,
@@ -89,28 +138,51 @@ class _SignupScreenState extends State<SignupScreen> {
             body: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  'We\'ve sent a verification code to your email. Please enter it below:',
+                Text(
+                  'We\'ve sent a verification code to:',
+                  style: TextStyle(fontSize: 16),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 8),
+                Text(
+                  _email.text,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: context.theme.colorScheme.primary,
+                  ),
+                ),
+                SizedBox(height: 16),
                 FTextField(
                   controller: _verificationCode,
                   label: const Text('Verification Code'),
                   keyboardType: TextInputType.number,
+                  validator: ValidationConstants.validateVerificationCode,
+                  hint: '6-digit code',
                 ),
+                if (_verificationError != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Text(
+                      _verificationError!,
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
               ],
             ),
             actions: [
               FButton(
                 style: FButtonStyle.outline,
-                label: const Text('Cancel'),
-                onPress: () => Navigator.of(context).pop(),
+                label: const Text('Resend Code'),
+                onPress: () {
+                  Navigator.of(context).pop();
+                  _requestVerificationCode();
+                },
               ),
               FButton(
                 label: const Text('Verify'),
                 onPress: () {
                   Navigator.of(context).pop();
-                  _completeSignup();
+                  _verifyCode();
                 },
               ),
             ],
@@ -124,7 +196,7 @@ class _SignupScreenState extends State<SignupScreen> {
       builder:
           (context) => FDialog(
             direction: Axis.horizontal,
-            title: const Text('Registration Error'),
+            title: const Text('Error'),
             body: Text(message),
             actions: [
               FButton(
@@ -137,45 +209,103 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  void _initiateSignup() async {
+  Future<void> _requestVerificationCode() async {
     if (_formKey.currentState?.validate() ?? false) {
       setState(() {
         _isLoading = true;
+        _verificationError = null;
       });
 
       try {
-        // In a real app, we would send an API request to send the verification code
-        // For now, we'll simulate this process
-        await Future.delayed(const Duration(seconds: 1));
+        // Real API call to request verification code
+        final success = await _authRepository.requestVerificationCode(
+          _email.text,
+        );
 
         if (mounted) {
           setState(() {
             _isLoading = false;
+            _codeRequested = success;
           });
-          _showVerificationDialog();
+
+          if (success) {
+            _showVerificationDialog();
+          } else {
+            _showErrorDialog(
+              'Failed to send verification code. Please try again.',
+            );
+          }
         }
       } catch (e) {
         if (mounted) {
           setState(() {
             _isLoading = false;
           });
-          _showErrorDialog('Failed to send verification code: ${e.toString()}');
+          _showErrorDialog('Error: ${e.toString()}');
         }
       }
     }
   }
 
+  Future<void> _verifyCode() async {
+    if (_verificationCode.text.isEmpty) {
+      setState(() {
+        _verificationError = 'Verification code is required';
+      });
+      _showVerificationDialog();
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _verificationError = null;
+    });
+
+    try {
+      // Real API call to verify code
+      final success = await _authRepository.verifyEmailCode(
+        _email.text,
+        _verificationCode.text,
+      );
+
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _codeVerified = success;
+        });
+
+        if (success) {
+          // If verified, proceed with signup
+          _completeSignup();
+        } else {
+          _verificationError = 'Invalid verification code. Please try again.';
+          _showVerificationDialog();
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _verificationError = e.toString();
+        });
+        _showVerificationDialog();
+      }
+    }
+  }
+
   void _completeSignup() async {
+    if (!_codeVerified) {
+      _showErrorDialog('Please verify your email first');
+      return;
+    }
+
     setState(() {
       _isLoading = true;
     });
 
     try {
-      // Default avatar ID (can be customized later)
-      final avatarId = '1';
-
-      // In a real app, we would validate the verification code here
-      // For now, we'll proceed with the signup
+      // Define avatarId before using it
+      const String avatarId = '1';
 
       // Dispatch signup event to auth bloc
       context.read<AuthBloc>().add(
@@ -184,22 +314,19 @@ class _SignupScreenState extends State<SignupScreen> {
           email: _email.text,
           password: _password.text,
           avatarId: avatarId,
-          department: 'ICT',
+          department: _selectedDepartment,
           profileImage: _profileImage,
+          verificationCode: _verificationCode.text,
         ),
       );
     } catch (e) {
       print('Signup error: $e');
 
-      // Show error dialog
-      if (mounted) {
-        _showErrorDialog('Registration failed: ${e.toString()}');
-      }
-    } finally {
       if (mounted) {
         setState(() {
           _isLoading = false;
         });
+        _showErrorDialog('Registration failed: ${e.toString()}');
       }
     }
   }
@@ -209,11 +336,50 @@ class _SignupScreenState extends State<SignupScreen> {
     // Get initials for avatar
     final initials = _getInitials();
 
+    // Replace the Department FTile with this fixed version
+    FTile buildDepartmentTile() {
+      return FTile(
+        title: const Text("Department"),
+        subtitle:
+            _loadingDepartments
+                ? const Center(child: CircularProgressIndicator.adaptive())
+                : _departments.isEmpty
+                ? const Text("No departments available")
+                : SizedBox(
+                  height: 120,
+                  child: CupertinoPicker(
+                    scrollController: _departmentScrollController,
+                    itemExtent: 40,
+                    onSelectedItemChanged: (index) {
+                      setState(() {
+                        _selectedDepartment = _departments[index].name;
+                      });
+                    },
+                    children:
+                        _departments
+                            .map(
+                              (dept) => Center(
+                                child: Text(
+                                  dept.name,
+                                  style: const TextStyle(fontSize: 16),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                  ),
+                ),
+      );
+    }
+
     return FScaffold(
       resizeToAvoidBottomInset: true,
       header: FHeader(title: Text("Create Account")),
       content: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
+          setState(() {
+            _isLoading = state is AuthLoading;
+          });
+
           if (state is AuthSuccess) {
             final navCubit = context.read<NavigationCubit>();
             // Refresh tabs with new auth state
@@ -224,14 +390,14 @@ class _SignupScreenState extends State<SignupScreen> {
           }
         },
         builder: (context, state) {
-          return state is AuthLoading || _isLoading
+          return _isLoading
               ? const Center(child: CircularProgressIndicator.adaptive())
               : SingleChildScrollView(
                 child: Form(
                   key: _formKey,
                   child: Column(
                     children: [
-                      // New avatar implementation with image picker
+                      // Avatar implementation with image picker
                       const SizedBox(height: 24),
                       GestureDetector(
                         onTap: _pickImage,
@@ -247,17 +413,26 @@ class _SignupScreenState extends State<SignupScreen> {
                                   context,
                                 ).primaryColor.withAlpha(26),
                               ),
-                              child: FAvatar(
-                                image: FileImage(_profileImage ?? File('')),  
-                                size: 64,
-                                fallback: Text(
-                                  initials,
-                                  style: const TextStyle(
-                                    fontSize: 36,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
+                              child:
+                                  _profileImage != null
+                                      ? ClipRRect(
+                                        borderRadius: BorderRadius.circular(60),
+                                        child: Image.file(
+                                          _profileImage!,
+                                          width: 120,
+                                          height: 120,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      )
+                                      : Center(
+                                        child: Text(
+                                          initials,
+                                          style: const TextStyle(
+                                            fontSize: 36,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
                             ),
                             Container(
                               padding: const EdgeInsets.all(8),
@@ -301,6 +476,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                 label: const SizedBox(),
                                 hint: 'Enter your work email',
                                 validator: ValidationConstants.validateEmail,
+                                enabled: !_codeRequested,
                               ),
                             ),
                             FTile(
@@ -311,14 +487,42 @@ class _SignupScreenState extends State<SignupScreen> {
                                 label: const SizedBox(),
                                 hint: 'Create a secure password',
                                 validator: ValidationConstants.validatePassword,
+                                enabled: !_codeRequested,
                               ),
                             ),
+                            // Replace the department tile with our fixed version
+                            buildDepartmentTile(),
                             FTile(
-                              title: FButton(
-                                onPress: _initiateSignup,
-                                label: const Text("Create Account"),
-                              ),
+                              title:
+                                  _codeRequested
+                                      ? FButton(
+                                        onPress:
+                                            () => _showVerificationDialog(),
+                                        label:
+                                            _codeVerified
+                                                ? const Text("Verified ✓")
+                                                : const Text(
+                                                  "Enter Verification Code",
+                                                ),
+                                        style:
+                                            _codeVerified
+                                                ? FButtonStyle.primary
+                                                : FButtonStyle.secondary,
+                                      )
+                                      : FButton(
+                                        onPress: _requestVerificationCode,
+                                        label: const Text(
+                                          "Request Verification Code",
+                                        ),
+                                      ),
                             ),
+                            if (_codeVerified)
+                              FTile(
+                                title: FButton(
+                                  onPress: _completeSignup,
+                                  label: const Text("Create Account"),
+                                ),
+                              ),
                           ],
                         ),
                       ),

@@ -3,10 +3,26 @@ const User = require('../models/userModel');
 const { createError } = require('../utils/errorUtils');
 const asyncHandler = require('./asyncMiddleware');
 const logger = require('../utils/logger');
+const mongoose = require('mongoose');
 
 // Protect routes - authentication middleware
 exports.protect = asyncHandler(async (req, res, next) => {
   let token;
+
+  // Check for MongoDB connection in development
+  if (process.env.NODE_ENV === 'development' && !mongoose.connection.readyState) {
+    console.log('[DEV MODE] Authentication bypass activated (no DB connection)');
+    // Create a mock user for development
+    req.user = {
+      id: 'dev-user-id',
+      email: 'dev@example.com',
+      username: 'devuser',
+      role: 'user',
+      fullName: 'Development User',
+      department: 'Development'
+    };
+    return next();
+  }
 
   // Check for Bearer token in the Authorization header
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
@@ -62,6 +78,12 @@ exports.protect = asyncHandler(async (req, res, next) => {
 // Role-based authorization middleware
 exports.authorize = (...roles) => {
   return (req, res, next) => {
+    // Development bypass
+    if (process.env.NODE_ENV === 'development' && !mongoose.connection.readyState) {
+      // In development without DB, allow access to any role-protected route
+      return next();
+    }
+
     if (!req.user || !roles.includes(req.user.role)) {
       return next(createError(403, `Role '${req.user?.role}' is not authorized to access this route`));
     }

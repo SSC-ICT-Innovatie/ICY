@@ -1,56 +1,54 @@
 class ApiConstants {
-  // Environment settings
-  static const bool isProduction = false; // Change to true for production
+  // API base URL
+  static const String baseUrl = 'http://localhost:5001/api/v1';
 
-  // Base API URLs
-  static const String devBaseUrl = 'http://localhost:5001/api/v1';
-  static const String prodBaseUrl = 'https://api.icy-app.com/api/v1';
-
-  // Get the appropriate URL based on environment
-  static String get baseUrl => isProduction ? prodBaseUrl : devBaseUrl;
-
-  // Various endpoint definitions for authentication, surveys, marketplace, etc.
-  // Authentication endpoints
+  // Auth routes
   static const String loginEndpoint = '/auth/login';
-  static const String registerEndpoint = '/auth/register';
-  static const String refreshTokenEndpoint = '/auth/refresh-token';
+  static const String signupEndpoint = '/auth/register';
+  static const String registerEndpoint =
+      '/auth/register'; // Alias for signupEndpoint
   static const String logoutEndpoint = '/auth/logout';
+  static const String refreshTokenEndpoint = '/auth/refresh-token';
   static const String currentUserEndpoint = '/auth/me';
-  static const String requestVerificationEndpoint =
-      '/auth/request-verification';
+  static const String requestVerificationCodeEndpoint =
+      '/auth/request-verification-code';
   static const String verifyEmailCodeEndpoint = '/auth/verify-email-code';
 
-  // User endpoints
-  static const String usersEndpoint = '/users';
-  static const String userPreferencesEndpoint = '/users/preferences';
-  static const String userStatsEndpoint = '/users/stats';
+  // Auth storage keys
+  static const String authTokenKey = 'auth_token';
+  static const String refreshTokenKey = 'refresh_token';
 
-  // Survey endpoints
+  // User routes
+  static const String usersEndpoint = '/users';
+  static const String userProfileEndpoint = '/users/profile';
+
+  // Survey routes
   static const String surveysEndpoint = '/surveys';
   static const String dailySurveysEndpoint = '/surveys/daily';
+  static const String userSurveysEndpoint = '/surveys/my';
 
-  // Marketplace endpoints
-  static const String marketplaceCategoriesEndpoint = '/marketplace/categories';
-  static const String marketplaceItemsEndpoint = '/marketplace/items';
-  static const String marketplacePurchasesEndpoint = '/marketplace/purchases';
+  // Achievement routes
+  static const String achievementsEndpoint = '/achievements';
+  static const String badgesEndpoint = '/achievements/badges';
+  static const String userBadgesEndpoint = '/achievements/badges/my';
+  static const String myBadgesEndpoint = '/achievements/badges/my';
+  static const String challengesEndpoint = '/achievements/challenges';
+  static const String userChallengesEndpoint = '/achievements/challenges/my';
+  static const String recentAchievementsEndpoint = '/achievements/recent';
 
-  // Team endpoints
+  // Team routes
   static const String teamsEndpoint = '/teams';
-  static const String myTeamEndpoint = '/teams/my-team';
+  static const String myTeamEndpoint = '/teams/my';
+  static const String teamMembersEndpoint = '/teams/members';
   static const String leaderboardEndpoint = '/teams/leaderboard';
   static const String leaguesEndpoint = '/teams/leagues';
 
-  // Achievement endpoints
-  static const String badgesEndpoint = '/achievements/badges';
-  static const String myBadgesEndpoint = '/achievements/badges/my';
-  static const String challengesEndpoint = '/achievements/challenges';
-  static const String achievementsEndpoint = '/achievements/achievements';
-  static const String recentAchievementsEndpoint =
-      '/achievements/achievements/recent';
+  // Department routes
+  static const String departmentsEndpoint = '/departments';
 
-  // Local storage keys
-  static const String authTokenKey = 'icy_auth_token';
-  static const String refreshTokenKey = 'icy_refresh_token';
-  static const String userIdKey = 'icy_user_id';
-  static const String userPreferencesKey = 'icy_user_prefs';
+  // Marketplace routes
+  static const String marketplaceEndpoint = '/marketplace';
+  static const String marketplaceCategoriesEndpoint = '/marketplace/categories';
+  static const String marketplaceItemsEndpoint = '/marketplace/items';
+  static const String marketplacePurchasesEndpoint = '/marketplace/purchases';
 }

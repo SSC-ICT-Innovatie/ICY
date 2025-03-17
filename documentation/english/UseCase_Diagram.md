@@ -14,6 +14,8 @@
 - Reset password
 - Update user profile
 - View and edit personal details
+- Select department during signup
+- Verify email address
 
 ### Survey Functionality
 - View available surveys
@@ -55,6 +57,14 @@
 - Configure badges and challenges
 - Manage marketplace items
 - View system analytics
+- Manage departments
+
+## Department Management
+- List all departments
+- Add new departments
+- Edit departments
+- Deactivate departments
+- Associate users with departments
 
 ## Use Case Relationships
 
@@ -76,6 +86,8 @@ flowchart TD
     Register[Register]
     ResetPwd[Reset Password]
     Profile[Manage Profile]
+    Verify[Verify Email]
+    SelectDept[Select Department]
     
     %% Survey Use Cases
     Surveys[Surveys]
@@ -83,7 +95,7 @@ flowchart TD
     CompleteSurveys[Complete Surveys]
     ViewHistory[View History]
     
-    %% Achievements Use Cases
+    %% Achievement Use Cases
     Achieve[Achievements]
     ViewBadges[View Badges]
     Challenges[Complete Challenges]
@@ -101,7 +113,7 @@ flowchart TD
     TeamStats[Team Statistics]
     Leaderboard[Leaderboard]
     
-    %% Notifications Use Cases
+    %% Notification Use Cases
     Notify[Notifications]
     ReceiveNotify[Receive Notifications]
     ManageNotify[Manage Notifications]
@@ -110,8 +122,16 @@ flowchart TD
     AdminFunc[Administration]
     ManageUsers[Manage Users]
     ManageSurveys[Manage Surveys]
-    ManageBadges[Manage Achievements]
+    ManageBadges[Manage Badges]
+    ManageDepts[Manage Departments]
     SystemAnalytics[System Analytics]
+    
+    %% Department Management Use Cases
+    DeptMgmt[Department Management]
+    ListDepts[List Departments]
+    AddDept[Add Department]
+    EditDept[Edit Department]
+    DeactivateDept[Deactivate Department]
     
     %% Relationships
     User --> Auth
@@ -126,12 +146,15 @@ flowchart TD
     
     Admin --> TeamLead
     Admin --> AdminFunc
+    Admin --> DeptMgmt
     
     %% Detailed relationships
     Auth --> Login
     Auth --> Register
     Auth --> ResetPwd
     Auth --> Profile
+    Auth --> Verify
+    Auth --> SelectDept
     
     Surveys --> ViewSurveys
     Surveys --> CompleteSurveys
@@ -155,6 +178,12 @@ flowchart TD
     AdminFunc --> ManageUsers
     AdminFunc --> ManageSurveys
     AdminFunc --> ManageBadges
+    AdminFunc --> ManageDepts
     AdminFunc --> SystemAnalytics
+    
+    DeptMgmt --> ListDepts
+    DeptMgmt --> AddDept
+    DeptMgmt --> EditDept
+    DeptMgmt --> DeactivateDept
 
 

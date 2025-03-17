@@ -8,17 +8,15 @@ class TeamRepository {
   TeamRepository({ApiService? apiService})
     : _apiService = apiService ?? ApiService();
 
-  // Get all teams
-  Future<List<Team>> getTeams() async {
+  /// Get all teams
+  Future<List<Team>> getAllTeams() async {
     try {
       final response = await _apiService.get(ApiConstants.teamsEndpoint);
-
       if (response['success'] == true && response['data'] != null) {
         return (response['data'] as List)
-            .map((teamJson) => Team.fromJson(teamJson))
+            .map((json) => Team.fromJson(json))
             .toList();
       }
-
       return [];
     } catch (e) {
       print('Error fetching teams: $e');
@@ -26,62 +24,79 @@ class TeamRepository {
     }
   }
 
-  // Get current user's team
-  Future<TeamDetails?> getUserTeam() async {
+  /// Get current user's team
+  Future<Team?> getMyTeam() async {
     try {
       final response = await _apiService.get(ApiConstants.myTeamEndpoint);
-
       if (response['success'] == true && response['data'] != null) {
-        final teamData = response['data'];
-
-        // If user has no team
-        if (teamData == null) {
-          return null;
-        }
-
-        return TeamDetails(
-          team: Team.fromJson(teamData['team']),
-          stats:
-              teamData['stats'] != null
-                  ? TeamStats.fromJson(teamData['stats'])
-                  : null,
-        );
+        return Team.fromJson(response['data']);
       }
-
       return null;
     } catch (e) {
-      print('Error fetching user team: $e');
+      print('Error fetching my team: $e');
       return null;
     }
   }
 
-  // Get team leaderboard
-  Future<Leaderboard?> getLeaderboard() async {
+  /// Get team members
+  Future<List<TeamMember>> getTeamMembers(String teamId) async {
+    try {
+      final response = await _apiService.get(
+        '${ApiConstants.teamsEndpoint}/$teamId/members',
+      );
+      if (response['success'] == true && response['data'] != null) {
+        return (response['data'] as List)
+            .map((json) => TeamMember.fromJson(json))
+            .toList();
+      }
+      return [];
+    } catch (e) {
+      print('Error fetching team members: $e');
+      return [];
+    }
+  }
+
+  /// Get team leaderboard
+  Future<List<TeamLeaderboardEntry>> getLeaderboard() async {
     try {
       final response = await _apiService.get(ApiConstants.leaderboardEndpoint);
-
       if (response['success'] == true && response['data'] != null) {
-        return Leaderboard.fromJson(response['data']);
+        return (response['data'] as List)
+            .map((json) => TeamLeaderboardEntry.fromJson(json))
+            .toList();
       }
-
-      return null;
+      return [];
     } catch (e) {
       print('Error fetching leaderboard: $e');
+      return [];
+    }
+  }
+
+  /// Get team/department statistics
+  Future<TeamStats?> getTeamStats(String teamId) async {
+    try {
+      final response = await _apiService.get(
+        '${ApiConstants.teamsEndpoint}/$teamId/stats',
+      );
+      if (response['success'] == true && response['data'] != null) {
+        return TeamStats.fromJson(response['data']);
+      }
+      return null;
+    } catch (e) {
+      print('Error fetching team stats: $e');
       return null;
     }
   }
 
-  // Get leagues
+  /// Get league information
   Future<List<League>> getLeagues() async {
     try {
       final response = await _apiService.get(ApiConstants.leaguesEndpoint);
-
       if (response['success'] == true && response['data'] != null) {
         return (response['data'] as List)
-            .map((leagueJson) => League.fromJson(leagueJson))
+            .map((json) => League.fromJson(json))
             .toList();
       }
-
       return [];
     } catch (e) {
       print('Error fetching leagues: $e');

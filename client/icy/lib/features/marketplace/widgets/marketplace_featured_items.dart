@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:icy/data/models/marketplace_model.dart';
+import 'package:icy/core/utils/color_utils.dart';
 
 class MarketplaceFeaturedItems extends StatelessWidget {
   final List<MarketplaceItem> featuredItems;
@@ -30,7 +31,7 @@ class MarketplaceFeaturedItems extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: ColorUtils.applyOpacity(Colors.black, 0.1),
                     blurRadius: 5,
                     offset: const Offset(0, 2),
                   ),
@@ -63,7 +64,7 @@ class MarketplaceFeaturedItems extends StatelessWidget {
                             begin: Alignment.bottomCenter,
                             end: Alignment.topCenter,
                             colors: [
-                              Colors.black.withOpacity(0.8),
+                              ColorUtils.applyOpacity(Colors.black, 0.8),
                               Colors.transparent,
                             ],
                           ),

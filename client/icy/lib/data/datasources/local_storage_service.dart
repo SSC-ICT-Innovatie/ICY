@@ -1,8 +1,10 @@
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:icy/abstractions/utils/api_constants.dart';
 import 'package:icy/data/models/user_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalStorageService {
+  static const String USER_KEY = 'auth_user';
   static const String _authUserKey = 'auth_user';
 
   // Save user to SharedPreferences
@@ -69,5 +71,32 @@ class LocalStorageService {
   Future<void> clearAll() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
+  }
+
+  Future<void> saveAuthToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(ApiConstants.authTokenKey, token);
+  }
+
+  Future<String?> getAuthToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(ApiConstants.authTokenKey);
+  }
+
+  Future<void> saveRefreshToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(ApiConstants.refreshTokenKey, token);
+  }
+
+  Future<String?> getRefreshToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(ApiConstants.refreshTokenKey);
+  }
+
+  Future<void> clearAuthData() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(ApiConstants.authTokenKey);
+    await prefs.remove(ApiConstants.refreshTokenKey);
+    await prefs.remove(USER_KEY);
   }
 }

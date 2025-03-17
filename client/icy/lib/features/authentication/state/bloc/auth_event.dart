@@ -33,6 +33,7 @@ class AuthSignUpRequested extends AuthEvent {
   final String? avatarId;
   final String department;
   final File? profileImage; // Add profile image support
+  final String? verificationCode; // Add verificationCode parameter
 
   AuthSignUpRequested({
     required this.name,
@@ -41,6 +42,7 @@ class AuthSignUpRequested extends AuthEvent {
     this.avatarId,
     required this.department,
     this.profileImage,
+    this.verificationCode, // Make it optional
   });
 }
 

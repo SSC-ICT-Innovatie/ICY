@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:icy/data/models/user_model.dart';
+import 'package:icy/core/utils/color_utils.dart'; // Import the ColorUtils class
 
 class StatsSummary extends StatelessWidget {
   final UserStats stats;
@@ -16,7 +17,8 @@ class StatsSummary extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            // Fix deprecated withOpacity usage
+            color: ColorUtils.applyOpacity(Colors.black, 0.05),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -88,7 +90,11 @@ class StatsSummary extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: context.theme.colorScheme.primary.withAlpha(26),
+            // Fix deprecated withOpacity usage
+            color: ColorUtils.applyOpacity(
+              context.theme.colorScheme.primary,
+              0.1,
+            ),
             shape: BoxShape.circle,
           ),
           child: Icon(icon, color: context.theme.colorScheme.primary, size: 24),

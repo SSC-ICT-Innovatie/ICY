@@ -13,6 +13,12 @@ class ColorUtils {
     return color.withAlpha(opacityToAlpha(opacity));
   }
 
+  /// Helper method to properly replace withOpacity calls
+  /// Replace color.withOpacity(value) with ColorUtils.applyOpacity(color, value)
+  static Color applyOpacity(Color color, double opacity) {
+    return color.withAlpha(opacityToAlpha(opacity));
+  }
+
   /// Parse a hex color string into a Color
   static Color hexToColor(String hexString) {
     final buffer = StringBuffer();

@@ -1,0 +1,339 @@
+import 'dart:async' as _i7;
+import 'dart:io' as _i9;
+import 'package:http/http.dart' as _i2;
+import 'package:icy/data/datasources/local_storage_service.dart' as _i6;
+import 'package:icy/data/models/user_model.dart' as _i8;
+import 'package:icy/services/api_service.dart' as _i5;
+import 'package:mockito/mockito.dart' as _i1;
+import 'package:mockito/src/dummies.dart' as _i3;
+import 'package:shared_preferences/shared_preferences.dart' as _i4;
+
+// ignore_for_file: type=lint
+// ignore_for_file: avoid_redundant_argument_values
+// ignore_for_file: avoid_setters_without_getters
+// ignore_for_file: comment_references
+// ignore_for_file: implementation_imports
+// ignore_for_file: invalid_use_of_visible_for_testing_member
+// ignore_for_file: prefer_const_constructors
+// ignore_for_file: unnecessary_parenthesis
+// ignore_for_file: camel_case_types
+// ignore_for_file: prefer_final_locals
+// ignore_for_file: subtype_of_sealed_class
+// ignore_for_file: invalid_use_of_internal_member
+
+class _FakeClient_0 extends _i1.SmartFake implements _i2.Client {
+  _FakeClient_0(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+}
+
+class _FakeDummy_1 extends _i1.SmartFake implements _i3.Dummy {
+  _FakeDummy_1(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+}
+
+class _FakeSharedPreferences_2 extends _i1.SmartFake
+    implements _i4.SharedPreferences {
+  _FakeSharedPreferences_2(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+}
+
+class _FakeUserModel_3 extends _i1.SmartFake implements _i8.UserModel {
+  _FakeUserModel_3(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+}
+
+class MockApiService extends _i1.Mock implements _i5.ApiService {
+  MockApiService() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i2.Client get _client => (super.noSuchMethod(
+        Invocation.getter(_#_client),
+        returnValue: _FakeClient_0(
+          this,
+          Invocation.getter(_#_client),
+        ),
+      ) as _i2.Client);
+  @override
+  String get baseUrl => (super.noSuchMethod(
+        Invocation.getter(_#baseUrl),
+        returnValue: '',
+      ) as String);
+  @override
+  _i7.Future<String?> _getAuthToken() => (super.noSuchMethod(
+        Invocation.method(
+          #_getAuthToken,
+          [],
+        ),
+        returnValue: _i7.Future<String?>.value(),
+      ) as _i7.Future<String?>);
+  @override
+  _i7.Future<void> init() => (super.noSuchMethod(
+        Invocation.method(
+          #init,
+          [],
+        ),
+        returnValue: _i7.Future<void>.value(),
+        returnValueForMissingStub: _i7.Future<void>.value(),
+      ) as _i7.Future<void>);
+  @override
+  _i7.Future<Map<String, dynamic>> login(
+    String? email,
+    String? password,
+  ) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #login,
+          [
+            email,
+            password,
+          ],
+        ),
+        returnValue: _i7.Future<Map<String, dynamic>>.value(<String, dynamic>{}),
+      ) as _i7.Future<Map<String, dynamic>>);
+  @override
+  _i7.Future<Map<String, dynamic>> register(
+    String name,
+    String email,
+    String password,
+    String avatarId,
+    String? department,
+    String verificationCode,
+    _i9.File? profileImage,
+  ) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #register,
+          [
+            name,
+            email,
+            password,
+            avatarId,
+            department,
+            verificationCode,
+            profileImage,
+          ],
+        ),
+        returnValue: _i7.Future<Map<String, dynamic>>.value(<String, dynamic>{}),
+      ) as _i7.Future<Map<String, dynamic>>);
+  @override
+  _i7.Future<Map<String, dynamic>> logout() => (super.noSuchMethod(
+        Invocation.method(
+          #logout,
+          [],
+        ),
+        returnValue: _i7.Future<Map<String, dynamic>>.value(<String, dynamic>{}),
+      ) as _i7.Future<Map<String, dynamic>>);
+  @override
+  _i7.Future<Map<String, dynamic>> get(String? endpoint) => (super.noSuchMethod(
+        Invocation.method(
+          #get,
+          [endpoint],
+        ),
+        returnValue: _i7.Future<Map<String, dynamic>>.value(<String, dynamic>{}),
+      ) as _i7.Future<Map<String, dynamic>>);
+  @override
+  _i7.Future<Map<String, dynamic>> post(
+    String? endpoint,
+    Map<String, dynamic>? data,
+  ) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #post,
+          [
+            endpoint,
+            data,
+          ],
+        ),
+        returnValue: _i7.Future<Map<String, dynamic>>.value(<String, dynamic>{}),
+      ) as _i7.Future<Map<String, dynamic>>);
+  @override
+  _i7.Future<Map<String, dynamic>> put(
+    String? endpoint,
+    Map<String, dynamic>? data,
+  ) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #put,
+          [
+            endpoint,
+            data,
+          ],
+        ),
+        returnValue: _i7.Future<Map<String, dynamic>>.value(<String, dynamic>{}),
+      ) as _i7.Future<Map<String, dynamic>>);
+  @override
+  _i7.Future<Map<String, dynamic>> delete(String? endpoint) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #delete,
+          [endpoint],
+        ),
+        returnValue: _i7.Future<Map<String, dynamic>>.value(<String, dynamic>{}),
+      ) as _i7.Future<Map<String, dynamic>>);
+  @override
+  _i7.Future<Map<String, dynamic>> uploadFile(
+    String? url,
+    String? filePath,
+    String? fieldName, [
+    Map<String, dynamic>? additionalFields,
+  ]) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #uploadFile,
+          [
+            url,
+            filePath,
+            fieldName,
+            additionalFields,
+          ],
+        ),
+        returnValue: _i7.Future<Map<String, dynamic>>.value(<String, dynamic>{}),
+      ) as _i7.Future<Map<String, dynamic>>);
+}
+
+class MockLocalStorageService extends _i1.Mock
+    implements _i6.LocalStorageService {
+  MockLocalStorageService() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i7.Future<void> saveAuthUser(_i8.UserModel? user) => (super.noSuchMethod(
+        Invocation.method(
+          #saveAuthUser,
+          [user],
+        ),
+        returnValue: _i7.Future<void>.value(),
+        returnValueForMissingStub: _i7.Future<void>.value(),
+      ) as _i7.Future<void>);
+  @override
+  _i7.Future<_i8.UserModel?> getAuthUser() => (super.noSuchMethod(
+        Invocation.method(
+          #getAuthUser,
+          [],
+        ),
+        returnValue: _i7.Future<_i8.UserModel?>.value(),
+      ) as _i7.Future<_i8.UserModel?>);
+  @override
+  _i7.Future<void> clearAuthUser() => (super.noSuchMethod(
+        Invocation.method(
+          #clearAuthUser,
+          [],
+        ),
+        returnValue: _i7.Future<void>.value(),
+        returnValueForMissingStub: _i7.Future<void>.value(),
+      ) as _i7.Future<void>);
+  @override
+  _i7.Future<void> saveData(
+    String? key,
+    dynamic value,
+  ) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #saveData,
+          [
+            key,
+            value,
+          ],
+        ),
+        returnValue: _i7.Future<void>.value(),
+        returnValueForMissingStub: _i7.Future<void>.value(),
+      ) as _i7.Future<void>);
+  @override
+  _i7.Future<dynamic> getData(String? key) => (super.noSuchMethod(
+        Invocation.method(
+          #getData,
+          [key],
+        ),
+        returnValue: _i7.Future<dynamic>.value(_FakeDummy_1(
+          this,
+          Invocation.method(
+            #getData,
+            [key],
+          ),
+        )),
+      ) as _i7.Future<dynamic>);
+  @override
+  _i7.Future<void> removeData(String? key) => (super.noSuchMethod(
+        Invocation.method(
+          #removeData,
+          [key],
+        ),
+        returnValue: _i7.Future<void>.value(),
+        returnValueForMissingStub: _i7.Future<void>.value(),
+      ) as _i7.Future<void>);
+  @override
+  _i7.Future<void> clearAll() => (super.noSuchMethod(
+        Invocation.method(
+          #clearAll,
+          [],
+        ),
+        returnValue: _i7.Future<void>.value(),
+        returnValueForMissingStub: _i7.Future<void>.value(),
+      ) as _i7.Future<void>);
+  @override
+  _i7.Future<void> saveAuthToken(String? token) => (super.noSuchMethod(
+        Invocation.method(
+          #saveAuthToken,
+          [token],
+        ),
+        returnValue: _i7.Future<void>.value(),
+        returnValueForMissingStub: _i7.Future<void>.value(),
+      ) as _i7.Future<void>);
+  @override
+  _i7.Future<String?> getAuthToken() => (super.noSuchMethod(
+        Invocation.method(
+          #getAuthToken,
+          [],
+        ),
+        returnValue: _i7.Future<String?>.value(),
+      ) as _i7.Future<String?>);
+  @override
+  _i7.Future<void> saveRefreshToken(String? token) => (super.noSuchMethod(
+        Invocation.method(
+          #saveRefreshToken,
+          [token],
+        ),
+        returnValue: _i7.Future<void>.value(),
+        returnValueForMissingStub: _i7.Future<void>.value(),
+      ) as _i7.Future<void>);
+  @override
+  _i7.Future<String?> getRefreshToken() => (super.noSuchMethod(
+        Invocation.method(
+          #getRefreshToken,
+          [],
+        ),
+        returnValue: _i7.Future<String?>.value(),
+      ) as _i7.Future<String?>);
+  @override
+  _i7.Future<void> clearAuthData() => (super.noSuchMethod(
+        Invocation.method(
+          #clearAuthData,
+          [],
+        ),
+        returnValue: _i7.Future<void>.value(),
+        returnValueForMissingStub: _i7.Future<void>.value(),
+      ) as _i7.Future<void>);
+}

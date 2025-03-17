@@ -1,20 +1,20 @@
 import 'dart:io';
-import 'package:icy/data/models/user_model.dart';
-import 'package:icy/data/datasources/local_storage_service.dart';
+
 import 'package:icy/abstractions/utils/api_constants.dart';
+import 'package:icy/data/datasources/local_storage_service.dart';
+import 'package:icy/data/models/user_model.dart';
 import 'package:icy/services/api_service.dart';
 
 class AuthRepository {
-  final LocalStorageService _localStorageService;
   final ApiService _apiService;
+  final LocalStorageService _localStorageService;
 
   AuthRepository({
-    LocalStorageService? localStorageService,
     ApiService? apiService,
-  }) : _localStorageService = localStorageService ?? LocalStorageService(),
-       _apiService = apiService ?? ApiService();
+    LocalStorageService? localStorageService,
+  }) : _apiService = apiService ?? ApiService(),
+       _localStorageService = localStorageService ?? LocalStorageService();
 
-  // Login with email and password
   Future<UserModel?> login(String email, String password) async {
     try {
       final response = await _apiService.login(email, password);
@@ -22,7 +22,12 @@ class AuthRepository {
       if (response['success'] == true && response['user'] != null) {
         final user = UserModel.fromJson(response['user']);
 
-        // Save auth info to local storage for persistence
+        // Save auth token
+        if (response['token'] != null) {
+          await _localStorageService.saveAuthToken(response['token']);
+        }
+
+        // Save user data
         await _localStorageService.saveAuthUser(user);
 
         return user;
@@ -31,71 +36,39 @@ class AuthRepository {
       return null;
     } catch (e) {
       print('Login error: $e');
-      rethrow; // Rethrow to let the UI layer handle it
+      return null;
     }
   }
 
-  // Request verification code
-  Future<bool> requestVerificationCode(String email) async {
-    try {
-      final response = await _apiService.requestVerificationCode(email);
-      return response['success'] == true;
-    } catch (e) {
-      print('Error requesting verification code: $e');
-      rethrow;
-    }
-  }
-
-  // Verify email code
-  Future<bool> verifyEmailCode(String email, String code) async {
-    try {
-      final response = await _apiService.verifyEmailCode(email, code);
-      return response['success'] == true;
-    } catch (e) {
-      print('Error verifying email code: $e');
-      rethrow;
-    }
-  }
-
-  // Register a new user with profile image and verification code
   Future<UserModel?> signup(
     String name,
     String email,
     String password,
     String avatarId, {
+    String? department,
     File? profileImage,
     String? verificationCode,
   }) async {
     try {
-      Map<String, dynamic> response;
-
-      if (verificationCode != null) {
-        // Use verification flow
-        response = await _apiService.register(
-          name,
-          email,
-          password,
-          'ICT', // Default department
-          avatarId,
-          verificationCode,
-          profileImage,
-        );
-      } else {
-        // Use normal signup flow without verification
-        response = await _apiService.simpleRegister(
-          name,
-          email,
-          password,
-          'ICT', // Default department
-          avatarId,
-          profileImage,
-        );
-      }
+      final response = await _apiService.register(
+        name,
+        email,
+        password,
+        avatarId,
+        department,
+        verificationCode ?? '',
+        profileImage,
+      );
 
       if (response['success'] == true && response['user'] != null) {
         final user = UserModel.fromJson(response['user']);
 
-        // Save to local storage for persistence
+        // Save auth token
+        if (response['token'] != null) {
+          await _localStorageService.saveAuthToken(response['token']);
+        }
+
+        // Save user data
         await _localStorageService.saveAuthUser(user);
 
         return user;
@@ -104,44 +77,110 @@ class AuthRepository {
       return null;
     } catch (e) {
       print('Signup error: $e');
-      rethrow; // Rethrow to let the UI layer handle it
+      return null;
     }
   }
 
-  // Logout user
-  Future<void> logout() async {
-    try {
-      await _apiService.logout();
-    } finally {
-      // Always clear local storage, even if API logout fails
-      await _localStorageService.clearAuthUser();
-    }
-  }
-
-  // Check if user is logged in
   Future<UserModel?> getCurrentUser() async {
-    // First check local storage
-    UserModel? cachedUser = await _localStorageService.getAuthUser();
+    try {
+      // Try to get cached user first
+      final cachedUser = await _localStorageService.getAuthUser();
 
-    // If we have a cached user and API service has a token, verify with server
-    if (cachedUser != null) {
-      try {
-        final response = await _apiService.get(
-          ApiConstants.currentUserEndpoint,
-        );
-        if (response['success'] == true && response['data'] != null) {
-          // Update cached user with fresh data
-          final freshUserData = UserModel.fromJson(response['data']);
-          await _localStorageService.saveAuthUser(freshUserData);
-          return freshUserData;
+      // If token exists, try to get fresh user data
+      if (await _localStorageService.getAuthToken() != null) {
+        try {
+          final response = await _apiService.get(
+            ApiConstants.currentUserEndpoint,
+          );
+
+          if (response['success'] == true && response['data'] != null) {
+            final updatedUser = UserModel.fromJson(response['data']);
+            await _localStorageService.saveAuthUser(updatedUser);
+            return updatedUser;
+          }
+        } catch (e) {
+          print('Error fetching current user: $e');
+          // If API fails, return cached user if available
+          if (cachedUser != null) return cachedUser;
         }
-      } catch (e) {
-        // If server verification fails, still return cached user
-        // but print error for debugging
-        print('Error fetching current user from server: $e');
       }
-    }
 
-    return cachedUser;
+      return cachedUser;
+    } catch (e) {
+      print('Get current user error: $e');
+      return null;
+    }
+  }
+
+  Future<bool> logout() async {
+    try {
+      // Call logout API
+      await _apiService.post(ApiConstants.logoutEndpoint, {});
+
+      // Clear local storage regardless of API response
+      await _localStorageService.clearAuthData();
+
+      return true;
+    } catch (e) {
+      print('Logout error: $e');
+
+      // Still clear local storage even if API call fails
+      await _localStorageService.clearAuthData();
+
+      return true;
+    }
+  }
+
+  // Request email verification code
+  Future<bool> requestVerificationCode(String email) async {
+    try {
+      final response = await _apiService.post(
+        ApiConstants.requestVerificationCodeEndpoint,
+        {'email': email},
+      );
+
+      if (response['success'] == true) {
+        // In development mode, the server might return the code directly
+        if (response.containsKey('devCode')) {
+          print(
+            'Development mode: Received verification code: ${response['devCode']}',
+          );
+          // Save the dev code for later use
+          await _localStorageService.saveData(
+            'dev_verification_code',
+            response['devCode'],
+          );
+        }
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print('Error requesting verification code: $e');
+      return false;
+    }
+  }
+
+  // Verify email code
+  Future<bool> verifyEmailCode(String email, String code) async {
+    try {
+      // In development mode, check if we have a stored dev code
+      final storedDevCode = await _localStorageService.getData(
+        'dev_verification_code',
+      );
+      if (storedDevCode != null && code == storedDevCode.toString()) {
+        print('Development mode: Verification code matched');
+        return true;
+      }
+
+      final response = await _apiService.post(
+        ApiConstants.verifyEmailCodeEndpoint,
+        {'email': email, 'code': code},
+      );
+
+      return response['success'] == true;
+    } catch (e) {
+      print('Error verifying email code: $e');
+      return false;
+    }
   }
 }

@@ -197,3 +197,47 @@ class TeamDetails {
 
   TeamDetails({required this.team, this.stats});
 }
+
+class TeamLeaderboardEntry {
+  final String id;
+  final String name;
+  final int position;
+  final int score;
+  final String department;
+  final int memberCount;
+  final int weeklyProgress;
+
+  TeamLeaderboardEntry({
+    required this.id,
+    required this.name,
+    required this.position,
+    required this.score,
+    required this.department,
+    required this.memberCount,
+    required this.weeklyProgress,
+  });
+
+  factory TeamLeaderboardEntry.fromJson(Map<String, dynamic> json) {
+    return TeamLeaderboardEntry(
+      id: json['id'] ?? json['_id'] ?? '',
+      name: json['name'] ?? '',
+      position: json['position'] ?? 0,
+      score: json['score'] ?? 0,
+      department: json['department'] ?? '',
+      memberCount: json['memberCount'] ?? 0,
+      weeklyProgress: json['weeklyProgress'] ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'position': position,
+      'score': score,
+      'department': department,
+      'memberCount': memberCount,
+      'weeklyProgress': weeklyProgress,
+    };
+  }
+}
