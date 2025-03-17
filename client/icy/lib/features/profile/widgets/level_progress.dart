@@ -5,7 +5,8 @@ import 'package:icy/data/models/user_model.dart';
 class LevelProgressCard extends StatelessWidget {
   final LevelModel level;
 
-  const LevelProgressCard({Key? key, required this.level}) : super(key: key);
+  // Use super parameter
+  const LevelProgressCard({super.key, required this.level});
 
   @override
   Widget build(BuildContext context) {

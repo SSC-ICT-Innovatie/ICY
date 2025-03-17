@@ -39,7 +39,9 @@ class ChallengeCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: challengeColor.withOpacity(0.1),
+                      color: challengeColor.withAlpha(
+                        26,
+                      ), // 0.1 opacity = ~26 alpha
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(_getIconData(icon), color: challengeColor),

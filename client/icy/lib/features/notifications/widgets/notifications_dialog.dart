@@ -11,11 +11,7 @@ class NotificationsDialog extends StatefulWidget {
   final VoidCallback? onClose;
   final Function(String, String)? onNotificationTap;
 
-  const NotificationsDialog({
-    super.key, 
-    this.onClose, 
-    this.onNotificationTap,
-  });
+  const NotificationsDialog({super.key, this.onClose, this.onNotificationTap});
 
   @override
   State<NotificationsDialog> createState() => _NotificationsDialogState();
@@ -32,7 +28,7 @@ class _NotificationsDialogState extends State<NotificationsDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: Theme.of(context).dialogBackgroundColor,
+      backgroundColor: Theme.of(context).dialogTheme.backgroundColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         padding: const EdgeInsets.all(16),

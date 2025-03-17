@@ -5,7 +5,7 @@ import 'package:icy/data/models/user_model.dart';
 class StatsSummary extends StatelessWidget {
   final UserStats stats;
 
-  const StatsSummary({Key? key, required this.stats}) : super(key: key);
+  const StatsSummary({super.key, required this.stats});
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +88,7 @@ class StatsSummary extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: context.theme.colorScheme.primary.withOpacity(0.1),
+            color: context.theme.colorScheme.primary.withAlpha(26),
             shape: BoxShape.circle,
           ),
           child: Icon(icon, color: context.theme.colorScheme.primary, size: 24),

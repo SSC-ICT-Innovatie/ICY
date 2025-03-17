@@ -36,7 +36,10 @@ class AchievementCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: achievementColor.withOpacity(0.1),
+                      // Replace withOpacity with withAlpha
+                      color: achievementColor.withAlpha(
+                        26,
+                      ), // 0.1 opacity = ~26 alpha
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(

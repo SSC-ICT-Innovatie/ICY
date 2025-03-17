@@ -26,7 +26,7 @@ class SurveyRepository {
     }
   }
 
-  // Get daily surveys
+  // Get daily surveys with graceful error handling
   Future<List<Survey>> getDailySurveys() async {
     try {
       final response = await _apiService.get(ApiConstants.dailySurveysEndpoint);
@@ -37,9 +37,18 @@ class SurveyRepository {
             .toList();
       }
 
+      // If we got a non-success response but it has data, still try to use it
+      if (response['data'] != null && response['data'] is List) {
+        return (response['data'] as List)
+            .map((surveyJson) => Survey.fromJson(surveyJson))
+            .toList();
+      }
+
+      // Log the error but return an empty list
+      print('Error fetching daily surveys: ${response['message']}');
       return [];
     } catch (e) {
-      print('Error fetching daily surveys: $e');
+      print('Exception fetching daily surveys: $e');
       return [];
     }
   }

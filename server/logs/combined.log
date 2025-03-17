@@ -7,3 +7,9 @@
 {"level":"info","message":"Redis connection skipped based on environment setting","service":"icy-server","timestamp":"2025-03-17 11:11:11"}
 {"level":"info","message":"Server running in development mode on port 5001","service":"icy-server","timestamp":"2025-03-17 11:11:11"}
 {"level":"info","message":"Connected to in-memory MongoDB","service":"icy-server","timestamp":"2025-03-17 11:11:19"}
+{"level":"error","message":"Not authorized to access this route - /api/v1/surveys/daily - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 11:17:59"}
+{"level":"error","message":"Not authorized to access this route - /api/v1/surveys - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 11:18:00"}
+{"level":"error","message":"Not authorized to access this route - /api/v1/achievements/challenges - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 11:18:00"}
+{"level":"error","message":"Not authorized to access this route - /api/v1/achievements/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 11:18:00"}
+{"level":"error","message":"Invalid email or password - /api/v1/auth/login - POST - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 11:24:38"}
+{"level":"error","message":"User with this email already exists - /api/v1/auth/register - POST - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 11:37:17"}

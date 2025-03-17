@@ -26,4 +26,21 @@ class SignUp extends AuthEvent {
   });
 }
 
+// Remove 'const' from the AuthSignUpRequested constructor
+class AuthSignUpRequested extends AuthEvent {
+  final String name;
+  final String email;
+  final String password;
+  final String? avatarId;
+  final String department;
+
+  AuthSignUpRequested({
+    required this.name,
+    required this.email,
+    required this.password,
+    this.avatarId,
+    required this.department,
+  });
+}
+
 class Logout extends AuthEvent {}
