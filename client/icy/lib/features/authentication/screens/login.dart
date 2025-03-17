@@ -138,15 +138,17 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
 
-                  // Helper text for no account
-                  SizedBox(height: 24),
-                  Center(
-                    child: Text(
-                      "Don't have an account?",
-                      style: TextStyle(color: Colors.grey[600]),
-                    ),
+                  FButton(
+                    style: FButtonStyle.ghost,
+                    onPress: () {
+                      // Navigate to login screen
+                      context.read<NavigationCubit>().changeVisibleTabByIndex(
+                        1,
+                      );
+                    },
+                    label: const Text("Already have an account? Login"),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 16),
                 ],
               ),
             ),

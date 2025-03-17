@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:forui/forui.dart';
@@ -5,6 +6,7 @@ import 'package:icy/abstractions/navigation/state/navigation_cubit.dart';
 import 'package:icy/abstractions/utils/validation_constants.dart';
 import 'package:icy/features/authentication/state/bloc/auth_bloc.dart';
 import 'package:icy/tabs.dart';
+import 'package:image_picker/image_picker.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -17,8 +19,11 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController _name = TextEditingController();
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
+  final TextEditingController _verificationCode = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
+  File? _profileImage;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -33,6 +38,7 @@ class _SignupScreenState extends State<SignupScreen> {
     _name.dispose();
     _email.dispose();
     _password.dispose();
+    _verificationCode.dispose();
     super.dispose();
   }
 
@@ -60,6 +66,58 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
+  Future<void> _pickImage() async {
+    try {
+      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        setState(() {
+          _profileImage = File(image.path);
+        });
+      }
+    } catch (e) {
+      _showErrorDialog('Failed to pick image: $e');
+    }
+  }
+
+  void _showVerificationDialog() {
+    showAdaptiveDialog(
+      context: context,
+      builder:
+          (context) => FDialog(
+            direction: Axis.horizontal,
+            title: const Text('Email Verification'),
+            body: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'We\'ve sent a verification code to your email. Please enter it below:',
+                ),
+                const SizedBox(height: 16),
+                FTextField(
+                  controller: _verificationCode,
+                  label: const Text('Verification Code'),
+                  keyboardType: TextInputType.number,
+                ),
+              ],
+            ),
+            actions: [
+              FButton(
+                style: FButtonStyle.outline,
+                label: const Text('Cancel'),
+                onPress: () => Navigator.of(context).pop(),
+              ),
+              FButton(
+                label: const Text('Verify'),
+                onPress: () {
+                  Navigator.of(context).pop();
+                  _completeSignup();
+                },
+              ),
+            ],
+          ),
+    );
+  }
+
   void _showErrorDialog(String message) {
     showAdaptiveDialog(
       context: context,
@@ -79,39 +137,69 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  void _signup() async {
+  void _initiateSignup() async {
     if (_formKey.currentState?.validate() ?? false) {
       setState(() {
         _isLoading = true;
       });
 
       try {
-        // Default avatar ID (can be customized later)
-        final avatarId = '1';
+        // In a real app, we would send an API request to send the verification code
+        // For now, we'll simulate this process
+        await Future.delayed(const Duration(seconds: 1));
 
-        // Dispatch signup event to auth bloc
-        context.read<AuthBloc>().add(
-          AuthSignUpRequested(
-            name: _name.text,
-            email: _email.text,
-            password: _password.text,
-            avatarId: avatarId,
-            department: 'ICT', // Default department
-          ),
-        );
-      } catch (e) {
-        print('Signup error: $e');
-
-        // Show error dialog
-        if (mounted) {
-          _showErrorDialog('Registration failed: ${e.toString()}');
-        }
-      } finally {
         if (mounted) {
           setState(() {
             _isLoading = false;
           });
+          _showVerificationDialog();
         }
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+          _showErrorDialog('Failed to send verification code: ${e.toString()}');
+        }
+      }
+    }
+  }
+
+  void _completeSignup() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Default avatar ID (can be customized later)
+      final avatarId = '1';
+
+      // In a real app, we would validate the verification code here
+      // For now, we'll proceed with the signup
+
+      // Dispatch signup event to auth bloc
+      context.read<AuthBloc>().add(
+        AuthSignUpRequested(
+          name: _name.text,
+          email: _email.text,
+          password: _password.text,
+          avatarId: avatarId,
+          department: 'ICT',
+          profileImage: _profileImage,
+        ),
+      );
+    } catch (e) {
+      print('Signup error: $e');
+
+      // Show error dialog
+      if (mounted) {
+        _showErrorDialog('Registration failed: ${e.toString()}');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
   }
@@ -143,17 +231,47 @@ class _SignupScreenState extends State<SignupScreen> {
                   key: _formKey,
                   child: Column(
                     children: [
-                      // New avatar implementation
+                      // New avatar implementation with image picker
                       const SizedBox(height: 24),
-                      FAvatar(
-                        image: null,
-                      size: 64,
-                        fallback: Text(
-                          initials,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      GestureDetector(
+                        onTap: _pickImage,
+                        child: Stack(
+                          alignment: Alignment.bottomRight,
+                          children: [
+                            Container(
+                              width: 120,
+                              height: 120,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Theme.of(
+                                  context,
+                                ).primaryColor.withAlpha(26),
+                              ),
+                              child: FAvatar(
+                                image: FileImage(_profileImage ?? File('')),  
+                                size: 64,
+                                fallback: Text(
+                                  initials,
+                                  style: const TextStyle(
+                                    fontSize: 36,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: context.theme.colorScheme.primary,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.camera_alt,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -197,7 +315,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             ),
                             FTile(
                               title: FButton(
-                                onPress: _signup,
+                                onPress: _initiateSignup,
                                 label: const Text("Create Account"),
                               ),
                             ),
@@ -205,14 +323,15 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      TextButton(
-                        onPressed: () {
+                      FButton(
+                        style: FButtonStyle.ghost,
+                        onPress: () {
                           // Navigate to login screen
                           context
                               .read<NavigationCubit>()
                               .changeVisibleTabByIndex(0);
                         },
-                        child: const Text("Already have an account? Login"),
+                        label: const Text("Already have an account? Login"),
                       ),
                       const SizedBox(height: 16),
                     ],

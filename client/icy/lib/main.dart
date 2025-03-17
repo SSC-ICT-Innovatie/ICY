@@ -49,26 +49,26 @@ class MyApp extends StatelessWidget {
             data:
                 AppConstants().isLight(context)
                     ? FThemes.orange.light.copyWith(
-                      scaffoldStyle: context.theme.scaffoldStyle.copyWith(
-                        backgroundColor: Colors.white,
-                      ),
-                      cardStyle: context.theme.cardStyle.copyWith(
-                        contentStyle: context.theme.cardStyle.contentStyle
-                            .copyWith(padding: EdgeInsets.zero),
-                      ),
+                      // scaffoldStyle: context.theme.scaffoldStyle.copyWith(
+                      //   // backgroundColor: Colors.white,
+                      // ),
+                      // cardStyle: context.theme.cardStyle.copyWith(
+                      //   // contentStyle: context.theme.cardStyle.contentStyle
+                      //   //     .copyWith(padding: EdgeInsets.zero),
+                      // ),
                     )
                     : FThemes.orange.dark.copyWith(
-                      scaffoldStyle: context.theme.scaffoldStyle.copyWith(
-                        backgroundColor: Colors.grey.shade900,
-                      ),
-                      cardStyle: context.theme.cardStyle.copyWith(
-                        decoration: context.theme.cardStyle.decoration.copyWith(
-                          color: Colors.grey.shade800,
-                          border: Border.all(color: Colors.grey.shade900),
-                        ),
-                        contentStyle: context.theme.cardStyle.contentStyle
-                            .copyWith(padding: EdgeInsets.zero),
-                      ),
+                      // scaffoldStyle: context.theme.scaffoldStyle.copyWith(
+                      //   // backgroundColor: Colors.grey.shade900,
+                      // ),
+                      // cardStyle: context.theme.cardStyle.copyWith(
+                      //   decoration: context.theme.cardStyle.decoration.copyWith(
+                      //     // color: Colors.grey.shade800,
+                      //     // border: Border.all(color: Colors.grey.shade900),
+                      //   ),
+                      //   contentStyle: context.theme.cardStyle.contentStyle
+                      //       .copyWith(padding: EdgeInsets.zero),
+                      // ),
                     ),
             child: child!,
           ),

@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:icy/abstractions/utils/api_constants.dart';
 
@@ -69,47 +71,89 @@ class ApiService {
     String password,
     String department,
     String? avatarId,
+    File? profileImage,
   ) async {
     try {
       print('Registering user: $email, name: $name, department: $department');
 
-      final response = await http.post(
-        Uri.parse(ApiConstants.baseUrl + ApiConstants.registerEndpoint),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'fullName': name,
-          'email': email,
-          'password': password,
-          'department': department,
-          'username': email.split('@')[0], // Generate username from email
-          if (avatarId != null) 'avatarId': avatarId,
-        }),
-      );
-
-      final data = jsonDecode(response.body);
-      print(
-        'Register response: ${response.statusCode} - ${response.body.substring(0, 100)}...',
-      );
-
-      if (response.statusCode == 201 && data['success'] == true) {
-        // Save tokens
-        _authToken = data['token'];
-        _refreshToken = data['refreshToken'];
-
-        // Store tokens
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString(ApiConstants.authTokenKey, _authToken!);
-        await prefs.setString(ApiConstants.refreshTokenKey, _refreshToken!);
-
-        print(
-          'Registration successful, token: ${_authToken?.substring(0, 10)}',
+      if (profileImage == null) {
+        // Standard JSON registration without image
+        final response = await http.post(
+          Uri.parse(ApiConstants.baseUrl + ApiConstants.registerEndpoint),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'fullName': name,
+            'email': email,
+            'password': password,
+            'department': department,
+            'username': email.split('@')[0], // Generate username from email
+            if (avatarId != null) 'avatarId': avatarId,
+          }),
         );
-      }
 
-      return data;
+        final data = jsonDecode(response.body);
+        _handleRegistrationResponse(response, data);
+        return data;
+      } else {
+        // Multipart form for image upload
+        var request = http.MultipartRequest(
+          'POST',
+          Uri.parse(ApiConstants.baseUrl + ApiConstants.registerEndpoint),
+        );
+
+        // Add text fields
+        request.fields['fullName'] = name;
+        request.fields['email'] = email;
+        request.fields['password'] = password;
+        request.fields['department'] = department;
+        request.fields['username'] = email.split('@')[0];
+        if (avatarId != null) request.fields['avatarId'] = avatarId;
+
+        // Add the image file
+        var imageFile = await http.MultipartFile.fromPath(
+          'profileImage',
+          profileImage.path,
+          filename: basename(profileImage.path),
+        );
+        request.files.add(imageFile);
+
+        // Send the request
+        var streamedResponse = await request.send();
+        var response = await http.Response.fromStream(streamedResponse);
+
+        final data = jsonDecode(response.body);
+        _handleRegistrationResponse(response, data);
+        return data;
+      }
     } catch (e) {
       print('Registration exception: $e');
       return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  // Helper method to handle registration response
+  void _handleRegistrationResponse(
+    http.Response response,
+    Map<String, dynamic> data,
+  ) {
+    if (response.statusCode == 201 && data['success'] == true) {
+      // Save tokens
+      _authToken = data['token'];
+      _refreshToken = data['refreshToken'];
+
+      // Store tokens
+      _saveTokens();
+
+      print('Registration successful, token: ${_authToken?.substring(0, 10)}');
+    }
+  }
+
+  // Save tokens to shared preferences
+  Future<void> _saveTokens() async {
+    if (_authToken != null && _refreshToken != null) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(ApiConstants.authTokenKey, _authToken!);
+      await prefs.setString(ApiConstants.refreshTokenKey, _refreshToken!);
     }
   }
 

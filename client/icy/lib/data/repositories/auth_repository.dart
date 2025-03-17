@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:icy/data/models/user_model.dart';
 import 'package:icy/data/datasources/local_storage_service.dart';
 import 'package:icy/abstractions/utils/api_constants.dart';
@@ -34,13 +35,14 @@ class AuthRepository {
     }
   }
 
-  // Register a new user
+  // Register a new user with optional profile image
   Future<UserModel?> signup(
     String name,
     String email,
     String password,
-    String avatarId,
-  ) async {
+    String avatarId, {
+    File? profileImage,
+  }) async {
     try {
       final response = await _apiService.register(
         name,
@@ -48,6 +50,7 @@ class AuthRepository {
         password,
         'Nieuwe Gebruiker', // Default department for new users
         avatarId,
+        profileImage, // Pass the profile image to the API service
       );
 
       if (response['success'] == true && response['user'] != null) {

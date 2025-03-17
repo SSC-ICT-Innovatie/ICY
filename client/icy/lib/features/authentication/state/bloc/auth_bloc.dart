@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:icy/data/models/user_model.dart';
@@ -84,6 +85,7 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
         event.email,
         event.password,
         event.avatarId ?? '0', // Default to '0' if null
+        profileImage: event.profileImage, // Pass the profile image
       );
 
       if (user != null) {

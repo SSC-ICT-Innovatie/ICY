@@ -26,13 +26,13 @@ class SignUp extends AuthEvent {
   });
 }
 
-// Remove 'const' from the AuthSignUpRequested constructor
 class AuthSignUpRequested extends AuthEvent {
   final String name;
   final String email;
   final String password;
   final String? avatarId;
   final String department;
+  final File? profileImage; // Add profile image support
 
   AuthSignUpRequested({
     required this.name,
@@ -40,6 +40,7 @@ class AuthSignUpRequested extends AuthEvent {
     required this.password,
     this.avatarId,
     required this.department,
+    this.profileImage,
   });
 }
 
