@@ -1,0 +1,2 @@
+{"level":"error","message":"Redis connection error: ","service":"icy-server","timestamp":"2025-03-17 11:05:16"}
+{"level":"error","message":"Error connecting to MongoDB: querySrv ENOTFOUND _mongodb._tcp.cluster.mongodb.net","service":"icy-server","timestamp":"2025-03-17 11:05:16"}

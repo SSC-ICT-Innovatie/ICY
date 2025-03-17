@@ -18,10 +18,9 @@ const surveyRoutes = require('./routes/surveyRoutes');
 const marketplaceRoutes = require('./routes/marketplaceRoutes');
 const teamRoutes = require('./routes/teamRoutes');
 const achievementRoutes = require('./routes/achievementRoutes');
-
+const healthRoutes = require('./routes/healthRoutes');
 
 const app = express();
-
 
 connectDB();
 
@@ -60,20 +59,34 @@ app.use(`${apiBaseUrl}/marketplace/categories`, cacheMiddleware(60 * 60)); // Ca
 app.use(`${apiBaseUrl}/marketplace`, marketplaceRoutes);
 app.use(`${apiBaseUrl}/teams`, teamRoutes);
 app.use(`${apiBaseUrl}/achievements`, achievementRoutes);
+app.use('/api/v1', healthRoutes);
 
 // Health check route
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', message: 'Server is running' });
 });
 
-
 app.use(notFound);
 app.use(errorHandler);
 
-// Start Server
-const PORT = process.env.PORT || 5000;
+// Start server with better error handling
+const PORT = process.env.PORT || 5001;
 const server = app.listen(PORT, () => {
   logger.info(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+})
+.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    logger.error(`Port ${PORT} is already in use. Trying port ${PORT + 1}...`);
+    // Try another port
+    const newPort = PORT + 1;
+    server.close();
+    app.listen(newPort, () => {
+      logger.info(`Server running in ${process.env.NODE_ENV} mode on port ${newPort}`);
+    });
+  } else {
+    logger.error(`Server error: ${err.message}`);
+    process.exit(1);
+  }
 });
 
 // Handle unhandled promise rejections
@@ -91,4 +104,4 @@ process.on('SIGTERM', () => {
   });
 });
 
-module.exports = app; 
+module.exports = app;

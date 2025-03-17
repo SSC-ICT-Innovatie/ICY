@@ -1,6 +1,13 @@
 class ApiConstants {
-  // Base API URL - change to production URL when deploying
-  static const String baseUrl = 'http://localhost:5000/api/v1';
+  // Environment settings
+  static const bool isProduction = false; // Change to true for production
+
+  // Base API URLs
+  static const String devBaseUrl = 'http://localhost:5001/api/v1';
+  static const String prodBaseUrl = 'https://api.icy-app.com/api/v1';
+
+  // Get the appropriate URL based on environment
+  static String get baseUrl => isProduction ? prodBaseUrl : devBaseUrl;
 
   // Various endpoint definitions for authentication, surveys, marketplace, etc.
   // Authentication endpoints

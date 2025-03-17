@@ -1,0 +1,9 @@
+{"level":"info","message":"Connecting to Redis...","service":"icy-server","timestamp":"2025-03-17 11:05:16"}
+{"level":"info","message":"Server running in development mode on port 5001","service":"icy-server","timestamp":"2025-03-17 11:05:16"}
+{"level":"error","message":"Redis connection error: ","service":"icy-server","timestamp":"2025-03-17 11:05:16"}
+{"level":"info","message":"Continuing without Redis caching","service":"icy-server","timestamp":"2025-03-17 11:05:16"}
+{"level":"error","message":"Error connecting to MongoDB: querySrv ENOTFOUND _mongodb._tcp.cluster.mongodb.net","service":"icy-server","timestamp":"2025-03-17 11:05:16"}
+{"level":"info","message":"Using in-memory MongoDB for development/testing","service":"icy-server","timestamp":"2025-03-17 11:11:11"}
+{"level":"info","message":"Redis connection skipped based on environment setting","service":"icy-server","timestamp":"2025-03-17 11:11:11"}
+{"level":"info","message":"Server running in development mode on port 5001","service":"icy-server","timestamp":"2025-03-17 11:11:11"}
+{"level":"info","message":"Connected to in-memory MongoDB","service":"icy-server","timestamp":"2025-03-17 11:11:19"}

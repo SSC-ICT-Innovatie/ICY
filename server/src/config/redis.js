@@ -5,6 +5,12 @@ let redisClient;
 
 const connectRedis = async () => {
   try {
+    // Skip Redis if SKIP_REDIS is set to true
+    if (process.env.SKIP_REDIS === 'true') {
+      logger.info('Redis connection skipped based on environment setting');
+      return null;
+    }
+    
     // Skip Redis connection if not configured in environment
     if (!process.env.REDIS_HOST) {
       logger.info('Redis not configured - running without cache');
