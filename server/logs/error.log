@@ -124,3 +124,37 @@
 {"level":"error","message":"Not authorized, no token - /api/v1/achievements/challenges - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:35:17"}
 {"level":"error","message":"Not authorized - No token provided - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:35:17"}
 {"level":"error","message":"Not authorized, no token - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:35:17"}
+{"level":"error","message":"Not authorized - No token provided - /api/v1/surveys/daily - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:45:44"}
+{"level":"error","message":"Not authorized, no token - /api/v1/surveys/daily - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:45:44"}
+{"level":"error","message":"Not authorized - No token provided - /api/v1/surveys - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:45:44"}
+{"level":"error","message":"Not authorized, no token - /api/v1/surveys - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:45:44"}
+{"level":"error","message":"Not authorized - No token provided - /api/v1/achievements/challenges - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:45:44"}
+{"level":"error","message":"Not authorized, no token - /api/v1/achievements/challenges - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:45:44"}
+{"level":"error","message":"Not authorized - No token provided - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:45:44"}
+{"level":"error","message":"Not authorized, no token - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:45:44"}
+{"level":"error","message":"Not authorized - No token provided - /api/v1/surveys/daily - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:45:50"}
+{"level":"error","message":"Not authorized, no token - /api/v1/surveys/daily - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:45:50"}
+{"level":"error","message":"Not authorized - No token provided - /api/v1/surveys - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:45:50"}
+{"level":"error","message":"Not authorized, no token - /api/v1/surveys - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:45:50"}
+{"level":"error","message":"Not authorized - No token provided - /api/v1/achievements/challenges - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:45:50"}
+{"level":"error","message":"Not authorized, no token - /api/v1/achievements/challenges - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:45:50"}
+{"level":"error","message":"Not authorized - No token provided - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:45:50"}
+{"level":"error","message":"Not authorized, no token - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:45:50"}
+{"error":{},"level":"error","message":"Error retrieving departments: mongoose is not defined","service":"icy-server","timestamp":"2025-03-17 15:45:53"}
+{"level":"error","message":"mongoose is not defined - /api/v1/departments - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:45:53"}
+{"level":"error","message":"User validation failed: department: Path `department` is required. - /api/v1/auth/register - POST - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:46:54"}
+{"level":"error","message":"User validation failed: department: Path `department` is required. - /api/v1/auth/register - POST - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:47:02"}
+{"level":"error","message":"User validation failed: department: Path `department` is required. - /api/v1/auth/register - POST - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:47:43"}
+{"level":"error","message":"User validation failed: department: Path `department` is required. - /api/v1/auth/register - POST - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:48:44"}
+{"error":{},"level":"error","message":"Error retrieving departments: mongoose is not defined","service":"icy-server","timestamp":"2025-03-17 15:49:00"}
+{"level":"error","message":"mongoose is not defined - /api/v1/departments - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:49:00"}
+{"level":"error","message":"User validation failed: department: Path `department` is required. - /api/v1/auth/register - POST - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:49:34"}
+{"level":"error","message":"Not authorized - No token provided - /api/v1/surveys/daily - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:57:08"}
+{"level":"error","message":"Not authorized, no token - /api/v1/surveys/daily - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:57:08"}
+{"level":"error","message":"Not authorized - No token provided - /api/v1/surveys - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:57:08"}
+{"level":"error","message":"Not authorized, no token - /api/v1/surveys - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:57:08"}
+{"level":"error","message":"Not authorized - No token provided - /api/v1/achievements/challenges - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:57:08"}
+{"level":"error","message":"Not authorized, no token - /api/v1/achievements/challenges - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:57:08"}
+{"level":"error","message":"Not authorized - No token provided - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:57:08"}
+{"level":"error","message":"Not authorized, no token - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:57:08"}
+{"level":"error","message":"User validation failed: fullName: Path `fullName` is required. - /api/v1/auth/register - POST - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:58:27"}

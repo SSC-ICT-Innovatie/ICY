@@ -304,8 +304,10 @@ class _SignupScreenState extends State<SignupScreen> {
     });
 
     try {
-      // Define avatarId before using it
       const String avatarId = '1';
+
+      // For debugging
+      print('Sending department: $_selectedDepartment');
 
       // Dispatch signup event to auth bloc
       context.read<AuthBloc>().add(
@@ -314,7 +316,8 @@ class _SignupScreenState extends State<SignupScreen> {
           email: _email.text,
           password: _password.text,
           avatarId: avatarId,
-          department: _selectedDepartment,
+          department:
+              _selectedDepartment, // Make sure this department value is non-empty
           profileImage: _profileImage,
           verificationCode: _verificationCode.text,
         ),

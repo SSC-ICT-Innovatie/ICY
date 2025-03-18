@@ -8,7 +8,7 @@ class DepartmentRepository {
   DepartmentRepository({ApiService? apiService})
     : _apiService = apiService ?? ApiService();
 
-  /// Get all departments
+  /// Get all departments from the backend API
   Future<List<Department>> getDepartments() async {
     try {
       final response = await _apiService.get(ApiConstants.departmentsEndpoint);
@@ -19,26 +19,25 @@ class DepartmentRepository {
             .toList();
       }
 
-      // If we can't get departments from the API, return default ones
-      return _getDefaultDepartments();
+      // If response wasn't successful but didn't throw an error
+      print('Warning: Failed to get departments, response was: $response');
+      return _getFallbackDepartments();
     } catch (e) {
       print('Error fetching departments: $e');
-      // Return default departments if API fails
-      return _getDefaultDepartments();
+      // Return fallback departments only if API fails completely
+      return _getFallbackDepartments();
     }
   }
 
-  /// Default departments used when API is not available
-  List<Department> _getDefaultDepartments() {
+  /// Fallback departments only used when API is completely unavailable
+  /// These should match the default seeded departments in the database
+  List<Department> _getFallbackDepartments() {
+    print('Using fallback departments due to API unavailability');
     return [
-      Department(id: 'ict', name: 'ICT'),
-      Department(id: 'hr', name: 'HR'),
-      Department(id: 'finance', name: 'Finance'),
-      Department(id: 'marketing', name: 'Marketing'),
-      Department(id: 'operations', name: 'Operations'),
-      Department(id: 'sales', name: 'Sales'),
-      Department(id: 'customer-service', name: 'Customer Service'),
-      Department(id: 'research', name: 'Research & Development'),
+      Department(id: 'fallback-1', name: 'ICT'),
+      Department(id: 'fallback-2', name: 'HR'),
+      Department(id: 'fallback-3', name: 'Finance'),
+      // Minimal list - the real data should come from the database
     ];
   }
 }

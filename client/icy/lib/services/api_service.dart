@@ -5,19 +5,24 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:icy/abstractions/utils/api_constants.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:path/path.dart' as path;
+import 'package:icy/data/datasources/local_storage_service.dart';
 
 class ApiService {
   final String baseUrl;
   final http.Client _client;
+  final LocalStorageService _localStorageService;
 
-  ApiService({http.Client? client, String? baseUrl})
-    : _client = client ?? http.Client(),
-      baseUrl = baseUrl ?? ApiConstants.baseUrl;
+  ApiService({
+    http.Client? client,
+    String? baseUrl,
+    LocalStorageService? localStorageService,
+  }) : _client = client ?? http.Client(),
+       baseUrl = baseUrl ?? ApiConstants.baseUrl,
+       _localStorageService = localStorageService ?? LocalStorageService();
 
   // Helper method to get auth token
   Future<String?> _getAuthToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(ApiConstants.authTokenKey);
+    return _localStorageService.getAuthToken();
   }
 
   // Helper method to get refresh token
@@ -55,16 +60,10 @@ class ApiService {
 
   // Add an initialization method
   Future<void> init() async {
-    // Check if we have auth tokens already
-    final authToken = await _getAuthToken();
-    if (authToken != null) {
-      print('API Service initialized with existing auth token');
-    } else {
-      print('API Service initialized without auth token');
-    }
-
-    // Any other initialization can go here
-    return;
+    final token = await _getAuthToken();
+    print(
+      'API Service initialized ${token != null ? 'with' : 'without'} auth token',
+    );
   }
 
   // GET request
@@ -135,21 +134,18 @@ class ApiService {
 
   // Login
   Future<Map<String, dynamic>> login(String email, String password) async {
-    final data = {'email': email, 'password': password};
-    final url = Uri.parse('$baseUrl${ApiConstants.loginEndpoint}');
-    final response = await _client.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode(data),
-    );
+    try {
+      final String url = '$baseUrl${ApiConstants.loginEndpoint}';
+      final response = await _client.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email, 'password': password}),
+      );
 
-    final responseData = _handleResponse(response);
-    if (responseData['success'] == true &&
-        responseData['token'] != null &&
-        responseData['refreshToken'] != null) {
-      await _saveTokens(responseData['token'], responseData['refreshToken']);
+      return _processResponse(response);
+    } catch (e) {
+      throw Exception('Login failed: $e');
     }
-    return responseData;
   }
 
   // Register
@@ -158,68 +154,67 @@ class ApiService {
     String email,
     String password,
     String avatarId,
-    String? department,
+    String department,
     String verificationCode,
     File? profileImage,
   ) async {
-    Map<String, dynamic> data = {
-      'fullName': name,
-      'email': email,
-      'password': password,
-      'avatarId': avatarId,
-      'verificationCode': verificationCode,
-    };
+    try {
+      final String url = '${baseUrl}${ApiConstants.registerEndpoint}';
 
-    if (department != null) {
-      data['department'] = department;
-    }
-
-    final url = Uri.parse('$baseUrl${ApiConstants.registerEndpoint}');
-
-    // If there's no profile image, do a regular POST
-    if (profileImage == null) {
-      final response = await _client.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode(data),
+      // Print debug info
+      print(
+        'Registering user with: name=$name, email=$email, department=$department',
       );
 
-      final responseData = _handleResponse(response);
-      if (responseData['success'] == true &&
-          responseData['token'] != null &&
-          responseData['refreshToken'] != null) {
-        await _saveTokens(responseData['token'], responseData['refreshToken']);
+      // Create request body
+      Map<String, dynamic> data = {
+        'name': name, // Server will map this to fullName
+        'email': email,
+        'password': password,
+        'avatarId': avatarId,
+        'department': department,
+        'verificationCode': verificationCode,
+      };
+
+      // Handle profile image upload if provided
+      if (profileImage != null) {
+        // For now, we're not handling image upload in this simple example
+        // In a real implementation, you would upload the image first and then
+        // include the uploaded image URL or ID in the registration data
       }
-      return responseData;
-    } else {
-      // If there is a profile image, use multipart request
-      return await uploadFile(
-        '$baseUrl${ApiConstants.registerEndpoint}',
-        profileImage.path,
-        'profileImage',
-        data,
+
+      final response = await _client.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(data),
       );
+
+      return _processResponse(response);
+    } catch (e) {
+      print('Error in register: $e');
+      throw Exception('Register failed: $e');
     }
   }
 
   // Logout
   Future<Map<String, dynamic>> logout() async {
     try {
-      final response = await post(ApiConstants.logoutEndpoint, {});
+      final token = await _getAuthToken();
+      final String url = '$baseUrl${ApiConstants.logoutEndpoint}';
+      final response = await _client.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
 
-      // Clear tokens regardless of response
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(ApiConstants.authTokenKey);
-      await prefs.remove(ApiConstants.refreshTokenKey);
-
-      return response;
+      await _localStorageService.clearAuthData();
+      return _processResponse(response);
     } catch (e) {
-      // Clear tokens even if API call fails
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(ApiConstants.authTokenKey);
-      await prefs.remove(ApiConstants.refreshTokenKey);
-
-      throw e;
+      await _localStorageService
+          .clearAuthData(); // Clear even if API call fails
+      throw Exception('Logout failed: $e');
     }
   }
 
@@ -230,63 +225,56 @@ class ApiService {
     String fieldName, [
     Map<String, dynamic>? additionalFields,
   ]) async {
-    final token = await _getAuthToken();
+    try {
+      final token = await _getAuthToken();
+      final request = http.MultipartRequest('POST', Uri.parse('$baseUrl$url'));
 
-    var request = http.MultipartRequest('POST', Uri.parse(url));
+      if (token != null) {
+        request.headers['Authorization'] = 'Bearer $token';
+      }
 
-    // Add auth header if token exists
-    if (token != null) {
-      request.headers['Authorization'] = 'Bearer $token';
-    }
+      // Add the file to the request
+      request.files.add(await http.MultipartFile.fromPath(fieldName, filePath));
 
-    // Add file
-    final file = File(filePath);
-    final fileStream = http.ByteStream(file.openRead());
-    final fileLength = await file.length();
-
-    // Determine file mime type
-    final fileExtension = path.extension(filePath).toLowerCase();
-    String mimeType = 'application/octet-stream';
-    if (fileExtension == '.jpg' || fileExtension == '.jpeg') {
-      mimeType = 'image/jpeg';
-    } else if (fileExtension == '.png') {
-      mimeType = 'image/png';
-    } else if (fileExtension == '.pdf') {
-      mimeType = 'application/pdf';
-    }
-
-    final multipartFile = http.MultipartFile(
-      fieldName,
-      fileStream,
-      fileLength,
-      filename: path.basename(filePath),
-      contentType: MediaType.parse(mimeType),
-    );
-
-    request.files.add(multipartFile);
-
-    // Add any additional fields
-    if (additionalFields != null) {
-      additionalFields.forEach((key, value) {
-        if (value != null) {
+      // Add any additional fields
+      if (additionalFields != null) {
+        additionalFields.forEach((key, value) {
           request.fields[key] = value.toString();
-        }
-      });
+        });
+      }
+
+      // Send the request
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      return _processResponse(response);
+    } catch (e) {
+      throw Exception('File upload failed: $e');
     }
+  }
 
-    // Send the request
-    final httpResponse = await http.Response.fromStream(await request.send());
+  // Add this method to process API responses consistently
+  Map<String, dynamic> _processResponse(http.Response response) {
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      // Success
+      if (response.body.isEmpty) {
+        return {'success': true};
+      }
 
-    // Handle response
-    final responseData = _handleResponse(httpResponse);
-
-    // Save auth tokens if they are in the response
-    if (responseData['success'] == true &&
-        responseData['token'] != null &&
-        responseData['refreshToken'] != null) {
-      await _saveTokens(responseData['token'], responseData['refreshToken']);
+      try {
+        return json.decode(response.body);
+      } catch (e) {
+        throw Exception('Failed to parse response: ${response.body}');
+      }
+    } else {
+      // Error
+      try {
+        final errorData = json.decode(response.body);
+        final errorMessage = errorData['message'] ?? 'Unknown error occurred';
+        throw Exception(errorMessage);
+      } catch (e) {
+        throw Exception('Request failed with status: ${response.statusCode}');
+      }
     }
-
-    return responseData;
   }
 }

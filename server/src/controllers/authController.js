@@ -64,25 +64,17 @@ const login = asyncHandler(async (req, res, next) => {
 // @route   POST /api/v1/auth/register
 // @access  Public
 const register = asyncHandler(async (req, res, next) => {
-  const { fullName, email, password, department, verificationCode } = req.body;
+  const { 
+    name, 
+    email, 
+    password, 
+    avatarId, 
+    department, 
+    verificationCode 
+  } = req.body;
 
-  // Validate required fields
-  if (!fullName || !email || !password) {
-    return next(createError(400, 'Please provide all required fields'));
-  }
-
-  // Check if verification code is required and valid
-  if (process.env.REQUIRE_EMAIL_VERIFICATION === 'true') {
-    if (!verificationCode) {
-      return next(createError(400, 'Email verification code is required'));
-    }
-
-    // Verify the code
-    const codeDoc = await VerificationCode.findOne({ email });
-    if (!codeDoc || codeDoc.code !== verificationCode) {
-      return next(createError(400, 'Invalid or expired verification code'));
-    }
-  }
+  // Log received data for debugging
+  console.log(`Registration request received: name=${name}, email=${email}, department=${department}`);
 
   // Check if user already exists
   const userExists = await User.findOne({ email });
@@ -90,50 +82,42 @@ const register = asyncHandler(async (req, res, next) => {
     return next(createError(400, 'User with this email already exists'));
   }
 
-  // Generate a username from email if not provided
-  const username = req.body.username || email.split('@')[0];
-
-  // Create user
-  const user = await User.create({
-    fullName,
-    username,
-    email,
-    password,
-    department,
-    avatar: req.body.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=random`,
-  });
-
-  // Create token
-  const token = jwt.sign(
-    { id: user._id },
-    process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRY }
-  );
-
-  // Create refresh token
-  const refreshToken = jwt.sign(
-    { id: user._id },
-    process.env.REFRESH_TOKEN_SECRET,
-    { expiresIn: process.env.REFRESH_TOKEN_EXPIRY }
-  );
-
-  // Save refresh token to user
-  user.refreshToken = refreshToken;
-  await user.save();
-
-  // Clean up the verification code if it was used
-  if (codeDoc) {
-    await VerificationCode.deleteOne({ _id: codeDoc._id });
+  // Make sure department is provided
+  if (!department) {
+    return next(createError(400, 'Department is required'));
   }
 
-  // Return token
-  res.status(201).json({
-    success: true,
-    message: 'Registration successful',
-    token,
-    refreshToken,
-    user
-  });
+  // Create user - use name as fullName if client sends 'name' instead of 'fullName'
+  try {
+    const user = await User.create({
+      username: email.split('@')[0],
+      email,
+      password,
+      fullName: name, // Map 'name' from client to 'fullName' in database
+      department: department,
+      avatarId: avatarId || '1'
+    });
+
+    // Generate tokens
+    const token = generateToken(user._id);
+    const refreshToken = generateRefreshToken(user._id);
+
+    // Set refresh token in database
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    // Remove password from response
+    user.password = undefined;
+
+    res.status(201).json({
+      success: true,
+      token,
+      refreshToken,
+      user
+    });
+  } catch (error) {
+    return next(error);
+  }
 });
 
 // @desc    Logout user / clear cookie

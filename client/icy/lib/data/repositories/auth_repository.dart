@@ -50,34 +50,40 @@ class AuthRepository {
     String? verificationCode,
   }) async {
     try {
+      print('Auth Repository - Signup parameters:');
+      print(' - name: $name');
+      print(' - email: $email');
+      print(' - department: ${department ?? "ICT"}');
+      print(' - verificationCode: ${verificationCode ?? ""}');
+
       final response = await _apiService.register(
         name,
         email,
         password,
         avatarId,
-        department,
+        department ?? 'ICT', // Use 'ICT' as fallback
         verificationCode ?? '',
         profileImage,
       );
 
-      if (response['success'] == true && response['user'] != null) {
+      if (response['success'] == true &&
+          response['user'] != null &&
+          response['token'] != null) {
         final user = UserModel.fromJson(response['user']);
-
-        // Save auth token
-        if (response['token'] != null) {
-          await _localStorageService.saveAuthToken(response['token']);
-        }
-
-        // Save user data
         await _localStorageService.saveAuthUser(user);
+        await _localStorageService.saveAuthToken(response['token']);
+
+        if (response['refreshToken'] != null) {
+          await _localStorageService.saveRefreshToken(response['refreshToken']);
+        }
 
         return user;
       }
 
       return null;
     } catch (e) {
-      print('Signup error: $e');
-      return null;
+      print('Error during signup: $e');
+      rethrow;
     }
   }
 

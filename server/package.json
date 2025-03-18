@@ -9,7 +9,8 @@
     "test": "mocha tests/**/*.test.js",
     "seed": "node src/scripts/seedDatabase.js",
     "lint": "eslint src/**/*.js",
-    "setup": "bash scripts/setup.sh"
+    "setup": "bash scripts/setup.sh",
+    "seed:departments": "node src/scripts/run_department_seed.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

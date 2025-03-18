@@ -80,12 +80,15 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
   ) async {
     emit(AuthLoading());
     try {
+      print('Department being sent: ${event.department}'); // Debug print
       final UserModel? user = await _authRepository.signup(
         event.name,
         event.email,
         event.password,
         event.avatarId ?? '0', // Default to '0' if null
-        profileImage: event.profileImage, // Pass the profile image
+        department: event.department, // Explicitly pass department
+        profileImage: event.profileImage,
+        verificationCode: event.verificationCode,
       );
 
       if (user != null) {
