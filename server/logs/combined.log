@@ -270,3 +270,5 @@
 {"level":"info","message":"[DEV MODE] Generated verification code for test@test.com: 905871","service":"icy-server","timestamp":"2025-03-17 15:58:18"}
 {"level":"error","message":"User validation failed: fullName: Path `fullName` is required. - /api/v1/auth/register - POST - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:58:27"}
 {"level":"http","message":"\u001b[0mPOST /api/v1/auth/register \u001b[31m500\u001b[0m 18.405 ms - 627\u001b[0m","service":"icy-server","timestamp":"2025-03-17 15:58:27"}
+{"level":"info","message":"Connecting to MongoDB (Attempt 1/3)...","service":"icy-server","timestamp":"2025-03-20 14:19:45"}
+{"level":"info","message":"MongoDB Connected: 127.0.0.1","service":"icy-server","timestamp":"2025-03-20 14:19:45"}

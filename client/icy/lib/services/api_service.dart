@@ -1,10 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:icy/abstractions/utils/api_constants.dart';
-import 'package:http_parser/http_parser.dart';
-import 'package:path/path.dart' as path;
 import 'package:icy/data/datasources/local_storage_service.dart';
 
 class ApiService {
@@ -23,12 +20,6 @@ class ApiService {
   // Helper method to get auth token
   Future<String?> _getAuthToken() async {
     return _localStorageService.getAuthToken();
-  }
-
-  // Helper method to get refresh token
-  Future<String?> _getRefreshToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(ApiConstants.refreshTokenKey);
   }
 
   // Helper to handle response
@@ -51,12 +42,7 @@ class ApiService {
     }
   }
 
-  // Save tokens to shared preferences
-  Future<void> _saveTokens(String token, String refreshToken) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(ApiConstants.authTokenKey, token);
-    await prefs.setString(ApiConstants.refreshTokenKey, refreshToken);
-  }
+
 
   // Add an initialization method
   Future<void> init() async {
@@ -159,7 +145,7 @@ class ApiService {
     File? profileImage,
   ) async {
     try {
-      final String url = '${baseUrl}${ApiConstants.registerEndpoint}';
+      final String url = '$baseUrl${ApiConstants.registerEndpoint}';
 
       // Print debug info
       print(

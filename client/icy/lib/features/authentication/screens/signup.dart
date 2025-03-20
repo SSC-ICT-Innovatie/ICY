@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:forui/forui.dart';
 import 'package:icy/abstractions/navigation/state/navigation_cubit.dart';
-import 'package:icy/abstractions/utils/constants.dart';
 import 'package:icy/abstractions/utils/validation_constants.dart';
 import 'package:icy/data/models/department_model.dart';
 import 'package:icy/data/repositories/department_repository.dart';

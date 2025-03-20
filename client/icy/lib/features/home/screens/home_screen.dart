@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:forui/forui.dart';
-import 'package:forui/widgets/scaffold.dart';
 import 'package:icy/features/authentication/state/bloc/auth_bloc.dart';
 import 'package:icy/features/home/bloc/home_bloc.dart';
 import 'package:icy/features/home/widgets/daily_challenge_card.dart';
@@ -9,7 +8,7 @@ import 'package:icy/features/home/widgets/home_header.dart';
 import 'package:icy/features/home/widgets/home_tab_section.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();

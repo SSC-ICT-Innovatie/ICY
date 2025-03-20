@@ -6,8 +6,7 @@ import 'package:intl/intl.dart';
 class PurchaseHistoryTab extends StatelessWidget {
   final List<PurchaseHistoryItem> purchases;
 
-  const PurchaseHistoryTab({Key? key, required this.purchases})
-    : super(key: key);
+  const PurchaseHistoryTab({super.key, required this.purchases});
 
   @override
   Widget build(BuildContext context) {

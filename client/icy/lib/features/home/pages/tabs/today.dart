@@ -5,7 +5,7 @@ import 'package:icy/features/home/widgets/survey_card.dart';
 class NewSurvey extends StatelessWidget {
   final List<SurveyModel> surveys;
 
-  const NewSurvey({Key? key, this.surveys = const []}) : super(key: key);
+  const NewSurvey({super.key, this.surveys = const []});
 
   @override
   Widget build(BuildContext context) {

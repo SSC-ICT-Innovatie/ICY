@@ -9,7 +9,7 @@ import 'package:icy/features/home/pages/tabs/ongoing_survey.dart';
 import 'package:icy/features/home/pages/tabs/results.dart';
 
 class HomeTabSection extends StatefulWidget {
-  const HomeTabSection({Key? key}) : super(key: key);
+  const HomeTabSection({super.key});
 
   @override
   State<HomeTabSection> createState() => _HomeTabSectionState();
