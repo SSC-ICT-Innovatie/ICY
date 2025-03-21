@@ -158,3 +158,38 @@
 {"level":"error","message":"Not authorized - No token provided - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:57:08"}
 {"level":"error","message":"Not authorized, no token - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:57:08"}
 {"level":"error","message":"User validation failed: fullName: Path `fullName` is required. - /api/v1/auth/register - POST - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-17 15:58:27"}
+{"level":"error","message":"Not authorized - No token provided - /api/v1/surveys/daily - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:47:53"}
+{"level":"error","message":"Not authorized, no token - /api/v1/surveys/daily - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:47:53"}
+{"level":"error","message":"Not authorized - No token provided - /api/v1/surveys - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:47:53"}
+{"level":"error","message":"Not authorized, no token - /api/v1/surveys - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:47:53"}
+{"level":"error","message":"Not authorized - No token provided - /api/v1/achievements/challenges - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:47:53"}
+{"level":"error","message":"Not authorized, no token - /api/v1/achievements/challenges - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:47:53"}
+{"level":"error","message":"Not authorized - No token provided - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:47:53"}
+{"level":"error","message":"Not authorized, no token - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:47:53"}
+{"level":"error","message":"Not authorized - No token provided - /api/v1/surveys/daily - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:48:24"}
+{"level":"error","message":"Not authorized, no token - /api/v1/surveys/daily - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:48:24"}
+{"level":"error","message":"Not authorized - No token provided - /api/v1/surveys - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:48:24"}
+{"level":"error","message":"Not authorized, no token - /api/v1/surveys - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:48:24"}
+{"level":"error","message":"Not authorized - No token provided - /api/v1/achievements/challenges - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:48:24"}
+{"level":"error","message":"Not authorized, no token - /api/v1/achievements/challenges - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:48:24"}
+{"level":"error","message":"Not authorized - No token provided - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:48:24"}
+{"level":"error","message":"Not authorized, no token - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:48:24"}
+{"level":"error","message":"Invalid email or password - /api/v1/auth/login - POST - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:48:48"}
+{"level":"error","message":"Invalid email or password - /api/v1/auth/login - POST - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:48:54"}
+{"level":"error","message":"generateToken is not defined - /api/v1/auth/register - POST - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:49:47"}
+{"level":"error","message":"User with this email already exists - /api/v1/auth/request-verification-code - POST - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:53:02"}
+{"level":"error","message":"Not Found - /api/v1/achievements/recent - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:53:44"}
+{"level":"error","message":"Not Found - /api/v1/achievements/recent - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:53:48"}
+{"level":"error","message":"Not Found - /api/v1/achievements/recent - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:54:04"}
+{"level":"error","message":"Not Found - /api/v1/achievements/recent - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:54:18"}
+{"level":"error","message":"Not Found - /api/v1/achievements/recent - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:54:19"}
+{"level":"error","message":"Not Found - /api/v1/achievements/recent - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:54:44"}
+{"level":"error","message":"Not Found - /api/v1/achievements/recent - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:54:50"}
+{"level":"error","message":"Not Found - /api/v1/achievements/recent - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:54:50"}
+{"level":"error","message":"Not Found - /api/v1/achievements/recent - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:55:04"}
+{"level":"error","message":"Not Found - /api/v1/achievements/recent - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:59:04"}
+{"level":"error","message":"Not Found - /api/v1/achievements/recent - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:59:16"}
+{"level":"error","message":"Not Found - /api/v1/achievements/recent - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:59:17"}
+{"level":"error","message":"Not Found - /api/v1/achievements/recent - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:59:59"}
+{"level":"error","message":"Not Found - /api/v1/achievements/recent - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 10:00:01"}
+{"level":"error","message":"Not Found - /api/v1/achievements/recent - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 10:00:14"}

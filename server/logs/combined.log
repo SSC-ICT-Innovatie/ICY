@@ -272,3 +272,72 @@
 {"level":"http","message":"\u001b[0mPOST /api/v1/auth/register \u001b[31m500\u001b[0m 18.405 ms - 627\u001b[0m","service":"icy-server","timestamp":"2025-03-17 15:58:27"}
 {"level":"info","message":"Connecting to MongoDB (Attempt 1/3)...","service":"icy-server","timestamp":"2025-03-20 14:19:45"}
 {"level":"info","message":"MongoDB Connected: 127.0.0.1","service":"icy-server","timestamp":"2025-03-20 14:19:45"}
+{"level":"info","message":"Connecting to MongoDB (Attempt 1/3)...","service":"icy-server","timestamp":"2025-03-21 09:47:04"}
+{"level":"info","message":"MongoDB Connected: 127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:47:04"}
+{"level":"error","message":"Not authorized - No token provided - /api/v1/surveys/daily - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:47:53"}
+{"level":"error","message":"Not authorized, no token - /api/v1/surveys/daily - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:47:53"}
+{"level":"http","message":"\u001b[0mGET /api/v1/surveys/daily \u001b[31m500\u001b[0m 15.078 ms - 1361\u001b[0m","service":"icy-server","timestamp":"2025-03-21 09:47:53"}
+{"level":"error","message":"Not authorized - No token provided - /api/v1/surveys - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:47:53"}
+{"level":"error","message":"Not authorized, no token - /api/v1/surveys - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:47:53"}
+{"level":"http","message":"\u001b[0mGET /api/v1/surveys \u001b[31m500\u001b[0m 0.857 ms - 1361\u001b[0m","service":"icy-server","timestamp":"2025-03-21 09:47:53"}
+{"level":"error","message":"Not authorized - No token provided - /api/v1/achievements/challenges - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:47:53"}
+{"level":"error","message":"Not authorized, no token - /api/v1/achievements/challenges - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:47:53"}
+{"level":"http","message":"\u001b[0mGET /api/v1/achievements/challenges \u001b[31m500\u001b[0m 1.338 ms - 1361\u001b[0m","service":"icy-server","timestamp":"2025-03-21 09:47:53"}
+{"level":"error","message":"Not authorized - No token provided - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:47:53"}
+{"level":"error","message":"Not authorized, no token - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:47:53"}
+{"level":"http","message":"\u001b[0mGET /api/v1/achievements/recent \u001b[31m500\u001b[0m 0.592 ms - 1361\u001b[0m","service":"icy-server","timestamp":"2025-03-21 09:47:53"}
+{"level":"error","message":"Not authorized - No token provided - /api/v1/surveys/daily - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:48:24"}
+{"level":"error","message":"Not authorized, no token - /api/v1/surveys/daily - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:48:24"}
+{"level":"http","message":"\u001b[0mGET /api/v1/surveys/daily \u001b[31m500\u001b[0m 2.382 ms - 1361\u001b[0m","service":"icy-server","timestamp":"2025-03-21 09:48:24"}
+{"level":"error","message":"Not authorized - No token provided - /api/v1/surveys - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:48:24"}
+{"level":"error","message":"Not authorized, no token - /api/v1/surveys - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:48:24"}
+{"level":"http","message":"\u001b[0mGET /api/v1/surveys \u001b[31m500\u001b[0m 0.537 ms - 1361\u001b[0m","service":"icy-server","timestamp":"2025-03-21 09:48:24"}
+{"level":"error","message":"Not authorized - No token provided - /api/v1/achievements/challenges - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:48:24"}
+{"level":"error","message":"Not authorized, no token - /api/v1/achievements/challenges - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:48:24"}
+{"level":"http","message":"\u001b[0mGET /api/v1/achievements/challenges \u001b[31m500\u001b[0m 0.435 ms - 1361\u001b[0m","service":"icy-server","timestamp":"2025-03-21 09:48:24"}
+{"level":"error","message":"Not authorized - No token provided - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:48:24"}
+{"level":"error","message":"Not authorized, no token - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:48:24"}
+{"level":"http","message":"\u001b[0mGET /api/v1/achievements/recent \u001b[31m500\u001b[0m 0.556 ms - 1361\u001b[0m","service":"icy-server","timestamp":"2025-03-21 09:48:24"}
+{"level":"error","message":"Invalid email or password - /api/v1/auth/login - POST - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:48:48"}
+{"level":"http","message":"\u001b[0mPOST /api/v1/auth/login \u001b[31m500\u001b[0m 32.064 ms - 393\u001b[0m","service":"icy-server","timestamp":"2025-03-21 09:48:48"}
+{"level":"error","message":"Invalid email or password - /api/v1/auth/login - POST - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:48:54"}
+{"level":"http","message":"\u001b[0mPOST /api/v1/auth/login \u001b[31m500\u001b[0m 2.156 ms - 393\u001b[0m","service":"icy-server","timestamp":"2025-03-21 09:48:54"}
+{"level":"info","message":"Retrieved 0 departments","service":"icy-server","timestamp":"2025-03-21 09:49:06"}
+{"level":"info","message":"[DEV MODE] Generated verification code for test@gmail.com: 467494","service":"icy-server","timestamp":"2025-03-21 09:49:30"}
+{"level":"error","message":"generateToken is not defined - /api/v1/auth/register - POST - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:49:47"}
+{"level":"http","message":"\u001b[0mPOST /api/v1/auth/register \u001b[31m500\u001b[0m 119.459 ms - 294\u001b[0m","service":"icy-server","timestamp":"2025-03-21 09:49:47"}
+{"level":"info","message":"Connecting to MongoDB (Attempt 1/3)...","service":"icy-server","timestamp":"2025-03-21 09:52:46"}
+{"level":"info","message":"MongoDB Connected: 127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:52:46"}
+{"level":"info","message":"[DEV MODE] Generated verification code for test@gmail.com: 877206","service":"icy-server","timestamp":"2025-03-21 09:53:02"}
+{"level":"error","message":"User with this email already exists - /api/v1/auth/request-verification-code - POST - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:53:02"}
+{"level":"http","message":"\u001b[0mPOST /api/v1/auth/request-verification-code \u001b[31m500\u001b[0m 12.548 ms - 414\u001b[0m","service":"icy-server","timestamp":"2025-03-21 09:53:02"}
+{"level":"error","message":"Not Found - /api/v1/achievements/recent - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:53:44"}
+{"level":"http","message":"\u001b[0mGET /api/v1/achievements/recent \u001b[33m404\u001b[0m 4.112 ms - 1423\u001b[0m","service":"icy-server","timestamp":"2025-03-21 09:53:44"}
+{"level":"error","message":"Not Found - /api/v1/achievements/recent - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:53:48"}
+{"level":"http","message":"\u001b[0mGET /api/v1/achievements/recent \u001b[33m404\u001b[0m 1.890 ms - 1423\u001b[0m","service":"icy-server","timestamp":"2025-03-21 09:53:48"}
+{"level":"error","message":"Not Found - /api/v1/achievements/recent - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:54:04"}
+{"level":"http","message":"\u001b[0mGET /api/v1/achievements/recent \u001b[33m404\u001b[0m 4.811 ms - 1423\u001b[0m","service":"icy-server","timestamp":"2025-03-21 09:54:04"}
+{"level":"error","message":"Not Found - /api/v1/achievements/recent - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:54:18"}
+{"level":"http","message":"\u001b[0mGET /api/v1/achievements/recent \u001b[33m404\u001b[0m 1.523 ms - 1423\u001b[0m","service":"icy-server","timestamp":"2025-03-21 09:54:18"}
+{"level":"error","message":"Not Found - /api/v1/achievements/recent - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:54:19"}
+{"level":"http","message":"\u001b[0mGET /api/v1/achievements/recent \u001b[33m404\u001b[0m 1.302 ms - 1423\u001b[0m","service":"icy-server","timestamp":"2025-03-21 09:54:19"}
+{"level":"error","message":"Not Found - /api/v1/achievements/recent - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:54:44"}
+{"level":"http","message":"\u001b[0mGET /api/v1/achievements/recent \u001b[33m404\u001b[0m 1.642 ms - 1423\u001b[0m","service":"icy-server","timestamp":"2025-03-21 09:54:44"}
+{"level":"error","message":"Not Found - /api/v1/achievements/recent - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:54:50"}
+{"level":"http","message":"\u001b[0mGET /api/v1/achievements/recent \u001b[33m404\u001b[0m 1.755 ms - 1423\u001b[0m","service":"icy-server","timestamp":"2025-03-21 09:54:50"}
+{"level":"error","message":"Not Found - /api/v1/achievements/recent - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:54:50"}
+{"level":"http","message":"\u001b[0mGET /api/v1/achievements/recent \u001b[33m404\u001b[0m 1.149 ms - 1423\u001b[0m","service":"icy-server","timestamp":"2025-03-21 09:54:50"}
+{"level":"error","message":"Not Found - /api/v1/achievements/recent - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:55:04"}
+{"level":"http","message":"\u001b[0mGET /api/v1/achievements/recent \u001b[33m404\u001b[0m 1.446 ms - 1423\u001b[0m","service":"icy-server","timestamp":"2025-03-21 09:55:04"}
+{"level":"error","message":"Not Found - /api/v1/achievements/recent - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:59:04"}
+{"level":"http","message":"\u001b[0mGET /api/v1/achievements/recent \u001b[33m404\u001b[0m 1.644 ms - 1423\u001b[0m","service":"icy-server","timestamp":"2025-03-21 09:59:04"}
+{"level":"error","message":"Not Found - /api/v1/achievements/recent - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:59:16"}
+{"level":"http","message":"\u001b[0mGET /api/v1/achievements/recent \u001b[33m404\u001b[0m 1.785 ms - 1423\u001b[0m","service":"icy-server","timestamp":"2025-03-21 09:59:16"}
+{"level":"error","message":"Not Found - /api/v1/achievements/recent - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:59:17"}
+{"level":"http","message":"\u001b[0mGET /api/v1/achievements/recent \u001b[33m404\u001b[0m 1.801 ms - 1423\u001b[0m","service":"icy-server","timestamp":"2025-03-21 09:59:17"}
+{"level":"error","message":"Not Found - /api/v1/achievements/recent - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 09:59:59"}
+{"level":"http","message":"\u001b[0mGET /api/v1/achievements/recent \u001b[33m404\u001b[0m 1.712 ms - 1423\u001b[0m","service":"icy-server","timestamp":"2025-03-21 09:59:59"}
+{"level":"error","message":"Not Found - /api/v1/achievements/recent - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 10:00:01"}
+{"level":"http","message":"\u001b[0mGET /api/v1/achievements/recent \u001b[33m404\u001b[0m 1.308 ms - 1423\u001b[0m","service":"icy-server","timestamp":"2025-03-21 10:00:01"}
+{"level":"error","message":"Not Found - /api/v1/achievements/recent - /api/v1/achievements/recent - GET - ::ffff:127.0.0.1","service":"icy-server","timestamp":"2025-03-21 10:00:14"}
+{"level":"http","message":"\u001b[0mGET /api/v1/achievements/recent \u001b[33m404\u001b[0m 1.516 ms - 1423\u001b[0m","service":"icy-server","timestamp":"2025-03-21 10:00:14"}

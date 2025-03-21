@@ -1,13 +1,28 @@
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const mongoose = require('mongoose'); // Add this import
+const mongoose = require('mongoose');
 const User = require('../models/userModel');
 const VerificationCode = require('../models/verificationCodeModel');
 const asyncHandler = require('../middleware/asyncMiddleware');
 const { createError } = require('../utils/errorUtils');
 const emailUtils = require('../utils/emailUtils');
 const logger = require('../utils/logger');
+
+// Add these token generation functions
+// Generate JWT token
+const generateToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRY || '30d'
+  });
+};
+
+// Generate refresh token
+const generateRefreshToken = (id) => {
+  return jwt.sign({ id }, process.env.REFRESH_TOKEN_SECRET || process.env.JWT_SECRET, {
+    expiresIn: process.env.REFRESH_TOKEN_EXPIRY || '90d'
+  });
+};
 
 // @desc    Login user
 // @route   POST /api/v1/auth/login
@@ -445,5 +460,7 @@ module.exports = {
   requestVerificationCode,
   verifyEmailCode,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  generateToken,
+  generateRefreshToken
 };
