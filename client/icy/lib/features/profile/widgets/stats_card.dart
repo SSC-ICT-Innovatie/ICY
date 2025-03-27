@@ -14,10 +14,8 @@ class StatsCard extends StatelessWidget {
       children: [
         FTile(
           title: Text("Surveys Completed"),
-          prefixIcon: Chip(
-            label: Text("${stats.surveysCompleted}"),
-            backgroundColor: context.theme.colorScheme.primary,
-          ),
+          // Replace Chip with a custom widget that doesn't need Material
+          prefixIcon: _buildCustomChip(context, "${stats.surveysCompleted}"),
         ),
         FTile(
           title: Text("Current Streak"),
@@ -43,7 +41,6 @@ class StatsCard extends StatelessWidget {
             children: [
               const Icon(Icons.emoji_events, color: Colors.amber),
               const SizedBox(width: 4),
-              // Use the newly added best getter
               Text(
                 "${stats.streak.best} days",
                 style: const TextStyle(fontWeight: FontWeight.bold),
@@ -84,6 +81,21 @@ class StatsCard extends StatelessWidget {
           suffixIcon: Text("${(stats.participationRate * 100).toInt()}%"),
         ),
       ],
+    );
+  }
+
+  // Custom widget to replace Chip that doesn't require Material
+  Widget _buildCustomChip(BuildContext context, String label) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Theme.of(context).primaryColor,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+      ),
     );
   }
 }

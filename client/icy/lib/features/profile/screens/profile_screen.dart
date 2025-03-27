@@ -6,6 +6,7 @@ import 'package:icy/features/authentication/services/auth_navigation_service.dar
 import 'package:icy/features/authentication/state/bloc/auth_bloc.dart';
 import 'package:icy/features/profile/widgets/level_progress.dart';
 import 'package:icy/features/profile/widgets/stats_card.dart';
+import 'package:icy/features/settings/screens/settings_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -33,7 +34,9 @@ class ProfileScreen extends StatelessWidget {
           FButton(
             style: FButtonStyle.ghost,
             onPress: () {
-              // Show settings dialog or navigate to settings
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
             },
             label: Text("Settings"),
             prefix: FIcon(FAssets.icons.settings),
@@ -104,7 +107,8 @@ class ProfileScreen extends StatelessWidget {
       children: [
         FTile(
           title: Text("Notifications"),
-          suffixIcon: Switch(
+          suffixIcon: _buildCustomSwitch(
+            context,
             value: user.preferences!.notifications,
             onChanged: (value) {
               // Update preferences (would be handled by a BLoC in a full implementation)
@@ -121,6 +125,53 @@ class ProfileScreen extends StatelessWidget {
         ),
         FTile(title: Text("Theme"), subtitle: Text(user.preferences!.theme)),
       ],
+    );
+  }
+
+  Widget _buildCustomSwitch(
+    BuildContext context, {
+    required bool value,
+    required Function(bool) onChanged,
+  }) {
+    return GestureDetector(
+      onTap: () => onChanged(!value),
+      child: Container(
+        width: 50,
+        height: 30,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+          color:
+              value
+                  ? context.theme.colorScheme.primary
+                  : Colors.grey.withOpacity(0.3),
+        ),
+        child: Stack(
+          children: [
+            AnimatedPositioned(
+              duration: Duration(milliseconds: 200),
+              curve: Curves.easeInOut,
+              left: value ? 20 : 0,
+              top: 0,
+              bottom: 0,
+              child: Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 4,
+                      spreadRadius: 1,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

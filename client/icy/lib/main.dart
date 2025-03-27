@@ -5,7 +5,7 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:icy/abstractions/navigation/screens/navigation.dart';
 import 'package:icy/abstractions/navigation/state/navigation_cubit.dart';
 import 'package:icy/abstractions/utils/constants.dart';
-import 'package:icy/abstractions/utils/db_migration_util.dart';
+// Removed unused db_migration_util import
 import 'package:icy/dependency_injector.dart';
 import 'package:icy/features/authentication/state/bloc/auth_bloc.dart';
 import 'package:icy/services/api_service.dart';
@@ -15,22 +15,18 @@ import 'package:path_provider/path_provider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize HydratedBloc for state persistence
   HydratedBloc.storage = await HydratedStorage.build(
     storageDirectory: HydratedStorageDirectory(
       (await getTemporaryDirectory()).path,
     ),
   );
 
-  // Initialize API service
   final apiService = ApiService();
   await apiService.init();
 
-  // Check if we need to migrate data
-  final dbMigrationUtil = DbMigrationUtil(apiService: apiService);
-  await dbMigrationUtil.migrateIfNeeded();
+  // No longer using DB migration
 
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -38,40 +34,26 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      themeMode: ThemeMode.system,
-      debugShowCheckedModeBanner: false,
-      home: DependencyInjector().injectStateIntoApp(
+    return FutureBuilder<Widget>(
+      future: DependencyInjector().injectStateIntoApp(
         const AuthStateListener(child: IceNavigation()),
       ),
-      builder:
-          (context, child) => FTheme(
-            data:
-                AppConstants().isLight(context)
-                    ? FThemes.orange.light.copyWith(
-                      // scaffoldStyle: context.theme.scaffoldStyle.copyWith(
-                      //   // backgroundColor: Colors.white,
-                      // ),
-                      // cardStyle: context.theme.cardStyle.copyWith(
-                      //   // contentStyle: context.theme.cardStyle.contentStyle
-                      //   //     .copyWith(padding: EdgeInsets.zero),
-                      // ),
-                    )
-                    : FThemes.orange.dark.copyWith(
-                      // scaffoldStyle: context.theme.scaffoldStyle.copyWith(
-                      //   // backgroundColor: Colors.grey.shade900,
-                      // ),
-                      // cardStyle: context.theme.cardStyle.copyWith(
-                      //   decoration: context.theme.cardStyle.decoration.copyWith(
-                      //     // color: Colors.grey.shade800,
-                      //     // border: Border.all(color: Colors.grey.shade900),
-                      //   ),
-                      //   contentStyle: context.theme.cardStyle.contentStyle
-                      //       .copyWith(padding: EdgeInsets.zero),
-                      // ),
-                    ),
-            child: child!,
-          ),
+      builder: (context, snapshot) {
+        return MaterialApp(
+          title: 'ICY App',
+          themeMode: ThemeMode.system,
+          debugShowCheckedModeBanner: false,
+          home: snapshot.data,
+          builder:
+              (context, child) => FTheme(
+                data:
+                    AppConstants().isLight(context)
+                        ? FThemes.orange.light.copyWith()
+                        : FThemes.orange.dark.copyWith(),
+                child: child!,
+              ),
+        );
+      },
     );
   }
 }

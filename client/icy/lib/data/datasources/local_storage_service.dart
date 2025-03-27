@@ -4,7 +4,8 @@ import 'package:icy/data/models/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalStorageService {
-  static const String USER_KEY = 'auth_user';
+  // Changed from USER_KEY to userKey
+  static const String userKey = 'auth_user';
   static const String _authUserKey = 'auth_user';
 
   // Save user to SharedPreferences
@@ -97,6 +98,6 @@ class LocalStorageService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(ApiConstants.authTokenKey);
     await prefs.remove(ApiConstants.refreshTokenKey);
-    await prefs.remove(USER_KEY);
+    await prefs.remove(userKey);
   }
 }

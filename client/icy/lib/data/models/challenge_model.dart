@@ -89,3 +89,53 @@ class ChallengeReward {
     return data;
   }
 }
+
+class UserChallenge {
+  final String id;
+  final String title; // Instead of name
+  final String description; // Instead of objective
+  final double progress;
+  final String reward; // Instead of rewardDescription
+  final DateTime? dueDate; // Instead of expiryDate
+
+  UserChallenge({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.progress,
+    required this.reward,
+    this.dueDate,
+  });
+
+  factory UserChallenge.fromJson(Map<String, dynamic> json) {
+    return UserChallenge(
+      id: json['id'] ?? json['_id'] ?? '',
+      title: json['title'] ?? json['name'] ?? 'Unnamed Challenge',
+      description: json['description'] ?? json['objective'] ?? '',
+      progress: (json['progress'] ?? 0.0).toDouble(),
+      reward: json['reward'] ?? json['rewardDescription'] ?? '',
+      dueDate:
+          json['dueDate'] != null
+              ? DateTime.tryParse(json['dueDate'])
+              : (json['expiryDate'] != null
+                  ? DateTime.tryParse(json['expiryDate'])
+                  : null),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = {
+      'id': id,
+      'title': title,
+      'description': description,
+      'progress': progress,
+      'reward': reward,
+    };
+
+    if (dueDate != null) {
+      data['dueDate'] = dueDate!.toIso8601String();
+    }
+
+    return data;
+  }
+}

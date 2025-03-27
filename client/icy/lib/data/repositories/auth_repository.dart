@@ -140,26 +140,14 @@ class AuthRepository {
   // Request email verification code
   Future<bool> requestVerificationCode(String email) async {
     try {
+      // Fix endpoint to match server route
       final response = await _apiService.post(
-        ApiConstants.requestVerificationCodeEndpoint,
+        ApiConstants
+            .requestVerificationEndpoint, // Ensure this matches the server route
         {'email': email},
       );
 
-      if (response['success'] == true) {
-        // In development mode, the server might return the code directly
-        if (response.containsKey('devCode')) {
-          print(
-            'Development mode: Received verification code: ${response['devCode']}',
-          );
-          // Save the dev code for later use
-          await _localStorageService.saveData(
-            'dev_verification_code',
-            response['devCode'],
-          );
-        }
-        return true;
-      }
-      return false;
+      return response['success'] == true;
     } catch (e) {
       print('Error requesting verification code: $e');
       return false;

@@ -5,6 +5,7 @@ import 'package:icy/data/models/achievement_model.dart' as achievement_model;
 import 'package:icy/data/models/survey_model.dart';
 import 'package:icy/features/home/repositories/home_repository.dart';
 import 'package:icy/data/repositories/achievement_repository.dart';
+import 'package:icy/features/settings/bloc/settings_bloc.dart';
 
 part 'home_event.dart';
 part 'home_state.dart';
@@ -13,7 +14,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final HomeRepository _homeRepository;
   final AchievementRepository _achievementRepository;
 
-  HomeBloc({
+  HomeBloc(SettingsBloc read, {
     required HomeRepository homeRepository,
     required AchievementRepository achievementRepository,
   }) : _homeRepository = homeRepository,
