@@ -6,22 +6,21 @@ const morgan = require('morgan');
 const connectDB = require('./config/database');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 const logger = require('./utils/logger');
-
+const fileUpload = require('express-fileupload');
 // Add a simple colorize function
 const colorText = (text, color) => {
   if (process.env.NODE_ENV !== 'production') {
-    const colors = {
+    const colors = process.env.NODE_ENV !== 'production' ? {
+      cyan: '\x1b[36m',
       yellow: '\x1b[33m',
       green: '\x1b[32m',
       red: '\x1b[31m',
-      reset: '\x1b[0m',
-      cyan: '\x1b[36m',
-    };
+      reset: '\x1b[0m'
+    } : {};
     return colors[color] ? `${colors[color]}${text}${colors.reset}` : text;
   }
   return text;
 };
-
 // Import routes
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
@@ -31,7 +30,8 @@ const marketplaceRoutes = require('./routes/marketplaceRoutes');
 const teamRoutes = require('./routes/teamRoutes');
 const departmentRoutes = require('./routes/departmentRoutes');
 const healthRoutes = require('./routes/healthRoutes');
-
+// Import file utils
+const fileUtils = require('./utils/fileUtils');
 // Initialize express app
 const app = express();
 
@@ -51,9 +51,10 @@ app.use(cors(corsOptions));
 // Logging middleware
 const morganFormat = process.env.NODE_ENV === 'development' ? 'dev' : 'combined';
 app.use(morgan(morganFormat, {
-  skip: (req, res) => res.statusCode < 400,
   stream: { write: message => logger.http(message.trim()) }
 }));
+
+app.use(fileUpload());
 
 // Static files
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
@@ -92,15 +93,17 @@ let server;
 // Function to gracefully start the server
 const startServer = async () => {
   try {
+    // Ensure required directories exist before starting the server
+    fileUtils.ensureDirectories();
+
     // Connect to MongoDB - this is critical and shouldn't be skipped
     await connectDB();
-    
+
     // Start Express server
     server = app.listen(PORT, () => {
       console.log(colorText(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`, 'yellow'));
       console.log(colorText(`MongoDB connection established successfully`, 'green'));
     });
-    
     return server;
   } catch (error) {
     logger.error(`Failed to start server: ${error.message}`, { error });

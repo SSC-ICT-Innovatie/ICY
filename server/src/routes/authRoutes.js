@@ -1,15 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const { 
+const {
   login,
   register,
-  logout,
-  refreshToken,
   getCurrentUser,
+  logout,
   requestVerificationCode,
   verifyEmailCode,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  refreshToken
 } = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -17,12 +17,13 @@ const { protect } = require('../middleware/authMiddleware');
 router.post('/login', login);
 router.post('/register', register);
 router.post('/refresh-token', refreshToken);
-router.post('/request-verification-code', requestVerificationCode);
+
+router.post('/request-verification', requestVerificationCode);
 router.post('/verify-email-code', verifyEmailCode);
 router.post('/forgot-password', forgotPassword);
 router.put('/reset-password/:resettoken', resetPassword);
 
-// Protected routes (require auth)
+// Protected routes
 router.get('/me', protect, getCurrentUser);
 router.post('/logout', protect, logout);
 

@@ -8,6 +8,8 @@ const asyncHandler = require('../middleware/asyncMiddleware');
 const { createError } = require('../utils/errorUtils');
 const emailUtils = require('../utils/emailUtils');
 const logger = require('../utils/logger');
+const path = require('path');
+const fs = require('fs');
 
 // Add these token generation functions
 // Generate JWT token
@@ -102,15 +104,42 @@ const register = asyncHandler(async (req, res, next) => {
     return next(createError(400, 'Department is required'));
   }
 
-  // Create user - use name as fullName if client sends 'name' instead of 'fullName'
+  // Handle file upload if present
+  let avatarUrl = null;
+  if (req.files && req.files.profileImage) {
+    try {
+      const file = req.files.profileImage;
+      const fileName = `user_${Date.now()}${path.extname(file.name)}`;
+      const uploadPath = path.join(__dirname, '../../uploads/avatars', fileName);
+      
+      // Create directory if it doesn't exist
+      if (!fs.existsSync(path.dirname(uploadPath))) {
+        fs.mkdirSync(path.dirname(uploadPath), { recursive: true });
+      }
+      
+      // Move file to upload directory
+      await file.mv(uploadPath);
+      
+      // Set the avatar URL to be saved with the user
+      avatarUrl = `/uploads/avatars/${fileName}`;
+      console.log(`File uploaded successfully to ${avatarUrl}`);
+    } catch (error) {
+      console.error('File upload error:', error);
+      return next(createError(500, 'Error uploading profile image'));
+    }
+  }
+
+  // Create user with avatar if uploaded
   try {
     const user = await User.create({
       username: email.split('@')[0],
       email,
       password,
-      fullName: name, // Map 'name' from client to 'fullName' in database
+      fullName: name,
       department: department,
-      avatarId: avatarId || '1'
+      avatarId: avatarId || '1',
+      // Use the uploaded avatar URL if available
+      ...(avatarUrl && { avatar: avatarUrl })
     });
 
     // Generate tokens
@@ -156,41 +185,47 @@ const logout = asyncHandler(async (req, res, next) => {
 // @route   POST /api/v1/auth/refresh-token
 // @access  Public
 const refreshToken = asyncHandler(async (req, res, next) => {
-  const { refreshToken: token } = req.body;
-
-  if (!token) {
-    return next(createError(400, 'Please provide refresh token'));
+  const { refreshToken } = req.body;
+  
+  if (!refreshToken) {
+    return next(createError(400, 'Refresh token is required'));
   }
-
+  
   try {
     // Verify refresh token
-    const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
-
-    // Get user from refresh token
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET || process.env.JWT_SECRET);
+    
+    // Find user by ID from decoded token
     const user = await User.findById(decoded.id);
+    
     if (!user) {
-      return next(createError(401, 'Invalid refresh token'));
+      return next(createError(401, 'Invalid refresh token - user not found'));
     }
-
-    // Check if refresh token matches
-    if (user.refreshToken !== token) {
-      return next(createError(401, 'Invalid refresh token'));
+    
+    // Verify that the refresh token matches what's stored for the user
+    if (user.refreshToken !== refreshToken) {
+      return next(createError(401, 'Invalid refresh token - token mismatch'));
     }
-
-    // Create new token
-    const newToken = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRY }
-    );
-
-    // Return new token
-    res.status(200).json({
+    
+    // Generate new access and refresh tokens
+    const newToken = generateToken(user._id);
+    const newRefreshToken = generateRefreshToken(user._id);
+    
+    // Save new refresh token to the user
+    user.refreshToken = newRefreshToken;
+    await user.save();
+    
+    // Send new tokens to client
+    res.json({
       success: true,
-      token: newToken
+      token: newToken,
+      refreshToken: newRefreshToken
     });
-  } catch (err) {
-    return next(createError(401, 'Invalid refresh token'));
+  } catch (error) {
+    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+      return next(createError(401, 'Invalid or expired refresh token'));
+    }
+    next(error);
   }
 });
 
@@ -319,7 +354,7 @@ const requestVerificationCode = asyncHandler(async (req, res, next) => {
   }
 });
 
-// @desc    Verify email code
+// @desc    Verify email verification code
 // @route   POST /api/v1/auth/verify-email-code
 // @access  Public
 const verifyEmailCode = asyncHandler(async (req, res, next) => {
@@ -329,21 +364,9 @@ const verifyEmailCode = asyncHandler(async (req, res, next) => {
     return next(createError(400, 'Please provide email and verification code'));
   }
 
-  // Special handling for development mode
-  if (process.env.NODE_ENV === 'development') {
-    logger.info(`[DEV MODE] Verification code ${code} for ${email} is considered valid`);
-    
-    // In development, we always return success
-    return res.status(200).json({
-      success: true,
-      message: 'Email verified successfully'
-    });
-  }
-
-  // For production, do the normal flow
   try {
-    // Find the verification code
-    const verificationCode = await VerificationCode.findOne({ 
+    // Find the verification code in database
+    const verificationCode = await VerificationCode.findOne({
       email,
       expiresAt: { $gt: new Date() }
     });
@@ -454,8 +477,8 @@ const resetPassword = asyncHandler(async (req, res, next) => {
 module.exports = {
   login,
   register,
-  logout,
   refreshToken,
+  logout,
   getCurrentUser,
   requestVerificationCode,
   verifyEmailCode,
