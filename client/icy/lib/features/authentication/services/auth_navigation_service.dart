@@ -10,9 +10,13 @@ class AuthNavigationService {
       listenWhen:
           (previous, current) => previous.runtimeType != current.runtimeType,
       listener: (context, state) {
-        // Refresh navigation when auth state changes
-        final navCubit = context.read<NavigationCubit>();
-        navCubit.refreshTabs(injectNavigationTabs(context));
+        try {
+          // Refresh navigation when auth state changes
+          final navCubit = context.read<NavigationCubit>();
+          navCubit.refreshTabs(injectNavigationTabs(context));
+        } catch (e) {
+          print("Navigation update failed: $e");
+        }
       },
       child: child,
     );
@@ -20,48 +24,60 @@ class AuthNavigationService {
 
   // Static method to handle logout and navigation
   static void logoutAndNavigate(BuildContext context) {
-    // Store references before the async gap
-    final authBloc = context.read<AuthBloc>();
-    final navCubit = context.read<NavigationCubit>();
-    final tabs = injectNavigationTabs(context);
+    try {
+      // Store references before the async gap
+      final authBloc = context.read<AuthBloc>();
+      final navCubit = context.read<NavigationCubit>();
+      final tabs = injectNavigationTabs(context);
 
-    // Show confirmation dialog
-    showAdaptiveDialog(
-      context: context,
-      builder:
-          (dialogContext) => AlertDialog(
-            title: const Text('Logout Confirmation'),
-            content: const Text('Are you sure you want to log out?'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(dialogContext).pop(false),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(dialogContext).pop(true),
-                child: const Text('Logout'),
-              ),
-            ],
-          ),
-    ).then((confirmed) {
-      if (confirmed == true) {
-        // Use stored references instead of context
-        authBloc.add(Logout());
-        navCubit.changeVisibleTabByIndex(0);
-        navCubit.refreshTabs(tabs);
-      }
-    });
+      // Show confirmation dialog
+      showAdaptiveDialog(
+        context: context,
+        builder:
+            (dialogContext) => AlertDialog(
+              title: const Text('Logout Confirmation'),
+              content: const Text('Are you sure you want to log out?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(false),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(true),
+                  child: const Text('Logout'),
+                ),
+              ],
+            ),
+      ).then((confirmed) {
+        if (confirmed == true) {
+          // Use stored references instead of context
+          authBloc.add(Logout());
+          navCubit.changeVisibleTabByIndex(0);
+          navCubit.refreshTabs(tabs);
+        }
+      });
+    } catch (e) {
+      print("Error during logout: $e");
+    }
   }
 
   // Navigate to profile screen
   static void navigateToProfile(BuildContext context) {
-    // Assuming profile is at index 5
-    context.read<NavigationCubit>().changeVisibleTabByIndex(5);
+    try {
+      // Assuming profile is at index 5
+      context.read<NavigationCubit>().changeVisibleTabByIndex(5);
+    } catch (e) {
+      print("Error navigating to profile: $e");
+    }
   }
 
   // Navigate to home screen
   static void navigateToHome(BuildContext context) {
-    // Assuming home is at index 2
-    context.read<NavigationCubit>().changeVisibleTabByIndex(2);
+    try {
+      // Assuming home is at index 2
+      context.read<NavigationCubit>().changeVisibleTabByIndex(2);
+    } catch (e) {
+      print("Error navigating to home: $e");
+    }
   }
 }

@@ -4,10 +4,45 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:icy/features/settings/bloc/settings_bloc.dart';
 import 'package:icy/features/authentication/services/auth_navigation_service.dart';
 import 'package:icy/core/utils/color_utils.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
+  @override
+  Widget build(BuildContext context) {
+    // Try to get the existing SettingsBloc if available
+    SettingsBloc? existingBloc;
+    try {
+      existingBloc = context.read<SettingsBloc>();
+    } catch (e) {
+      print('No SettingsBloc available in context, will create a new one');
+    }
+
+    // If we can't get the existing bloc, wrap with a new provider
+    if (existingBloc == null) {
+      return FutureBuilder<SharedPreferences>(
+        future: SharedPreferences.getInstance(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          return BlocProvider(
+            create: (context) => SettingsBloc(prefs: snapshot.data!),
+            child: _SettingsScreenContent(),
+          );
+        },
+      );
+    }
+
+    // Use existing bloc if available
+    return _SettingsScreenContent();
+  }
+}
+
+// Extract the content into a separate widget to avoid duplication
+class _SettingsScreenContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<SettingsBloc, SettingsState>(

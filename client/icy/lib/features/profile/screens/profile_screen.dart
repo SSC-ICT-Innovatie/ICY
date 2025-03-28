@@ -20,7 +20,7 @@ class ProfileScreen extends StatelessWidget {
           return _buildProfileContent(context, user);
         } else {
           // This shouldn't happen since this screen should only be accessible when logged in
-          return Center(child: Text("Not logged in"));
+          return const Center(child: Text("Not logged in"));
         }
       },
     );
@@ -29,7 +29,7 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildProfileContent(BuildContext context, UserModel user) {
     return FScaffold(
       header: FHeader(
-        title: Text("My Profile"),
+        title: const Text("My Profile"),
         actions: [
           FButton(
             style: FButtonStyle.ghost,
@@ -38,7 +38,7 @@ class ProfileScreen extends StatelessWidget {
                 MaterialPageRoute(builder: (context) => const SettingsScreen()),
               );
             },
-            label: Text("Settings"),
+            label: const Text("Settings"),
             prefix: FIcon(FAssets.icons.settings),
           ),
         ],
@@ -62,7 +62,7 @@ class ProfileScreen extends StatelessWidget {
                     onPress: () {
                       AuthNavigationService.logoutAndNavigate(context);
                     },
-                    label: Text("Logout"),
+                    label: const Text("Logout"),
                     prefix: FIcon(FAssets.icons.logOut),
                     style: FButtonStyle.destructive,
                   ),
@@ -78,13 +78,10 @@ class ProfileScreen extends StatelessWidget {
 
   Widget _buildUserHeader(BuildContext context, UserModel user) {
     return FTileGroup(
-      description: Text("Profile Information"),
+      description: const Text("Profile Information"),
       children: [
         FTile(
-          prefixIcon: CircleAvatar(
-            backgroundImage: NetworkImage(user.avatar),
-            radius: 30,
-          ),
+          prefixIcon: _buildAvatarWithErrorHandling(user.avatar),
           title: Text(user.fullName),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,14 +96,48 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
+  // New method to safely load user avatar with error handling
+  Widget _buildAvatarWithErrorHandling(String avatarUrl) {
+    return CircleAvatar(
+      radius: 30,
+      backgroundColor: Colors.grey.shade200,
+      child: ClipOval(
+        child: SizedBox(
+          width: 60,
+          height: 60,
+          child: Image.network(
+            avatarUrl,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              // Show fallback icon on error
+              return const Icon(Icons.person, size: 40, color: Colors.grey);
+            },
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+              return Center(
+                child: CircularProgressIndicator(
+                  value:
+                      loadingProgress.expectedTotalBytes != null
+                          ? loadingProgress.cumulativeBytesLoaded /
+                              loadingProgress.expectedTotalBytes!
+                          : null,
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildPreferences(BuildContext context, UserModel user) {
-    if (user.preferences == null) return SizedBox();
+    if (user.preferences == null) return const SizedBox();
 
     return FTileGroup(
-      description: Text("Preferences"),
+      description: const Text("Preferences"),
       children: [
         FTile(
-          title: Text("Notifications"),
+          title: const Text("Notifications"),
           suffixIcon: _buildCustomSwitch(
             context,
             value: user.preferences!.notifications,
@@ -116,14 +147,17 @@ class ProfileScreen extends StatelessWidget {
           ),
         ),
         FTile(
-          title: Text("Daily Reminder"),
+          title: const Text("Daily Reminder"),
           subtitle: Text(user.preferences!.dailyReminderTime),
         ),
         FTile(
-          title: Text("Language"),
+          title: const Text("Language"),
           subtitle: Text(user.preferences!.language),
         ),
-        FTile(title: Text("Theme"), subtitle: Text(user.preferences!.theme)),
+        FTile(
+          title: const Text("Theme"),
+          subtitle: Text(user.preferences!.theme),
+        ),
       ],
     );
   }
@@ -148,7 +182,7 @@ class ProfileScreen extends StatelessWidget {
         child: Stack(
           children: [
             AnimatedPositioned(
-              duration: Duration(milliseconds: 200),
+              duration: const Duration(milliseconds: 200),
               curve: Curves.easeInOut,
               left: value ? 20 : 0,
               top: 0,

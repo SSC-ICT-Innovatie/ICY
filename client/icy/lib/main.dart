@@ -39,19 +39,45 @@ class MyApp extends StatelessWidget {
         const AuthStateListener(child: IceNavigation()),
       ),
       builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const MaterialApp(
+            debugShowCheckedModeBanner: false,
+            home: Scaffold(
+              body: Center(child: CircularProgressIndicator.adaptive()),
+            ),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            home: Scaffold(
+              body: Center(
+                child: Text('Error initializing app: ${snapshot.error}'),
+              ),
+            ),
+          );
+        }
+
         return MaterialApp(
           title: 'ICY App',
           themeMode: ThemeMode.system,
           debugShowCheckedModeBanner: false,
           home: snapshot.data,
-          builder:
-              (context, child) => FTheme(
-                data:
-                    AppConstants().isLight(context)
-                        ? FThemes.orange.light.copyWith()
-                        : FThemes.orange.dark.copyWith(),
-                child: child!,
-              ),
+          builder: (context, child) {
+            // Safely wrap in a null check
+            if (child == null) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            return FTheme(
+              data:
+                  AppConstants().isLight(context)
+                      ? FThemes.orange.light.copyWith()
+                      : FThemes.orange.dark.copyWith(),
+              child: child,
+            );
+          },
         );
       },
     );
@@ -71,8 +97,12 @@ class AuthStateListener extends StatelessWidget {
       listener: (context, state) {
         // Refresh navigation when auth state changes
         if (state is AuthSuccess || state is AuthInitial) {
-          final navCubit = context.read<NavigationCubit>();
-          navCubit.refreshTabs(injectNavigationTabs(context));
+          try {
+            final navCubit = context.read<NavigationCubit>();
+            navCubit.refreshTabs(injectNavigationTabs(context));
+          } catch (e) {
+            print('Error updating navigation: $e');
+          }
         }
       },
       child: child,

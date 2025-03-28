@@ -19,14 +19,20 @@ class DependencyInjector {
   Future<Widget> injectStateIntoApp(Widget app) async {
     final prefs = await SharedPreferences.getInstance();
 
-
-    
-
     return MultiBlocProvider(
       providers: [
+        // Create AuthBloc first as it's needed by NavigationCubit
+        BlocProvider<AuthBloc>(
+          create: (context) => AuthBloc(),
+          lazy: false, // Ensure it's created immediately
+        ),
+
+        // Single instance of SettingsBloc (remove the duplicate)
         BlocProvider<SettingsBloc>(
           create: (context) => SettingsBloc(prefs: prefs),
+          lazy: false, // Create immediately
         ),
+
         BlocProvider<NavigationCubit>(
           lazy: false, // Create immediately
           create: (context) {
@@ -43,7 +49,6 @@ class DependencyInjector {
             return navCubit;
           },
         ),
-        BlocProvider<AuthBloc>(create: (context) => AuthBloc()),
 
         BlocProvider<HomeBloc>(
           create:
@@ -86,7 +91,3 @@ class DependencyInjector {
     return injector.injectStateIntoApp(app);
   }
 }
-
-
-
-

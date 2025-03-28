@@ -17,10 +17,11 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
     on<AuthCheckRequested>(_onAuthCheckRequested);
     on<AuthLogin>(_onAuthLogin);
     on<SignUp>(_onSignUp);
-    on<AuthSignUpRequested>(
-      _onAuthSignUpRequested,
-    ); // Register the new event handler
+    on<AuthSignUpRequested>(_onAuthSignUpRequested);
     on<Logout>(_onLogout);
+
+    // Immediately check authentication state when created
+    add(AuthCheckRequested());
   }
 
   Future<void> _onAuthCheckRequested(
@@ -32,11 +33,18 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
       final user = await _authRepository.getCurrentUser();
       if (user != null) {
         emit(AuthSuccess(user: user));
+        // Update auth cache
+        AuthCacheService().updateAuthState(true);
       } else {
         emit(AuthInitial());
+        // Update auth cache
+        AuthCacheService().updateAuthState(false);
       }
     } catch (e) {
-      emit(AuthFailure("Failed to check authentication status"));
+      print("Auth check failed: ${e.toString()}");
+      emit(AuthInitial());
+      // Update auth cache
+      AuthCacheService().updateAuthState(false);
     }
   }
 
@@ -126,9 +134,12 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
   @override
   AuthState? fromJson(Map<String, dynamic> json) {
     try {
-      final state = json['state'] as String?;
-      if (state == 'auth_success') {
-        return AuthSuccess.fromJson(json);
+      final stateType = json['stateType'] as String?;
+      if (stateType == 'auth_success') {
+        final authSuccess = AuthSuccess.fromJson(json);
+        // Update auth cache when state is hydrated
+        AuthCacheService().updateAuthState(true);
+        return authSuccess;
       }
     } catch (e) {
       print("Error deserializing AuthBloc state: $e");
@@ -139,7 +150,7 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
   @override
   Map<String, dynamic>? toJson(AuthState state) {
     if (state is AuthSuccess) {
-      return {'state': 'auth_success', 'user': state.user.toJson()};
+      return {'stateType': 'auth_success', 'user': state.user.toJson()};
     }
     return null;
   }

@@ -4,14 +4,17 @@ import 'package:icy/data/models/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalStorageService {
-  // Changed from USER_KEY to userKey
+  // Consistent naming for user key
   static const String userKey = 'auth_user';
   static const String _authUserKey = 'auth_user';
 
   // Save user to SharedPreferences
   Future<void> saveAuthUser(UserModel user) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_authUserKey, json.encode(user.toJson()));
+    final userJson = json.encode(user.toJson());
+    await prefs.setString(_authUserKey, userJson);
+    // For debugging
+    print('User saved to local storage: ${user.fullName}');
   }
 
   // Get user from SharedPreferences
@@ -20,11 +23,14 @@ class LocalStorageService {
     final userJson = prefs.getString(_authUserKey);
 
     if (userJson == null) {
+      print('No user found in local storage');
       return null;
     }
 
     try {
-      return UserModel.fromJson(json.decode(userJson));
+      final user = UserModel.fromJson(json.decode(userJson));
+      print('User loaded from local storage: ${user.fullName}');
+      return user;
     } catch (e) {
       print('Error parsing auth user: $e');
       return null;
@@ -35,6 +41,7 @@ class LocalStorageService {
   Future<void> clearAuthUser() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_authUserKey);
+    print('User cleared from local storage');
   }
 
   // Save any generic data
@@ -98,6 +105,8 @@ class LocalStorageService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(ApiConstants.authTokenKey);
     await prefs.remove(ApiConstants.refreshTokenKey);
-    await prefs.remove(userKey);
+    // Use consistent keys
+    await prefs.remove(_authUserKey);
+    print('All auth data cleared from local storage');
   }
 }
