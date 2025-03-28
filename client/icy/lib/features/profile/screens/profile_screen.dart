@@ -4,9 +4,11 @@ import 'package:forui/forui.dart';
 import 'package:icy/data/models/user_model.dart';
 import 'package:icy/features/authentication/services/auth_navigation_service.dart';
 import 'package:icy/features/authentication/state/bloc/auth_bloc.dart';
+import 'package:icy/features/profile/bloc/user_preferences_bloc.dart';
 import 'package:icy/features/profile/widgets/level_progress.dart';
 import 'package:icy/features/profile/widgets/stats_card.dart';
 import 'package:icy/features/settings/screens/settings_screen.dart';
+import 'package:icy/services/notification_service.dart'; // Import the system notification service
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -53,7 +55,7 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 16),
             if (user.stats != null) StatsCard(stats: user.stats!),
             const SizedBox(height: 16),
-            _buildPreferences(context, user),
+            _buildUserPreferences(context, user),
             const SizedBox(height: 16),
             FTileGroup(
               children: [
@@ -130,36 +132,114 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPreferences(BuildContext context, UserModel user) {
-    if (user.preferences == null) return const SizedBox();
+  // Updated to use UserPreferencesBloc
+  Widget _buildUserPreferences(BuildContext context, UserModel user) {
+    return BlocBuilder<UserPreferencesBloc, UserPreferencesState>(
+      builder: (context, state) {
+        if (state.isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-    return FTileGroup(
-      description: const Text("Preferences"),
-      children: [
-        FTile(
-          title: const Text("Notifications"),
-          suffixIcon: _buildCustomSwitch(
-            context,
-            value: user.preferences!.notifications,
-            onChanged: (value) {
-              // Update preferences (would be handled by a BLoC in a full implementation)
-            },
-          ),
-        ),
-        FTile(
-          title: const Text("Daily Reminder"),
-          subtitle: Text(user.preferences!.dailyReminderTime),
-        ),
-        FTile(
-          title: const Text("Language"),
-          subtitle: Text(user.preferences!.language),
-        ),
-        FTile(
-          title: const Text("Theme"),
-          subtitle: Text(user.preferences!.theme),
-        ),
-      ],
+        return FTileGroup(
+          description: const Text("Preferences"),
+          children: [
+            FTile(
+              title: const Text("Notifications"),
+              subtitle: const Text("Enable app notifications"),
+              suffixIcon: _buildCustomSwitch(
+                context,
+                value: state.notificationsEnabled,
+                onChanged: (value) {
+                  context.read<UserPreferencesBloc>().add(
+                    ToggleNotificationsEvent(enabled: value),
+                  );
+
+                  // Test notification when enabled
+                  if (value) {
+                    _sendTestNotification(context);
+                  }
+                },
+              ),
+            ),
+            FTile(
+              title: const Text("Daily Reminder"),
+              subtitle: Text("Time: ${state.dailyReminderTime}"),
+              suffixIcon: const Icon(Icons.access_time),
+              onPress:
+                  () => _showTimePickerDialog(context, state.dailyReminderTime),
+            ),
+            // Remove unused language picker dialog call
+            FTile(
+              title: const Text("Language"),
+              subtitle: Text(state.language),
+              suffixIcon: const Icon(Icons.language),
+            ),
+            // Remove unused theme picker dialog call
+            FTile(
+              title: const Text("Theme"),
+              subtitle: Text(state.theme),
+              suffixIcon: const Icon(Icons.brightness_4),
+            ),
+            // Add a test notification button
+            if (state.notificationsEnabled)
+              FTile(
+                title: const Text("Test Notification"),
+                subtitle: const Text("Send a test notification"),
+                suffixIcon: const Icon(Icons.notifications_active),
+                onPress: () => _sendTestNotification(context),
+              ),
+          ],
+        );
+      },
     );
+  }
+
+  // Add a helper method to test notifications, with clear commenting about which service is used
+  void _sendTestNotification(BuildContext context) async {
+    // Using SystemNotificationService for device-level notifications
+    final notificationService = SystemNotificationService();
+    await notificationService.showNotification(
+      id: 999,
+      title: 'Test Notification',
+      body: 'This is a test notification from ICY!',
+    );
+
+    // Show feedback to user
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Test notification sent!'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+  // Keep only the time picker dialog since it's being used
+  void _showTimePickerDialog(BuildContext context, String currentTime) async {
+    // Parse the current time string (format: "HH:mm")
+    final parts = currentTime.split(':');
+    int hour = 9;
+    int minute = 0;
+
+    if (parts.length == 2) {
+      hour = int.tryParse(parts[0]) ?? 9;
+      minute = int.tryParse(parts[1]) ?? 0;
+    }
+
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: hour, minute: minute),
+    );
+
+    if (picked != null) {
+      // Format as "HH:mm"
+      final formattedTime =
+          '${picked.hour.toString().padLeft(2, '0')}:'
+          '${picked.minute.toString().padLeft(2, '0')}';
+
+      context.read<UserPreferencesBloc>().add(
+        SetDailyReminderTimeEvent(time: formattedTime),
+      );
+    }
   }
 
   Widget _buildCustomSwitch(

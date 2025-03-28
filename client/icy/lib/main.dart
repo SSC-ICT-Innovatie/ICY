@@ -1,30 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:forui/forui.dart';
-import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:icy/abstractions/navigation/screens/navigation.dart';
 import 'package:icy/abstractions/navigation/state/navigation_cubit.dart';
 import 'package:icy/abstractions/utils/constants.dart';
-// Removed unused db_migration_util import
 import 'package:icy/dependency_injector.dart';
 import 'package:icy/features/authentication/state/bloc/auth_bloc.dart';
-import 'package:icy/services/api_service.dart';
+import 'package:icy/services/app_initialization_service.dart';
 import 'package:icy/tabs.dart';
-import 'package:path_provider/path_provider.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  HydratedBloc.storage = await HydratedStorage.build(
-    storageDirectory: HydratedStorageDirectory(
-      (await getTemporaryDirectory()).path,
-    ),
-  );
-
-  final apiService = ApiService();
-  await apiService.init();
-
-  // No longer using DB migration
+  // Initialize all services
+  await AppInitializationService.initialize();
 
   runApp(const MyApp());
 }

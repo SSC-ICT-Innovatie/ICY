@@ -6,12 +6,14 @@ import 'package:icy/features/notifications/repository/notifications_repository.d
 part 'notifications_event.dart';
 part 'notifications_state.dart';
 
+enum NotificationStatus { initial, loading, success, error }
+
 class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
   final NotificationsRepository _notificationsRepository;
 
   NotificationsBloc({required NotificationsRepository notificationsRepository})
     : _notificationsRepository = notificationsRepository,
-      super(NotificationsInitial()) {
+      super(const NotificationsState()) {
     on<LoadNotifications>(_onLoadNotifications);
     on<MarkNotificationAsRead>(_onMarkNotificationAsRead);
     on<ClearAllNotifications>(_onClearAllNotifications);
@@ -21,20 +23,23 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     LoadNotifications event,
     Emitter<NotificationsState> emit,
   ) async {
-    emit(NotificationsLoading());
-    try {
-      final notifications =
-          await _notificationsRepository.getNotificationsForUser();
-      final unreadCount = notifications.where((n) => !n.read).length;
+    emit(state.copyWith(status: NotificationStatus.loading));
 
+    try {
+      final notifications = await _notificationsRepository.getNotifications();
       emit(
-        NotificationsLoaded(
+        state.copyWith(
+          status: NotificationStatus.success,
           notifications: notifications,
-          unreadCount: unreadCount,
         ),
       );
     } catch (e) {
-      emit(NotificationsError(message: e.toString()));
+      emit(
+        state.copyWith(
+          status: NotificationStatus.error,
+          errorMessage: e.toString(),
+        ),
+      );
     }
   }
 
@@ -42,36 +47,25 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     MarkNotificationAsRead event,
     Emitter<NotificationsState> emit,
   ) async {
-    if (state is NotificationsLoaded) {
-      final currentState = state as NotificationsLoaded;
-      try {
-        final success = await _notificationsRepository.markNotificationAsRead(
-          event.notificationId,
-        );
+    try {
+      final updatedNotifications =
+          state.notifications.map((notification) {
+            if (notification.id == event.notificationId) {
+              return notification.copyWith(isRead: true);
+            }
+            return notification;
+          }).toList();
 
-        if (success) {
-          final updatedNotifications =
-              currentState.notifications.map((notification) {
-                if (notification.id == event.notificationId) {
-                  return notification.copyWith(read: true);
-                }
-                return notification;
-              }).toList();
+      emit(state.copyWith(notifications: updatedNotifications));
 
-          final unreadCount = updatedNotifications.where((n) => !n.read).length;
-
-          emit(
-            NotificationsLoaded(
-              notifications: updatedNotifications,
-              unreadCount: unreadCount,
-            ),
-          );
-        }
-      } catch (e) {
-        emit(NotificationsError(message: e.toString()));
-        // Revert to previous state after error
-        emit(currentState);
-      }
+      // Update in repository
+      await _notificationsRepository.markAsRead(event.notificationId);
+    } catch (e) {
+      emit(
+        state.copyWith(
+          errorMessage: 'Failed to mark notification as read: ${e.toString()}',
+        ),
+      );
     }
   }
 
@@ -79,22 +73,15 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     ClearAllNotifications event,
     Emitter<NotificationsState> emit,
   ) async {
-    if (state is NotificationsLoaded) {
-      final currentState = state as NotificationsLoaded;
-      emit(NotificationsLoading());
-
-      try {
-        final success = await _notificationsRepository.clearAllNotifications();
-
-        if (success) {
-          emit(const NotificationsLoaded(notifications: [], unreadCount: 0));
-        } else {
-          emit(currentState);
-        }
-      } catch (e) {
-        emit(NotificationsError(message: e.toString()));
-        emit(currentState);
-      }
+    try {
+      await _notificationsRepository.clearAllNotifications();
+      emit(state.copyWith(notifications: []));
+    } catch (e) {
+      emit(
+        state.copyWith(
+          errorMessage: 'Failed to clear notifications: ${e.toString()}',
+        ),
+      );
     }
   }
 }

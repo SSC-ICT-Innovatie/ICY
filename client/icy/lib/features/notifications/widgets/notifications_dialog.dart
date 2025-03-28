@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
+import 'package:forui/forui.dart';
 import 'package:icy/features/notifications/bloc/notifications_bloc.dart';
 import 'package:icy/features/notifications/models/notification_model.dart';
-import 'package:icy/features/notifications/services/notification_service.dart';
-
-final DateFormat dateFormatter = DateFormat('dd MMM, HH:mm');
 
 class NotificationsDialog extends StatefulWidget {
-  final VoidCallback? onClose;
-  final Function(String, String)? onNotificationTap;
+  final Function(String?, String) onNotificationTap;
 
-  const NotificationsDialog({super.key, this.onClose, this.onNotificationTap});
+  const NotificationsDialog({required this.onNotificationTap, super.key});
 
   @override
   State<NotificationsDialog> createState() => _NotificationsDialogState();
@@ -19,148 +15,151 @@ class NotificationsDialog extends StatefulWidget {
 
 class _NotificationsDialogState extends State<NotificationsDialog> {
   @override
-  void initState() {
-    super.initState();
-    // Load notifications when dialog opens
-    context.read<NotificationsBloc>().add(const LoadNotifications());
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: Theme.of(context).dialogTheme.backgroundColor,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        constraints: BoxConstraints(
-          maxWidth: 400,
-          maxHeight: MediaQuery.of(context).size.height * 0.7,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Notifications',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close, size: 20),
-                  onPressed: () {
-                    if (widget.onClose != null) {
-                      widget.onClose!();
-                    }
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Expanded(child: _buildNotificationsList()),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNotificationsList() {
-    return BlocBuilder<NotificationsBloc, NotificationsState>(
-      builder: (context, state) {
-        if (state is NotificationsLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (state is NotificationsError) {
-          return Center(
-            child: Text(
-              'Error: ${state.message}',
-              style: const TextStyle(color: Colors.red),
-            ),
-          );
-        }
-
-        if (state is NotificationsLoaded) {
-          if (state.notifications.isEmpty) {
-            return const Center(child: Text('No notifications'));
-          }
-
-          return ListView.separated(
-            itemCount: state.notifications.length,
-            separatorBuilder: (context, index) => const Divider(height: 1),
-            itemBuilder: (context, index) {
-              final notification = state.notifications[index];
-              return _buildNotificationItem(notification);
-            },
-          );
-        }
-
-        return const Center(child: Text('No notifications'));
-      },
-    );
-  }
-
-  Widget _buildNotificationItem(NotificationModel notification) {
-    final notificationService = NotificationService();
-
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: CircleAvatar(
-        backgroundColor: notificationService.getNotificationColor(
-          notification.type,
-        ),
-        child: Icon(
-          notificationService.getNotificationIcon(notification.type),
-          color: Colors.white,
-        ),
-      ),
-      title: Text(
-        notification.title,
-        style: TextStyle(
-          fontWeight: notification.read ? FontWeight.normal : FontWeight.bold,
-        ),
-      ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return FDialog(
+      title: const Row(
         children: [
-          Text(notification.message),
-          const SizedBox(height: 4),
-          Text(
-            dateFormatter.format(notification.timestamp),
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
+          Icon(Icons.notifications),
+          SizedBox(width: 8),
+          Text('Notifications'),
         ],
       ),
-      trailing:
-          notification.read
-              ? null
-              : IconButton(
-                icon: const Icon(Icons.circle, size: 12, color: Colors.blue),
-                onPressed: () {
+      direction: Axis.vertical,
+      body: BlocBuilder<NotificationsBloc, NotificationsState>(
+        builder: (context, state) {
+          if (state.status == NotificationStatus.loading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (state.status == NotificationStatus.error) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                  const SizedBox(height: 16),
+                  Text('Error: ${state.errorMessage}'),
+                  const SizedBox(height: 16),
+                  FButton(
+                    onPress: () {
+                      context.read<NotificationsBloc>().add(
+                        const LoadNotifications(),
+                      );
+                    },
+                    label: const Text('Retry'),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          if (state.notifications.isEmpty) {
+            return const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.notifications_off_outlined,
+                    size: 48,
+                    color: Colors.grey,
+                  ),
+                  SizedBox(height: 16),
+                  Text('No notifications'),
+                ],
+              ),
+            );
+          }
+
+          return ListView.builder(
+            shrinkWrap: true,
+            itemCount: state.notifications.length,
+            itemBuilder: (context, index) {
+              final notification = state.notifications[index];
+              return _buildNotificationItem(context, notification);
+            },
+          );
+        },
+      ),
+      actions: [
+        BlocBuilder<NotificationsBloc, NotificationsState>(
+          builder: (context, state) {
+            if (state.notifications.isNotEmpty) {
+              return FButton(
+                style: FButtonStyle.outline,
+                onPress: () {
                   context.read<NotificationsBloc>().add(
-                    MarkNotificationAsRead(notificationId: notification.id),
+                    const ClearAllNotifications(),
                   );
                 },
-              ),
-      onTap: () {
-        // Mark as read when tapped
-        if (!notification.read) {
-          context.read<NotificationsBloc>().add(
-            MarkNotificationAsRead(notificationId: notification.id),
-          );
-        }
+                label: const Text('Clear All'),
+              );
+            } else {
+              return const SizedBox.shrink();
+            }
+          },
+        ),
+        FButton(
+          onPress: () => Navigator.of(context).pop(),
+          label: const Text('Close'),
+        ),
+      ],
+    );
+  }
 
-        // Handle notification tap
-        if (widget.onNotificationTap != null && notification.actionId != null) {
-          widget.onNotificationTap!(
-            notification.actionId!,
-            notification.actionUrl,
-          );
-          Navigator.of(context).pop();
-        }
+  Widget _buildNotificationItem(
+    BuildContext context,
+    NotificationModel notification,
+  ) {
+    return ListTile(
+      leading: _getNotificationIcon(notification.type),
+      title: Text(notification.title),
+      subtitle: Text(notification.body),
+      trailing:
+          notification.isRead
+              ? null
+              : const CircleAvatar(radius: 5, backgroundColor: Colors.red),
+      onTap: () {
+        // Mark as read
+        context.read<NotificationsBloc>().add(
+          MarkNotificationAsRead(notificationId: notification.id),
+        );
+
+        // Navigate based on notification type
+        widget.onNotificationTap(notification.actionId, notification.actionUrl);
+
+        // Close the dialog
+        Navigator.of(context).pop();
       },
+    );
+  }
+
+  Widget _getNotificationIcon(NotificationType type) {
+    IconData iconData;
+    Color iconColor;
+
+    switch (type) {
+      case NotificationType.survey:
+        iconData = Icons.assignment;
+        iconColor = Colors.blue;
+        break;
+      case NotificationType.achievement:
+        iconData = Icons.military_tech;
+        iconColor = Colors.amber;
+        break;
+      case NotificationType.team:
+        iconData = Icons.people;
+        iconColor = Colors.green;
+        break;
+      case NotificationType.general:
+      default:
+        iconData = Icons.notifications;
+        iconColor = Colors.grey;
+        break;
+    }
+
+    return CircleAvatar(
+      backgroundColor: iconColor.withOpacity(0.2),
+      child: Icon(iconData, color: iconColor),
     );
   }
 }

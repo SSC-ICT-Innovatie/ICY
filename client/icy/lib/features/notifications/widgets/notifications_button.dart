@@ -1,41 +1,95 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:icy/features/notifications/bloc/notifications_bloc.dart';
-import 'package:icy/features/notifications/services/notification_service.dart';
+import 'package:icy/features/notifications/widgets/notifications_dialog.dart';
 
 class NotificationsButton extends StatelessWidget {
-  final bool showBadge;
-
-  const NotificationsButton({super.key, this.showBadge = false});
+  const NotificationsButton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      icon: Stack(
-        children: [
-          const Icon(Icons.notifications_outlined),
-          if (showBadge)
-            Positioned(
-              right: 0,
-              top: 0,
-              child: Container(
-                padding: const EdgeInsets.all(1),
-                decoration: const BoxDecoration(
-                  color: Colors.red,
-                  shape: BoxShape.circle,
-                ),
-                constraints: const BoxConstraints(minWidth: 10, minHeight: 10),
-              ),
-            ),
-        ],
-      ),
-      onPressed: () {
-        // Load notifications when button is tapped
-        context.read<NotificationsBloc>().add(const LoadNotifications());
+    return BlocBuilder<NotificationsBloc, NotificationsState>(
+      builder: (context, state) {
+        final hasUnread = state.notifications.any((n) => !n.isRead);
 
-        // Show notifications dialog
-        NotificationService().showNotificationsDialog(context);
+        return Stack(
+          alignment: Alignment.topRight,
+          children: [
+            FButton.icon(
+              child: FIcon(
+                FAssets.icons.bell,
+                color: Theme.of(context).iconTheme.color,
+              ),
+              onPress: () {
+                _showNotificationsDialog(context);
+              },
+            ),
+            FBadge(label: hasUnread ? Text(1.toString()) : Text(0.toString())),
+          ],
+        );
       },
     );
+  }
+
+  void _showNotificationsDialog(BuildContext context) {
+    // Create a local NotificationsBloc specifically for the dialog
+    final notificationsBloc = context.read<NotificationsBloc>();
+
+    // Load notifications
+    notificationsBloc.add(const LoadNotifications());
+
+    // Show the dialog
+    showDialog(
+      context: context,
+      builder:
+          (context) => BlocProvider.value(
+            value: notificationsBloc,
+            child: NotificationsDialog(
+              onNotificationTap: (actionId, actionUrl) {
+                _handleNotificationTap(context, actionId, actionUrl);
+              },
+            ),
+          ),
+    );
+  }
+
+  void _handleNotificationTap(
+    BuildContext context,
+    String? actionId,
+    String actionUrl,
+  ) {
+    if (actionId == null || actionId.isEmpty) {
+      return;
+    }
+
+    // This is a simplified navigation handler
+    if (actionUrl.contains('/surveys')) {
+      // Navigate to survey
+      print('Navigate to survey: $actionId');
+    } else if (actionUrl.contains('/achievements')) {
+      // Navigate to achievements
+      print('Navigate to achievement: $actionId');
+    } else if (actionUrl.contains('/teams')) {
+      // Navigate to teams
+      print('Navigate to team: $actionId');
+    }
+  }
+}
+
+class NotificationsDialog extends StatefulWidget {
+  final Function(String?, String) onNotificationTap;
+
+  const NotificationsDialog({required this.onNotificationTap, super.key});
+
+  @override
+  State<NotificationsDialog> createState() => _NotificationsDialogState();
+}
+
+class _NotificationsDialogState extends State<NotificationsDialog> {
+  @override
+  Widget build(BuildContext context) {
+    // Implementation will go here
+    return Container();
   }
 }

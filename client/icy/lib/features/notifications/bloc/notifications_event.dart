@@ -4,7 +4,7 @@ abstract class NotificationsEvent extends Equatable {
   const NotificationsEvent();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 class LoadNotifications extends NotificationsEvent {
@@ -17,7 +17,7 @@ class MarkNotificationAsRead extends NotificationsEvent {
   const MarkNotificationAsRead({required this.notificationId});
 
   @override
-  List<Object> get props => [notificationId];
+  List<Object?> get props => [notificationId];
 }
 
 class ClearAllNotifications extends NotificationsEvent {

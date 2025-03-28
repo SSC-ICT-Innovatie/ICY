@@ -10,14 +10,20 @@ import 'package:icy/features/marketplace/bloc/marketplace_bloc.dart';
 import 'package:icy/features/marketplace/repository/marketplace_repository_impl.dart';
 import 'package:icy/features/notifications/bloc/notifications_bloc.dart';
 import 'package:icy/features/notifications/repository/notifications_repository.dart';
+import 'package:icy/features/profile/bloc/user_preferences_bloc.dart';
 import 'package:icy/features/settings/bloc/settings_bloc.dart';
 import 'package:icy/services/api_service.dart';
+import 'package:icy/services/notification_service.dart'; // Update import
 import 'package:icy/tabs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DependencyInjector {
   Future<Widget> injectStateIntoApp(Widget app) async {
     final prefs = await SharedPreferences.getInstance();
+
+    // Initialize notification service with the updated class name
+    final notificationService = SystemNotificationService();
+    await notificationService.initialize();
 
     return MultiBlocProvider(
       providers: [
@@ -27,10 +33,20 @@ class DependencyInjector {
           lazy: false, // Ensure it's created immediately
         ),
 
-        // Single instance of SettingsBloc (remove the duplicate)
+        // Single instance of SettingsBloc
         BlocProvider<SettingsBloc>(
           create: (context) => SettingsBloc(prefs: prefs),
           lazy: false, // Create immediately
+        ),
+
+        // Add UserPreferencesBloc for profile settings with the updated class reference
+        BlocProvider<UserPreferencesBloc>(
+          create:
+              (context) => UserPreferencesBloc(
+                prefs: prefs,
+                notificationService: notificationService,
+              ),
+          lazy: false,
         ),
 
         BlocProvider<NavigationCubit>(
