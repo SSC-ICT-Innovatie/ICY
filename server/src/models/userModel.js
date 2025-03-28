@@ -107,6 +107,38 @@ const userSchema = new mongoose.Schema({
       default: 'light'
     }
   },
+  notifications: [{
+    id: {
+      type: String,
+      required: true
+    },
+    title: {
+      type: String,
+      required: true
+    },
+    body: {
+      type: String,
+      required: true
+    },
+    type: {
+      type: String,
+      enum: ['survey', 'achievement', 'team', 'general'],
+      default: 'general'
+    },
+    isRead: {
+      type: Boolean,
+      default: false
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    },
+    actionId: String,
+    actionUrl: {
+      type: String,
+      default: '/'
+    }
+  }],
   refreshToken: String,
   passwordResetToken: String,
   passwordResetExpires: Date,

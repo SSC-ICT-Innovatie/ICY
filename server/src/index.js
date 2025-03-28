@@ -7,6 +7,7 @@ const connectDB = require('./config/database');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 const logger = require('./utils/logger');
 const fileUpload = require('express-fileupload');
+
 // Add a simple colorize function
 const colorText = (text, color) => {
   if (process.env.NODE_ENV !== 'production') {
@@ -21,6 +22,7 @@ const colorText = (text, color) => {
   }
   return text;
 };
+
 // Import routes
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
@@ -30,8 +32,11 @@ const marketplaceRoutes = require('./routes/marketplaceRoutes');
 const teamRoutes = require('./routes/teamRoutes');
 const departmentRoutes = require('./routes/departmentRoutes');
 const healthRoutes = require('./routes/healthRoutes');
+const notificationRoutes = require('./routes/notificationRoutes'); // Add notifications routes
+
 // Import file utils
 const fileUtils = require('./utils/fileUtils');
+
 // Initialize express app
 const app = express();
 
@@ -71,6 +76,7 @@ app.use(`${baseUrl}/achievements`, achievementRoutes);
 app.use(`${baseUrl}/marketplace`, marketplaceRoutes);
 app.use(`${baseUrl}/teams`, teamRoutes);
 app.use(`${baseUrl}/departments`, departmentRoutes);
+app.use(`${baseUrl}/notifications`, notificationRoutes); // Add notifications routes
 app.use(`${baseUrl}`, healthRoutes);
 
 // API root route
