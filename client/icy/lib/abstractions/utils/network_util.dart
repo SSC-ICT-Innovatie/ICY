@@ -13,7 +13,7 @@ class NetworkUtil {
 
   static Future<bool> isApiAvailable() async {
     try {
-      // Try to connect to our API server
+      // Try to connect to THE icy API server
       // Here we're just checking general internet connectivity
       // In a real app, you would try to hit a health check endpoint on your API
       final hasConnection = await hasNetworkConnection();

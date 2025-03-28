@@ -216,23 +216,25 @@ class _SignupScreenState extends State<SignupScreen> {
       });
 
       try {
-        // Real API call to request verification code
-        final success = await _authRepository.requestVerificationCode(
+        // Real API call to request verification code - now returns VerificationResult
+        final result = await _authRepository.requestVerificationCode(
           _email.text,
         );
 
         if (mounted) {
           setState(() {
             _isLoading = false;
-            _codeRequested = success;
+            _codeRequested = result.success;
+
+            if (result.code != null) {
+              _verificationCode.text = result.code!;
+            }
           });
 
-          if (success) {
+          if (result.success) {
             _showVerificationDialog();
           } else {
-            _showErrorDialog(
-              'Failed to send verification code. Please try again.',
-            );
+            _showErrorDialog(result.message);
           }
         }
       } catch (e) {

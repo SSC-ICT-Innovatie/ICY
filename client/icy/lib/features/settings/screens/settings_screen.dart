@@ -248,10 +248,23 @@ class _SettingsScreenContent extends StatelessWidget {
   }
 
   void _showTimePickerDialog(BuildContext context) {
+    // Get the current reminder time from state
+    final currentTime = context.read<SettingsBloc>().state.reminderTime;
+
+    // Parse the current time string (format: "HH:mm")
+    final parts = currentTime.split(':');
+    int hour = 9;
+    int minute = 0;
+
+    if (parts.length == 2) {
+      hour = int.tryParse(parts[0]) ?? 9;
+      minute = int.tryParse(parts[1]) ?? 0;
+    }
+
     showAdaptiveDialog(
       context: context,
       builder:
-          (context) => FDialog(
+          (dialogContext) => FDialog(
             direction: Axis.horizontal,
             title: const Text('Set Reminder Time'),
             body: Column(
@@ -262,17 +275,28 @@ class _SettingsScreenContent extends StatelessWidget {
                 FTextField(
                   label: const Text('Time'),
                   readOnly: true,
-                  initialValue: '09:00 AM',
+                  initialValue: currentTime, // Use the current time from state
                   suffixBuilder:
-                      (context, value, child) => Icon(Icons.access_time),
+                      (context, value, child) => const Icon(Icons.access_time),
                   onTap: () async {
+                    // Use the parsed current time for initial value
                     final TimeOfDay? time = await showTimePicker(
-                      context: context,
-                      initialTime: const TimeOfDay(hour: 9, minute: 0),
+                      context: dialogContext,
+                      initialTime: TimeOfDay(hour: hour, minute: minute),
                     );
+
                     if (time != null) {
-                      // Save the selected time via BLoC
-                      // Not implemented in this simplified example
+                      // Format as "HH:mm"
+                      final formattedTime =
+                          '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+
+                      // Dispatch the event to update the time
+                      context.read<SettingsBloc>().add(
+                        SetReminderTimeEvent(time: formattedTime),
+                      );
+
+                      // Close the dialog after setting the time
+                      Navigator.of(dialogContext).pop();
                     }
                   },
                 ),
@@ -282,11 +306,11 @@ class _SettingsScreenContent extends StatelessWidget {
               FButton(
                 style: FButtonStyle.outline,
                 label: const Text('Cancel'),
-                onPress: () => Navigator.of(context).pop(),
+                onPress: () => Navigator.of(dialogContext).pop(),
               ),
               FButton(
                 label: const Text('Save'),
-                onPress: () => Navigator.of(context).pop(),
+                onPress: () => Navigator.of(dialogContext).pop(),
               ),
             ],
           ),

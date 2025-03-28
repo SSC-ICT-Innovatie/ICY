@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
-
+import 'package:http/http.dart' as http;
 import 'package:icy/abstractions/utils/api_constants.dart';
+import 'package:icy/abstractions/utils/network_diagnostics.dart';
 import 'package:icy/data/datasources/local_storage_service.dart';
 import 'package:icy/data/models/user_model.dart';
 import 'package:icy/services/api_service.dart';
@@ -17,14 +19,20 @@ class AuthRepository {
 
   Future<UserModel?> login(String email, String password) async {
     try {
-      final response = await _apiService.login(email, password);
+      // Run connection diagnostics before making the request
+      await NetworkDiagnostics.checkServerConnection();
 
-      if (response['success'] == true && response['user'] != null) {
-        final user = UserModel.fromJson(response['user']);
+      final data = await _apiService.login(email, password);
 
-        // Save auth token
-        if (response['token'] != null) {
-          await _localStorageService.saveAuthToken(response['token']);
+      if (data['success'] == true &&
+          data['user'] != null &&
+          data['token'] != null) {
+        final UserModel user = UserModel.fromJson(data['user']);
+
+        // Save tokens
+        await _localStorageService.saveAuthToken(data['token']);
+        if (data['refreshToken'] != null) {
+          await _localStorageService.saveRefreshToken(data['refreshToken']);
         }
 
         // Save user data
@@ -36,7 +44,7 @@ class AuthRepository {
       return null;
     } catch (e) {
       print('Login error: $e');
-      return null;
+      throw Exception('Login failed: $e');
     }
   }
 
@@ -50,131 +58,144 @@ class AuthRepository {
     String? verificationCode,
   }) async {
     try {
-      print('Auth Repository - Signup parameters:');
-      print(' - name: $name');
-      print(' - email: $email');
-      print(' - department: ${department ?? "ICT"}');
-      print(' - verificationCode: ${verificationCode ?? ""}');
+      // Run connection diagnostics before making the request
+      await NetworkDiagnostics.checkServerConnection();
 
-      final response = await _apiService.register(
+      final data = await _apiService.register(
         name,
         email,
         password,
         avatarId,
-        department ?? 'ICT', // Use 'ICT' as fallback
+        department,
         verificationCode ?? '',
         profileImage,
       );
 
-      if (response['success'] == true &&
-          response['user'] != null &&
-          response['token'] != null) {
-        final user = UserModel.fromJson(response['user']);
-        await _localStorageService.saveAuthUser(user);
-        await _localStorageService.saveAuthToken(response['token']);
+      if (data['success'] == true &&
+          data['user'] != null &&
+          data['token'] != null) {
+        final UserModel user = UserModel.fromJson(data['user']);
 
-        if (response['refreshToken'] != null) {
-          await _localStorageService.saveRefreshToken(response['refreshToken']);
+        // Save tokens
+        await _localStorageService.saveAuthToken(data['token']);
+        if (data['refreshToken'] != null) {
+          await _localStorageService.saveRefreshToken(data['refreshToken']);
         }
+
+        // Save user data
+        await _localStorageService.saveAuthUser(user);
 
         return user;
       }
 
       return null;
     } catch (e) {
-      print('Error during signup: $e');
-      rethrow;
+      print('Signup error: $e');
+      throw Exception('Signup failed: $e');
     }
   }
 
   Future<UserModel?> getCurrentUser() async {
     try {
-      // Try to get cached user first
-      final cachedUser = await _localStorageService.getAuthUser();
-
-      // If token exists, try to get fresh user data
-      if (await _localStorageService.getAuthToken() != null) {
-        try {
-          final response = await _apiService.get(
-            ApiConstants.currentUserEndpoint,
-          );
-
-          if (response['success'] == true && response['data'] != null) {
-            final updatedUser = UserModel.fromJson(response['data']);
-            await _localStorageService.saveAuthUser(updatedUser);
-            return updatedUser;
-          }
-        } catch (e) {
-          print('Error fetching current user: $e');
-          // If API fails, return cached user if available
-          if (cachedUser != null) return cachedUser;
-        }
-      }
-
-      return cachedUser;
+      return await _localStorageService.getAuthUser();
     } catch (e) {
-      print('Get current user error: $e');
+      print('Error getting current user: $e');
       return null;
     }
   }
 
-  Future<bool> logout() async {
+  Future<void> logout() async {
     try {
-      // Call logout API
-      await _apiService.post(ApiConstants.logoutEndpoint, {});
-
-      // Clear local storage regardless of API response
-      await _localStorageService.clearAuthData();
-
-      return true;
+      await _apiService.logout();
     } catch (e) {
-      print('Logout error: $e');
-
-      // Still clear local storage even if API call fails
+      print('Logout error from API: $e');
+      // Continue with local logout even if API call fails
+    } finally {
+      // Always clear local auth data
       await _localStorageService.clearAuthData();
-
-      return true;
     }
   }
 
   // Request email verification code
-  Future<bool> requestVerificationCode(String email) async {
+  // Updated to return a proper result object instead of a String?
+  Future<VerificationResult> requestVerificationCode(String email) async {
     try {
-      // Fix endpoint to match server route
-      final response = await _apiService.post(
-        ApiConstants
-            .requestVerificationEndpoint, // Ensure this matches the server route
-        {'email': email},
+      // Run connection diagnostics before making the request
+      await NetworkDiagnostics.checkServerConnection();
+
+      final url =
+          '${ApiConstants.apiBaseUrl}${ApiConstants.requestVerificationEndpoint}';
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email}),
       );
 
-      return response['success'] == true;
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          // In development mode, the server returns the code in the response
+          final code = data['devCode'] as String?;
+          return VerificationResult(
+            success: true,
+            code: code,
+            message:
+                code != null
+                    ? 'Code retrieved for development'
+                    : 'Code sent to email',
+          );
+        }
+        return VerificationResult(
+          success: true,
+          message: 'Verification code sent to email',
+        );
+      }
+
+      return VerificationResult(
+        success: false,
+        message: 'Request failed with status: ${response.statusCode}',
+      );
     } catch (e) {
       print('Error requesting verification code: $e');
-      return false;
+      return VerificationResult(
+        success: false,
+        message: 'Error: ${e.toString()}',
+      );
     }
   }
 
   // Verify email code
   Future<bool> verifyEmailCode(String email, String code) async {
     try {
-      // In development mode, check if we have a stored dev code
-      final storedDevCode = await _localStorageService.getData(
-        'dev_verification_code',
+      // Run connection diagnostics before making the request
+      await NetworkDiagnostics.checkServerConnection();
+
+      final url =
+          '${ApiConstants.apiBaseUrl}${ApiConstants.verifyEmailCodeEndpoint}';
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email, 'code': code}),
       );
-      if (storedDevCode != null && code == storedDevCode.toString()) {
-        print('Development mode: Verification code matched');
-        return true;
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['success'] == true;
       }
 
-      final response = await _apiService.post(
-        ApiConstants.verifyEmailCodeEndpoint,
-        {'email': email, 'code': code},
-      );
-
-      return response['success'] == true;
+      return false;
     } catch (e) {
       print('Error verifying email code: $e');
       return false;
     }
   }
+}
+
+// Add this class to properly handle verification code results
+class VerificationResult {
+  final bool success;
+  final String? code;
+  final String message;
+
+  VerificationResult({required this.success, this.code, required this.message});
 }
