@@ -1,23 +1,22 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
 import 'package:icy/features/notifications/bloc/notifications_bloc.dart';
 import 'package:icy/features/notifications/models/notification_model.dart';
 import 'package:icy/features/notifications/repository/notifications_repository.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 
-// Generate mock files
-@GenerateMocks([NotificationsRepository])
 import 'notifications_bloc_test.mocks.dart';
 
+@GenerateMocks([NotificationsRepository])
 void main() {
-  late MockNotificationsRepository mockRepository;
+  late MockNotificationsRepository mockNotificationsRepository;
   late NotificationsBloc notificationsBloc;
 
   setUp(() {
-    mockRepository = MockNotificationsRepository();
+    mockNotificationsRepository = MockNotificationsRepository();
     notificationsBloc = NotificationsBloc(
-      notificationsRepository: mockRepository,
+      notificationsRepository: mockNotificationsRepository,
     );
   });
 
@@ -25,107 +24,136 @@ void main() {
     notificationsBloc.close();
   });
 
-  group('NotificationsBloc', () {
-    final notificationsList = [
-      NotificationModel(
-        id: '1',
-        title: 'Test Notification 1',
-        message: 'Test message 1',
-        timestamp: DateTime.now(),
-        read: false,
-        type: NotificationType.survey,
-        actionUrl: '/test/url',
-      ),
-      NotificationModel(
-        id: '2',
-        title: 'Test Notification 2',
-        message: 'Test message 2',
-        timestamp: DateTime.now(),
-        read: true,
-        type: NotificationType.achievement,
-        actionUrl: '/test/url2',
-      ),
-    ];
+  final testNotifications = [
+    NotificationModel(
+      id: '1',
+      title: 'Test Notification 1',
+      body: 'This is test notification 1',
+      type: NotificationType.general,
+      isRead: false,
+      createdAt: DateTime.now(),
+      actionUrl: '/test/1',
+    ),
+    NotificationModel(
+      id: '2',
+      title: 'Test Notification 2',
+      body: 'This is test notification 2',
+      type: NotificationType.survey,
+      isRead: true,
+      createdAt: DateTime.now().subtract(const Duration(hours: 1)),
+      actionUrl: '/test/2',
+    ),
+  ];
 
-    test('initial state is NotificationsInitial', () {
-      expect(notificationsBloc.state, isA<NotificationsInitial>());
+  group('NotificationsBloc', () {
+    test('initial state is correct', () {
+      expect(notificationsBloc.state, const NotificationsState());
     });
 
     blocTest<NotificationsBloc, NotificationsState>(
-      'emits [NotificationsLoading, NotificationsLoaded] when LoadNotifications is added',
+      'emits [loading, success] states when notifications are loaded successfully',
       build: () {
         when(
-          mockRepository.getNotificationsForUser(),
-        ).thenAnswer((_) async => notificationsList);
+          mockNotificationsRepository.getNotifications(),
+        ).thenAnswer((_) async => testNotifications);
         return notificationsBloc;
       },
       act: (bloc) => bloc.add(const LoadNotifications()),
       expect:
           () => [
-            isA<NotificationsLoading>(),
-            isA<NotificationsLoaded>()
-                .having(
-                  (state) => state.notifications,
-                  'notifications',
-                  notificationsList,
-                )
-                .having(
-                  (state) => state.unreadCount,
-                  'unreadCount',
-                  1, // Only the first notification is unread
-                ),
+            const NotificationsState(status: NotificationStatus.loading),
+            NotificationsState(
+              status: NotificationStatus.success,
+              notifications: testNotifications,
+            ),
           ],
+      verify: (_) {
+        verify(mockNotificationsRepository.getNotifications()).called(1);
+        return true; // Fix: Always return true to satisfy FutureOr<bool>
+      },
     );
 
     blocTest<NotificationsBloc, NotificationsState>(
-      'emits [NotificationsError] when repository throws an exception',
+      'emits [loading, error] states when loading notifications fails',
       build: () {
         when(
-          mockRepository.getNotificationsForUser(),
+          mockNotificationsRepository.getNotifications(),
         ).thenThrow(Exception('Failed to load notifications'));
         return notificationsBloc;
       },
       act: (bloc) => bloc.add(const LoadNotifications()),
       expect:
           () => [
-            isA<NotificationsLoading>(),
-            isA<NotificationsError>().having(
-              (state) => state.message,
-              'message',
-              contains('Failed to load notifications'),
+            const NotificationsState(status: NotificationStatus.loading),
+            predicate<NotificationsState>(
+              (state) =>
+                  state.status == NotificationStatus.error &&
+                  state.errorMessage.contains('Failed to load notifications'),
             ),
           ],
     );
 
     blocTest<NotificationsBloc, NotificationsState>(
-      'marks notification as read when MarkNotificationAsRead is added',
+      'marks notification as read',
       build: () {
+        // First load the notifications
         when(
-          mockRepository.getNotificationsForUser(),
-        ).thenAnswer((_) async => notificationsList);
+          mockNotificationsRepository.getNotifications(),
+        ).thenAnswer((_) async => testNotifications);
         when(
-          mockRepository.markNotificationAsRead('1'),
+          mockNotificationsRepository.markAsRead(any),
         ).thenAnswer((_) async => true);
+
         return notificationsBloc;
       },
       seed:
-          () => NotificationsLoaded(
-            notifications: notificationsList,
-            unreadCount: 1,
+          () => NotificationsState(
+            status: NotificationStatus.success,
+            notifications: testNotifications,
           ),
       act:
           (bloc) => bloc.add(const MarkNotificationAsRead(notificationId: '1')),
       expect:
           () => [
-            isA<NotificationsLoaded>()
-                .having(
-                  (state) =>
-                      state.notifications.firstWhere((n) => n.id == '1').read,
-                  'notification is read',
-                  true,
-                )
-                .having((state) => state.unreadCount, 'unreadCount', 0),
+            predicate<NotificationsState>(
+              (state) =>
+                  state.status == NotificationStatus.success &&
+                  state.notifications.length == 2 &&
+                  state.notifications[0].isRead == true &&
+                  state.notifications[1].isRead == true,
+            ),
           ],
+      verify: (_) {
+        verify(mockNotificationsRepository.markAsRead('1')).called(1);
+        return true; // Fix: Always return true to satisfy FutureOr<bool>
+      },
+    );
+
+    blocTest<NotificationsBloc, NotificationsState>(
+      'clears all notifications',
+      build: () {
+        when(
+          mockNotificationsRepository.clearAllNotifications(),
+        ).thenAnswer((_) async => true);
+        return notificationsBloc;
+      },
+      seed:
+          () => NotificationsState(
+            status: NotificationStatus.success,
+            notifications: testNotifications,
+          ),
+      act: (bloc) => bloc.add(const ClearAllNotifications()),
+      expect:
+          () => [
+            const NotificationsState(
+              status: NotificationStatus.success,
+              notifications: [],
+            ),
+          ],
+      verify: (_) {
+        verify(mockNotificationsRepository.clearAllNotifications()).called(1);
+        return true; // Fix: Always return true to satisfy FutureOr<bool>
+      },
     );
   });
 }

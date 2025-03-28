@@ -1,42 +1,50 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:icy/features/notifications/widgets/notifications_button.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:icy/features/notifications/bloc/notifications_bloc.dart';
-
-@GenerateMocks([NotificationsBloc])
-import 'notification_button_test_simple.mocks.dart';
+import 'package:icy/features/notifications/models/notification_model.dart';
+import 'package:icy/features/notifications/repository/notifications_repository.dart';
+import 'package:icy/features/notifications/widgets/notifications_button.dart';
 
 void main() {
-  late MockNotificationsBloc mockNotificationsBloc;
-
-  setUp(() {
-    mockNotificationsBloc = MockNotificationsBloc();
-    when(mockNotificationsBloc.state).thenReturn(NotificationsInitial());
-    when(mockNotificationsBloc.stream).thenAnswer((_) => Stream.empty());
-  });
-
-  testWidgets('NotificationsButton renders without badge', (
+  testWidgets('NotificationsButton displays properly', (
     WidgetTester tester,
   ) async {
-    // Build our app and trigger a frame.
+    // Initial state with no notifications
+    final initialState = NotificationsState();
+
+    // Create a proper implementation of the repository for testing
+    final testRepository = TestNotificationsRepository();
+
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: BlocProvider<NotificationsBloc>.value(
-            value: mockNotificationsBloc,
-            child: Builder(
-              builder: (context) => const NotificationsButton(showBadge: false),
-            ),
+          body: BlocProvider<NotificationsBloc>(
+            create:
+                (_) =>
+                    NotificationsBloc(notificationsRepository: testRepository),
+            child: const NotificationsButton(),
           ),
         ),
       ),
     );
 
-    expect(find.byIcon(Icons.notifications_outlined), findsOneWidget);
-    expect(find.byType(Stack), findsOneWidget);
-    expect(find.byType(Positioned), findsNothing);
+    // Test if the button is displayed
+    expect(find.byType(NotificationsButton), findsOneWidget);
+
+    // Find badge with text '0'
+    expect(find.text('0'), findsOneWidget);
   });
+}
+
+// Simple test repository that extends the actual repository class
+class TestNotificationsRepository extends NotificationsRepository {
+  @override
+  Future<List<NotificationModel>> getNotifications() async => [];
+
+  @override
+  Future<void> markAsRead(String notificationId) async {}
+
+  @override
+  Future<void> clearAllNotifications() async {}
 }

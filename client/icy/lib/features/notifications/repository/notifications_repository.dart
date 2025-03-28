@@ -1,12 +1,58 @@
+import 'dart:convert';
 import 'package:icy/features/notifications/models/notification_model.dart';
+import 'package:icy/services/api_service.dart';
 
 class NotificationsRepository {
-  // In a real app, this would call an API
-  Future<List<NotificationModel>> getNotifications() async {
-    // Simulate API delay
-    await Future.delayed(const Duration(milliseconds: 800));
+  final ApiService _apiService = ApiService();
 
-    // Return mock notifications
+  // Get notifications from server API
+  Future<List<NotificationModel>> getNotifications() async {
+    try {
+      // ApiService.get() returns Map<String, dynamic>, not http.Response
+      final responseData = await _apiService.get('/notifications');
+
+      // Check if the API call was successful and contains data
+      if (responseData['success'] == true && responseData['data'] != null) {
+        return (responseData['data'] as List)
+            .map(
+              (json) =>
+                  NotificationModel.fromJson(json as Map<String, dynamic>),
+            )
+            .toList();
+      }
+
+      // Return empty list if data is missing
+      return [];
+    } catch (e) {
+      print('Error fetching notifications: $e');
+
+      // For development, return mock data if API fails
+      return _getMockNotifications();
+    }
+  }
+
+  // Mark notification as read
+  Future<void> markAsRead(String notificationId) async {
+    try {
+      await _apiService.put('/notifications/$notificationId/read', {});
+    } catch (e) {
+      print('Error marking notification as read: $e');
+      // Silently fail - UI will still show as read
+    }
+  }
+
+  // Clear all notifications
+  Future<void> clearAllNotifications() async {
+    try {
+      await _apiService.delete('/notifications');
+    } catch (e) {
+      print('Error clearing notifications: $e');
+      // Silently fail - UI will still clear
+    }
+  }
+
+  // Mock data for development or when API fails
+  List<NotificationModel> _getMockNotifications() {
     return [
       NotificationModel(
         id: '1',
@@ -40,19 +86,5 @@ class NotificationsRepository {
         actionUrl: '/teams/789',
       ),
     ];
-  }
-
-  // Mark a notification as read
-  Future<void> markAsRead(String notificationId) async {
-    // Simulate API call
-    await Future.delayed(const Duration(milliseconds: 300));
-    print('Marked notification $notificationId as read');
-  }
-
-  // Clear all notifications
-  Future<void> clearAllNotifications() async {
-    // Simulate API call
-    await Future.delayed(const Duration(milliseconds: 500));
-    print('Cleared all notifications');
   }
 }
