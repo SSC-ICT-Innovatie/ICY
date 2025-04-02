@@ -31,6 +31,9 @@ class ApiConstants {
 
   static const String departmentsEndpoint = '/departments';
 
+  // User endpoints
+  static const String usersEndpoint = '/users'; // Add this missing endpoint
+
   static const String achievementsEndpoint = '/achievements';
   static const String badgesEndpoint = '/achievements/badges';
   static const String myBadgesEndpoint = '/achievements/badges/my';
@@ -55,9 +58,19 @@ class ApiConstants {
   static const String marketplaceCategoriesEndpoint = '/marketplace/categories';
   static const String marketplacePurchasesEndpoint = '/marketplace/purchases';
 
+  static const String notificationsEndpoint = '/notifications';
+
+  // Admin endpoints
+  static const String adminEndpoint = '/admin';
+  static const String adminStatsEndpoint = '/admin/stats';
+
   static const String authTokenKey = 'auth_token';
   static const String refreshTokenKey = 'refresh_token';
   static const String userKey = 'auth_user';
   static const String themeKey = 'app_theme';
   static const String languageKey = 'app_language';
+
+  // Theme settings keys
+  static const String isDarkModeKey = 'is_dark_mode';
+  static const String useSystemThemeKey = 'use_system_theme';
 }
