@@ -46,7 +46,7 @@ class AuthCacheService {
 
       // Also update role if logged in
       if (isLoggedIn) {
-        updateUserRole((authState).user.role);
+        updateUserRole(authState.user.role);
       }
 
       print("Authentication status: $isLoggedIn");
