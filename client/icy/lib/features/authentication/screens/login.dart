@@ -49,6 +49,28 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  void _showAdminLoginInfo() {
+    showAdaptiveDialog(
+      context: context,
+      builder:
+          (context) => FDialog(
+            direction: Axis.horizontal,
+            title: const Text('Admin Login'),
+            body: const Text(
+              'Administrator accounts have elevated privileges. '
+              'Please enter your admin email and password to continue.',
+            ),
+            actions: [
+              FButton(
+                style: FButtonStyle.outline,
+                label: const Text('OK'),
+                onPress: () => Navigator.of(context).pop(),
+              ),
+            ],
+          ),
+    );
+  }
+
   void _login() {
     if (_formKey.currentState?.validate() ?? false) {
       setState(() {
@@ -206,6 +228,16 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                     label: const Text("Don't have an account? Register now"),
                   ),
+
+                  // Add Admin Login Info Button
+                  const SizedBox(height: 8),
+                  FButton(
+                    style: FButtonStyle.ghost,
+                    onPress: _showAdminLoginInfo,
+                    label: const Text("Administrator Login"),
+                    prefix: FIcon(FAssets.icons.shield),
+                  ),
+
                   const SizedBox(height: 16),
                 ],
               ),

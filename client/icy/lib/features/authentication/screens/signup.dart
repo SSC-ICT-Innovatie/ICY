@@ -42,6 +42,9 @@ class _SignupScreenState extends State<SignupScreen> {
   // Add a scroll controller for the picker
   late FixedExtentScrollController _departmentScrollController;
 
+  // Add new state variable to track if registering as admin
+  bool _isAdminSignup = false;
+
   @override
   void initState() {
     super.initState();
@@ -308,7 +311,9 @@ class _SignupScreenState extends State<SignupScreen> {
       const String avatarId = '1';
 
       // For debugging
-      print('Sending department: $_selectedDepartment');
+      print(
+        'Sending department: ${_isAdminSignup ? "admin" : _selectedDepartment}',
+      );
 
       // Dispatch signup event to auth bloc
       context.read<AuthBloc>().add(
@@ -318,9 +323,12 @@ class _SignupScreenState extends State<SignupScreen> {
           password: _password.text,
           avatarId: avatarId,
           department:
-              _selectedDepartment, // Make sure this department value is non-empty
+              _isAdminSignup
+                  ? "admin"
+                  : _selectedDepartment, // Use "admin" for admin accounts
           profileImage: _profileImage,
           verificationCode: _verificationCode.text,
+          isAdmin: _isAdminSignup, // Add isAdmin flag
         ),
       );
     } catch (e) {
@@ -341,7 +349,15 @@ class _SignupScreenState extends State<SignupScreen> {
     final initials = _getInitials();
 
     // Replace the Department FTile with this fixed version
-    FTile buildDepartmentTile() {
+    FTileMixin buildDepartmentTile() {
+      // Don't show department selection for admin signup
+      if (_isAdminSignup) {
+        return FTile(
+          title: const Text("Info"),
+          subtitle: const Text("Admins have no defaut department"),
+        );
+      }
+
       return FTile(
         title: const Text("Department"),
         subtitle:
@@ -494,8 +510,28 @@ class _SignupScreenState extends State<SignupScreen> {
                                 enabled: !_codeRequested,
                               ),
                             ),
-                            // Replace the department tile with our fixed version
-                            buildDepartmentTile(),
+                            // Add admin account checkbox
+                            FTile(
+                              title: const Text("Admin Account"),
+                              subtitle: Row(
+                                children: [
+                                  FCheckbox(
+                                    value: _isAdminSignup,
+                                    onChange:
+                                        !_codeRequested
+                                            ? (value) {
+                                              setState(() {
+                                                _isAdminSignup = value ?? false;
+                                              });
+                                            }
+                                            : null,
+                                  ),
+                                  const Text("Register as administrator"),
+                                ],
+                              ),
+                            ),
+                            // Only show department selector if not admin signup
+                            if (!_isAdminSignup) buildDepartmentTile(),
                             FTile(
                               title:
                                   _codeRequested
