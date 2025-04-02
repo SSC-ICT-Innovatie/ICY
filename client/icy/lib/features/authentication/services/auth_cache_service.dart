@@ -36,10 +36,15 @@ class AuthCacheService {
   /// Get cached user role
   String get userRole => _userRole;
 
-  /// Check if user is logged in from context
+  /// Check if user is logged in from context - with safety check for deactivated widgets
   /// Updates the cache and returns the result
   bool checkLoggedIn(BuildContext context) {
     try {
+      if (!context.mounted) {
+        print("Context is not mounted - using cached value: $_isLoggedIn");
+        return _isLoggedIn;
+      }
+
       final authState = BlocProvider.of<AuthBloc>(context, listen: false).state;
       final isLoggedIn = authState is AuthSuccess;
       updateAuthState(isLoggedIn);
@@ -57,9 +62,14 @@ class AuthCacheService {
     }
   }
 
-  /// Get user role from context or return cached role
+  /// Get user role from context or return cached role - with safety check for deactivated widgets
   String getUserRole(BuildContext context) {
     try {
+      if (!context.mounted) {
+        print("Context is not mounted - using cached value: $_userRole");
+        return _userRole;
+      }
+
       final authState = BlocProvider.of<AuthBloc>(context, listen: false).state;
       if (authState is AuthSuccess) {
         final role = authState.user.role;

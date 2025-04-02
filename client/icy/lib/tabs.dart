@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:icy/abstractions/navigation/services/icy_tab_registerar.dart';
 import 'package:icy/features/achievements/screens/achievement_page.dart';
+import 'package:icy/features/admin/providers/admin_provider.dart'; // Import AdminProvider
 import 'package:icy/features/admin/screens/admin_dashboard.dart';
 import 'package:icy/features/authentication/screens/login.dart';
 import 'package:icy/features/authentication/screens/signup.dart';
@@ -56,12 +57,14 @@ List<IcyTab> injectNavigationTabs(BuildContext context) {
       accessRule: () => !AuthCacheService().isLoggedIn,
     ),
 
-    // Admin tab (only visible for admins)
+    // Admin tab (only visible for admins) - wrap with AdminProvider
     IcyTab(
       showInTabBar: isLoggedIn && isAdminUser,
       icon: FAssets.icons.settings,
       title: "Admin",
-      content: AdminDashboard(),
+      content: AdminProvider(
+        child: AdminDashboard(),
+      ), // Wrap with AdminProvider
       accessRule: () => AuthCacheService().isLoggedIn && isAdmin(context),
     ),
 

@@ -7,6 +7,7 @@ import 'package:icy/data/repositories/department_repository.dart';
 import 'package:icy/data/repositories/survey_repository.dart';
 import 'package:icy/features/admin/models/admin_model.dart';
 import 'package:icy/features/admin/repositories/admin_repository.dart';
+import 'package:flutter/foundation.dart';
 
 part 'admin_event.dart';
 part 'admin_state.dart';
@@ -126,5 +127,11 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
     } catch (e) {
       emit(AdminError('Failed to create survey: $e'));
     }
+  }
+
+  @override
+  void onError(Object error, StackTrace stackTrace) {
+    debugPrint('AdminBloc error: $error');
+    super.onError(error, stackTrace);
   }
 }

@@ -34,8 +34,25 @@ class _CreateSurveyScreenState extends State<CreateSurveyScreen> {
     // Add initial question
     _addNewQuestion();
 
-    // Load departments
-    context.read<AdminBloc>().add(LoadDepartments());
+    // Access the AdminBloc safely - it should be available from the parent
+    if (mounted) {
+      // Try first
+      try {
+        context.read<AdminBloc>().add(LoadDepartments());
+      } catch (e) {
+        // Delayed initialization as fallback
+        print('Error loading departments: $e, trying again after build');
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            try {
+              context.read<AdminBloc>().add(LoadDepartments());
+            } catch (e) {
+              print('Failed to load departments after build: $e');
+            }
+          }
+        });
+      }
+    }
   }
 
   @override

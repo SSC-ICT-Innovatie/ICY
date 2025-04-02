@@ -20,48 +20,38 @@ class AdminDashboard extends StatefulWidget {
 }
 
 class _AdminDashboardState extends State<AdminDashboard> {
-  late AdminBloc _adminBloc;
-
   @override
   void initState() {
     super.initState();
-    _adminBloc = AdminBloc(
-      adminRepository: AdminRepository(),
-      departmentRepository: DepartmentRepository(),
-      surveyRepository: SurveyRepository(),
-    );
-    _adminBloc.add(LoadAdminStats());
-  }
-
-  @override
-  void dispose() {
-    _adminBloc.close();
-    super.dispose();
+    // Try to safely load admin stats
+    try {
+      context.read<AdminBloc>().add(LoadAdminStats());
+    } catch (e) {
+      print("Error loading admin stats: $e");
+      // We'll try again in the build method
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: _adminBloc,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Admin Dashboard'),
-          backgroundColor: Theme.of(context).colorScheme.primary,
-        ),
-        body: BlocConsumer<AdminBloc, AdminState>(
-          listener: (context, state) {
-            if (state is AdminError) {
-              _showSnackBar(context, state.message, isError: true);
-            } else if (state is AdminActionSuccess) {
-              _showSnackBar(context, state.message, isError: false);
-            }
-          },
-          builder: (context, state) {
-            return _buildContent(context, state);
-          },
-        ),
-        floatingActionButton: _buildFloatingActionButton(context),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Admin Dashboard'),
+        backgroundColor: Theme.of(context).colorScheme.primary,
       ),
+      body: BlocConsumer<AdminBloc, AdminState>(
+        listener: (context, state) {
+          if (state is AdminError) {
+            _showSnackBar(context, state.message, isError: true);
+          } else if (state is AdminActionSuccess) {
+            _showSnackBar(context, state.message, isError: false);
+          }
+        },
+        builder: (context, state) {
+          return _buildContent(context, state);
+        },
+      ),
+      floatingActionButton: _buildFloatingActionButton(context),
     );
   }
 
@@ -341,11 +331,21 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   void _navigateTo(BuildContext context, Widget screen) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder:
-            (context) => BlocProvider.value(value: _adminBloc, child: screen),
-      ),
-    );
+    // Create a provider that preserves the existing AdminBloc instance
+    try {
+      final adminBloc = context.read<AdminBloc>();
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder:
+              (context) => BlocProvider.value(value: adminBloc, child: screen),
+        ),
+      );
+    } catch (e) {
+      // Fallback if AdminBloc is not available
+      print("AdminBloc not found in context: $e");
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (context) => screen));
+    }
   }
 }

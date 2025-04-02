@@ -170,54 +170,73 @@ class SystemNotificationService implements NotificationService {
     required TimeOfDay timeOfDay,
     String? payload,
   }) async {
-    final now = DateTime.now();
-    final scheduledDate = DateTime(
-      now.year,
-      now.month,
-      now.day,
-      timeOfDay.hour,
-      timeOfDay.minute,
-    );
+    try {
+      final now = DateTime.now();
+      final scheduledDate = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        timeOfDay.hour,
+        timeOfDay.minute,
+      );
 
-    // If the time has already passed today, schedule for tomorrow
-    final effectiveDate =
-        scheduledDate.isBefore(now)
-            ? scheduledDate.add(const Duration(days: 1))
-            : scheduledDate;
+      // If the time has already passed today, schedule for tomorrow
+      final effectiveDate =
+          scheduledDate.isBefore(now)
+              ? scheduledDate.add(const Duration(days: 1))
+              : scheduledDate;
 
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
-          'daily_notifications',
-          'Daily Notifications',
-          channelDescription: 'Daily reminder notifications',
-          importance: Importance.high,
-          priority: Priority.high,
+      const AndroidNotificationDetails androidPlatformChannelSpecifics =
+          AndroidNotificationDetails(
+            'daily_notifications',
+            'Daily Notifications',
+            channelDescription: 'Daily reminder notifications',
+            importance: Importance.high,
+            priority: Priority.high,
+          );
+
+      const DarwinNotificationDetails iOSPlatformChannelSpecifics =
+          DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+          );
+
+      const NotificationDetails platformChannelSpecifics = NotificationDetails(
+        android: androidPlatformChannelSpecifics,
+        iOS: iOSPlatformChannelSpecifics,
+      );
+
+      await _flutterLocalNotificationsPlugin.zonedSchedule(
+        id,
+        title,
+        body,
+        tz.TZDateTime.from(effectiveDate, tz.local),
+        platformChannelSpecifics,
+        // Use correct parameters for the current Flutter Local Notifications version
+        matchDateTimeComponents: DateTimeComponents.time,
+        payload: payload,
+        // Set this parameter for Android 12+ compatibility
+        androidScheduleMode:
+            AndroidScheduleMode
+                .inexactAllowWhileIdle, // Use inexact mode to avoid permission issues
+      );
+    } catch (e) {
+      // Log the error but don't crash
+      print('Failed to schedule notification: $e');
+
+      // Try to show a regular notification instead
+      try {
+        await showNotification(
+          id: id,
+          title: title,
+          body: body,
+          payload: payload,
         );
-
-    const DarwinNotificationDetails iOSPlatformChannelSpecifics =
-        DarwinNotificationDetails(
-          presentAlert: true,
-          presentBadge: true,
-          presentSound: true,
-        );
-
-    const NotificationDetails platformChannelSpecifics = NotificationDetails(
-      android: androidPlatformChannelSpecifics,
-      iOS: iOSPlatformChannelSpecifics,
-    );
-
-    await _flutterLocalNotificationsPlugin.zonedSchedule(
-      id,
-      title,
-      body,
-      tz.TZDateTime.from(effectiveDate, tz.local),
-      platformChannelSpecifics,
-      // Use correct parameters for the current Flutter Local Notifications version
-      matchDateTimeComponents: DateTimeComponents.time,
-      payload: payload,
-      // Set this parameter for Android 12+ compatibility
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-    );
+      } catch (innerE) {
+        print('Failed to show fallback notification: $innerE');
+      }
+    }
   }
 
   // Method needed for UserPreferencesBloc

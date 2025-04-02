@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:icy/abstractions/navigation/state/navigation_cubit.dart';
 import 'package:icy/data/repositories/achievement_repository.dart';
+import 'package:icy/data/repositories/department_repository.dart';
+import 'package:icy/data/repositories/survey_repository.dart';
 import 'package:icy/features/achievements/bloc/achievements_bloc.dart';
+import 'package:icy/features/admin/bloc/admin_bloc.dart';
+import 'package:icy/features/admin/repositories/admin_repository.dart';
 import 'package:icy/features/authentication/state/bloc/auth_bloc.dart';
 import 'package:icy/features/home/bloc/home_bloc.dart';
 import 'package:icy/features/home/repositories/home_repository.dart';
@@ -25,6 +29,19 @@ class DependencyInjector {
     final notificationService = SystemNotificationService();
     await notificationService.initialize();
 
+    // Create shared repositories
+    final apiService = ApiService();
+    final departmentRepository = DepartmentRepository(apiService: apiService);
+    final surveyRepository = SurveyRepository(apiService: apiService);
+    final adminRepository = AdminRepository(apiService: apiService);
+
+    // Create the admin bloc with its dependencies
+    final adminBloc = AdminBloc(
+      adminRepository: adminRepository,
+      departmentRepository: departmentRepository,
+      surveyRepository: surveyRepository,
+    );
+
     return MultiBlocProvider(
       providers: [
         // Create AuthBloc first as it's needed by NavigationCubit
@@ -44,6 +61,13 @@ class DependencyInjector {
                 notificationService: notificationService,
               ),
           lazy: false,
+        ),
+
+        // Admin Bloc - Set lazy to false to initialize immediately
+        BlocProvider<AdminBloc>(
+          create: (context) => adminBloc,
+          lazy:
+              false, // Important: Create immediately to avoid initialization issues
         ),
 
         BlocProvider<NavigationCubit>(
