@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:forui/forui.dart';
 import 'package:icy/data/repositories/department_repository.dart';
 import 'package:icy/data/repositories/survey_repository.dart';
 import 'package:icy/features/admin/bloc/admin_bloc.dart';
@@ -23,35 +24,36 @@ class _AdminDashboardState extends State<AdminDashboard> {
   @override
   void initState() {
     super.initState();
-    // Try to safely load admin stats
+
     try {
       context.read<AdminBloc>().add(LoadAdminStats());
     } catch (e) {
       print("Error loading admin stats: $e");
-      // We'll try again in the build method
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Admin Dashboard'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
+    return FScaffold(
+      header: FHeader(title: const Text('Admin Dashboard')),
+      content: Stack(
+        alignment: Alignment.bottomRight,
+        children: [
+          BlocConsumer<AdminBloc, AdminState>(
+            listener: (context, state) {
+              if (state is AdminError) {
+                _showSnackBar(context, state.message, isError: true);
+              } else if (state is AdminActionSuccess) {
+                _showSnackBar(context, state.message, isError: false);
+              }
+            },
+            builder: (context, state) {
+              return _buildContent(context, state);
+            },
+          ),
+          _buildFloatingActionButton(context),
+        ],
       ),
-      body: BlocConsumer<AdminBloc, AdminState>(
-        listener: (context, state) {
-          if (state is AdminError) {
-            _showSnackBar(context, state.message, isError: true);
-          } else if (state is AdminActionSuccess) {
-            _showSnackBar(context, state.message, isError: false);
-          }
-        },
-        builder: (context, state) {
-          return _buildContent(context, state);
-        },
-      ),
-      floatingActionButton: _buildFloatingActionButton(context),
     );
   }
 
@@ -83,12 +85,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Welcome to Admin Dashboard',
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
-          const SizedBox(height: 24),
-
           _buildStatCards(context, stats),
           const SizedBox(height: 32),
 
@@ -184,39 +180,39 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   Widget _buildManageContent(BuildContext context) {
-    return Column(
+    return FTileGroup(
       children: [
-        ListTile(
-          leading: Icon(
+        FTile(
+          prefixIcon: Icon(
             Icons.poll,
             color: Theme.of(context).colorScheme.primary,
           ),
           title: const Text('Manage Surveys'),
           subtitle: const Text('Create, edit and view all surveys'),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: () => _navigateTo(context, const SurveysScreen()),
+          suffixIcon: const Icon(Icons.chevron_right),
+          onPress: () => _navigateTo(context, const SurveysScreen()),
         ),
-        const Divider(),
-        ListTile(
-          leading: Icon(
+
+        FTile(
+          prefixIcon: Icon(
             Icons.business,
             color: Theme.of(context).colorScheme.primary,
           ),
           title: const Text('Manage Departments'),
           subtitle: const Text('Create and manage departments'),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: () => _navigateTo(context, const DepartmentsScreen()),
+          suffixIcon: const Icon(Icons.chevron_right),
+          onPress: () => _navigateTo(context, const DepartmentsScreen()),
         ),
-        const Divider(),
-        ListTile(
-          leading: Icon(
+
+        FTile(
+          prefixIcon: Icon(
             Icons.people,
             color: Theme.of(context).colorScheme.primary,
           ),
           title: const Text('Manage Users'),
           subtitle: const Text('View and manage user accounts'),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: () => _navigateTo(context, const UsersScreen()),
+          suffixIcon: const Icon(Icons.chevron_right),
+          onPress: () => _navigateTo(context, const UsersScreen()),
         ),
       ],
     );
@@ -228,26 +224,24 @@ class _AdminDashboardState extends State<AdminDashboard> {
     IconData icon,
     VoidCallback onPress,
   ) {
-    return ElevatedButton.icon(
-      onPressed: onPress,
-      icon: Icon(icon),
-      label: Text(label),
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      ),
-    );
+    return FButton(onPress: onPress, prefix: Icon(icon), label: Text(label));
   }
 
   Widget _buildSectionTitle(BuildContext context, String title) {
-    return Text(title, style: Theme.of(context).textTheme.titleLarge);
+    return FTile(title: Text(title, style: Theme.of(context).textTheme.titleLarge));
   }
 
   Widget _buildFloatingActionButton(BuildContext context) {
-    return FloatingActionButton(
-      child: const Icon(Icons.add),
-      onPressed: () {
-        _showFloatingActionMenu(context);
-      },
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        FButton(
+          label: const Icon(Icons.add),
+          onPress: () {
+            _showFloatingActionMenu(context);
+          },
+        ),
+      ],
     );
   }
 

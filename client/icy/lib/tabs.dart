@@ -60,7 +60,7 @@ List<IcyTab> injectNavigationTabs(BuildContext context) {
     // Admin tab (only visible for admins) - wrap with AdminProvider
     IcyTab(
       showInTabBar: isLoggedIn && isAdminUser,
-      icon: FAssets.icons.settings,
+      icon: FAssets.icons.shield,
       title: "Admin",
       content: AdminProvider(
         child: AdminDashboard(),
@@ -77,7 +77,7 @@ List<IcyTab> injectNavigationTabs(BuildContext context) {
       accessRule: () => AuthCacheService().isLoggedIn,
     ),
     IcyTab(
-      showInTabBar: isLoggedIn,
+      showInTabBar: isLoggedIn && !isAdminUser,
       icon: FAssets.icons.trophy,
       title: "Achievements",
       content: isAdminUser ? Container() : AchievementPage(),
