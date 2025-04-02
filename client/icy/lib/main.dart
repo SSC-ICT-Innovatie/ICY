@@ -6,12 +6,17 @@ import 'package:icy/abstractions/navigation/state/navigation_cubit.dart';
 import 'package:icy/abstractions/utils/constants.dart';
 import 'package:icy/dependency_injector.dart';
 import 'package:icy/features/authentication/state/bloc/auth_bloc.dart';
+import 'package:icy/features/settings/bloc/settings_bloc.dart';
 import 'package:icy/services/app_initialization_service.dart';
 import 'package:icy/tabs.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   // Initialize all services
   await AppInitializationService.initialize();
+
+  // Initialize AppConstants theme cache
+  await AppConstants().initThemeCache();
 
   runApp(const MyApp());
 }
@@ -21,10 +26,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Widget>(
-      future: DependencyInjector().injectStateIntoApp(
-        const AuthStateListener(child: IceNavigation()),
-      ),
+    return FutureBuilder<SharedPreferences>(
+      future: SharedPreferences.getInstance(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const MaterialApp(
@@ -46,23 +49,75 @@ class MyApp extends StatelessWidget {
           );
         }
 
-        return MaterialApp(
-          title: 'ICY App',
-          themeMode: ThemeMode.system,
-          debugShowCheckedModeBanner: false,
-          home: snapshot.data,
-          builder: (context, child) {
-            // Safely wrap in a null check
-            if (child == null) {
-              return const Center(child: CircularProgressIndicator());
+        // Create SettingsBloc first
+        return BlocProvider(
+          create: (context) => SettingsBloc(prefs: snapshot.data!),
+          child: const AppWithSettings(),
+        );
+      },
+    );
+  }
+}
+
+class AppWithSettings extends StatelessWidget {
+  const AppWithSettings({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // Now we can safely access the SettingsBloc
+    return BlocBuilder<SettingsBloc, SettingsState>(
+      builder: (context, settingsState) {
+        return FutureBuilder<Widget>(
+          future: DependencyInjector().injectStateIntoApp(
+            const AuthStateListener(child: IceNavigation()),
+          ),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const MaterialApp(
+                debugShowCheckedModeBanner: false,
+                home: Scaffold(
+                  body: Center(child: CircularProgressIndicator.adaptive()),
+                ),
+              );
             }
 
-            return FTheme(
-              data:
-                  AppConstants().isLight(context)
-                      ? FThemes.orange.light.copyWith()
-                      : FThemes.orange.dark.copyWith(),
-              child: child,
+            if (snapshot.hasError) {
+              return MaterialApp(
+                debugShowCheckedModeBanner: false,
+                home: Scaffold(
+                  body: Center(
+                    child: Text('Error initializing app: ${snapshot.error}'),
+                  ),
+                ),
+              );
+            }
+
+            // Determine theme mode based on settings
+            ThemeMode themeMode = ThemeMode.system;
+            if (!settingsState.useSystemTheme) {
+              themeMode =
+                  settingsState.isDarkMode ? ThemeMode.dark : ThemeMode.light;
+            }
+
+            return MaterialApp(
+              title: 'ICY App',
+              themeMode: themeMode,
+              debugShowCheckedModeBanner: false,
+              home: snapshot.data,
+              builder: (context, child) {
+                // Safely wrap in a null check
+                if (child == null) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                return FTheme(
+                  data:
+                      AppConstants().isLight(context)
+                          ? FThemes.orange.light.copyWith()
+                          : FThemes.orange.dark.copyWith(),
+                  child: child,
+                );
+              },
             );
           },
         );

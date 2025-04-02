@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:icy/abstractions/utils/constants.dart';
 
 part 'settings_event.dart';
 part 'settings_state.dart';
@@ -21,12 +22,19 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   }
 
   void _onInitSettings(InitSettingsEvent event, Emitter<SettingsState> emit) {
-    final isDarkMode = prefs.getBool('isDarkMode') ?? false;
-    final useSystemTheme = prefs.getBool('useSystemTheme') ?? true;
+    final isDarkMode = prefs.getBool(AppConstants.isDarkModeKey) ?? false;
+    final useSystemTheme =
+        prefs.getBool(AppConstants.useSystemThemeKey) ?? true;
     final notificationsEnabled = prefs.getBool('notificationsEnabled') ?? true;
     final surveyRemindersEnabled =
         prefs.getBool('surveyRemindersEnabled') ?? true;
     final reminderTime = prefs.getString('reminderTime') ?? '09:00';
+
+    // Update AppConstants cache
+    AppConstants().updateThemeCache(
+      isDarkMode: isDarkMode,
+      useSystemTheme: useSystemTheme,
+    );
 
     emit(
       state.copyWith(
@@ -40,7 +48,11 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   }
 
   void _onToggleTheme(ToggleThemeEvent event, Emitter<SettingsState> emit) {
-    prefs.setBool('isDarkMode', event.isDarkMode);
+    prefs.setBool(AppConstants.isDarkModeKey, event.isDarkMode);
+
+    // Update AppConstants cache
+    AppConstants().updateThemeCache(isDarkMode: event.isDarkMode);
+
     emit(state.copyWith(isDarkMode: event.isDarkMode));
   }
 
@@ -48,7 +60,11 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     ToggleUseSystemThemeEvent event,
     Emitter<SettingsState> emit,
   ) {
-    prefs.setBool('useSystemTheme', event.useSystemTheme);
+    prefs.setBool(AppConstants.useSystemThemeKey, event.useSystemTheme);
+
+    // Update AppConstants cache
+    AppConstants().updateThemeCache(useSystemTheme: event.useSystemTheme);
+
     emit(state.copyWith(useSystemTheme: event.useSystemTheme));
   }
 
