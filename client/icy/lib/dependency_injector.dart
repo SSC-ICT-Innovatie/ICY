@@ -13,7 +13,7 @@ import 'package:icy/features/notifications/repository/notifications_repository.d
 import 'package:icy/features/profile/bloc/user_preferences_bloc.dart';
 import 'package:icy/features/settings/bloc/settings_bloc.dart';
 import 'package:icy/services/api_service.dart';
-import 'package:icy/services/notification_service.dart'; // Update import
+import 'package:icy/services/notification_service.dart';
 import 'package:icy/tabs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -33,11 +33,8 @@ class DependencyInjector {
           lazy: false, // Ensure it's created immediately
         ),
 
-        // Single instance of SettingsBloc
-        BlocProvider<SettingsBloc>(
-          create: (context) => SettingsBloc(prefs: prefs),
-          lazy: false, // Create immediately
-        ),
+        // We no longer create SettingsBloc here since it's created at the root level
+        // Instead, we'll reuse the existing one
 
         // Add UserPreferencesBloc for profile settings with the updated class reference
         BlocProvider<UserPreferencesBloc>(
@@ -69,6 +66,7 @@ class DependencyInjector {
         BlocProvider<HomeBloc>(
           create:
               (context) => HomeBloc(
+                // Get the SettingsBloc from the context because it's defined at the root
                 context.read<SettingsBloc>(),
                 homeRepository: HomeRepository(),
                 achievementRepository: AchievementRepository(),
