@@ -153,3 +153,18 @@ class SurveyDetail {
 
   SurveyDetail({required this.survey, this.progress});
 }
+
+extension SurveyModelDateHelpers on SurveyModel {
+  // Helper method to safely get expiry date whether it's a String or DateTime
+  DateTime getExpiryDate() {
+    if (expiresAt is String) {
+      return DateTime.parse(expiresAt as String);
+    }
+    return expiresAt as DateTime;
+  }
+
+  // Check if survey is expired
+  bool isExpired() {
+    return getExpiryDate().isBefore(DateTime.now());
+  }
+}
