@@ -33,6 +33,7 @@ const teamRoutes = require('./routes/teamRoutes');
 const departmentRoutes = require('./routes/departmentRoutes');
 const healthRoutes = require('./routes/healthRoutes');
 const notificationRoutes = require('./routes/notificationRoutes'); // Add notifications routes
+const adminRoutes = require('./routes/admin_routes'); // Add admin routes
 
 // Import file utils
 const fileUtils = require('./utils/fileUtils');
@@ -77,6 +78,7 @@ app.use(`${baseUrl}/marketplace`, marketplaceRoutes);
 app.use(`${baseUrl}/teams`, teamRoutes);
 app.use(`${baseUrl}/departments`, departmentRoutes);
 app.use(`${baseUrl}/notifications`, notificationRoutes); // Add notifications routes
+app.use(`${baseUrl}/admin`, adminRoutes); // Add admin routes
 app.use(`${baseUrl}`, healthRoutes);
 
 // API root route
