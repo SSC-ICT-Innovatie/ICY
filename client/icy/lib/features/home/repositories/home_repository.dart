@@ -41,4 +41,38 @@ class HomeRepository {
       return [];
     }
   }
+
+  Future<List<SurveyModel>> getMySurveys() async {
+    try {
+      final response = await _apiService.get(ApiConstants.mySurveysEndpoint);
+
+      if (response['success'] == true && response['data'] != null) {
+        return (response['data'] as List)
+            .map((surveyJson) => SurveyModel.fromJson(surveyJson))
+            .toList();
+      }
+
+      return [];
+    } catch (e) {
+      print('Error fetching my surveys: $e');
+      return [];
+    }
+  }
+
+  Future<bool> completeSurvey(
+    String surveyId,
+    List<Map<String, dynamic>> answers,
+  ) async {
+    try {
+      final response = await _apiService.post(
+        '${ApiConstants.surveysEndpoint}/$surveyId/submit',
+        {'answers': answers},
+      );
+
+      return response['success'] == true;
+    } catch (e) {
+      print('Error submitting survey: $e');
+      return false;
+    }
+  }
 }
