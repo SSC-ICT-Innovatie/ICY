@@ -86,12 +86,13 @@ const register = asyncHandler(async (req, res, next) => {
     email, 
     password, 
     avatarId, 
-    department, 
+    department,
+    role, // Added role parameter
     verificationCode 
   } = req.body;
 
   // Log received data for debugging
-  console.log(`Registration request received: name=${name}, email=${email}, department=${department}`);
+  console.log(`Registration request received: name=${name}, email=${email}, department=${department}, role=${role || 'user'}`);
 
   // Check if user already exists
   const userExists = await User.findOne({ email });
@@ -99,8 +100,11 @@ const register = asyncHandler(async (req, res, next) => {
     return next(createError(400, 'User with this email already exists'));
   }
 
-  // Make sure department is provided
-  if (!department) {
+  // Only allow admin role if explicitly provided
+  const userRole = role === 'admin' ? 'admin' : 'user';
+  
+  // Make sure department is provided (except for admins who can use 'admin' as department)
+  if (!department && userRole !== 'admin') {
     return next(createError(400, 'Department is required'));
   }
 
@@ -136,8 +140,9 @@ const register = asyncHandler(async (req, res, next) => {
       email,
       password,
       fullName: name,
-      department: department,
+      department: department || 'admin', // Default to 'admin' for admin users
       avatarId: avatarId || '1',
+      role: userRole, // Use the determined role
       // Use the uploaded avatar URL if available
       ...(avatarUrl && { avatar: avatarUrl })
     });
