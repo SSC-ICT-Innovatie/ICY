@@ -27,3 +27,10 @@ class SetThemeEvent extends UserPreferencesEvent {
 
   SetThemeEvent({required this.theme});
 }
+
+// Add the missing event
+class EnableRemindersEvent extends UserPreferencesEvent {
+  final bool enable;
+
+  EnableRemindersEvent({required this.enable});
+}

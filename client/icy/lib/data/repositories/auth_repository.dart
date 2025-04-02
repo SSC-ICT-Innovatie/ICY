@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart'; // Add this import for FormData and MultipartFile
 import 'package:icy/abstractions/utils/api_constants.dart';
 import 'package:icy/abstractions/utils/network_diagnostics.dart';
 import 'package:icy/data/datasources/local_storage_service.dart';
@@ -56,42 +57,65 @@ class AuthRepository {
     String? department,
     File? profileImage,
     String? verificationCode,
+    bool isAdmin = false, // Add isAdmin parameter
   }) async {
     try {
-      // Run connection diagnostics before making the request
-      await NetworkDiagnostics.checkServerConnection();
+      // Prepare form data
+      final Map<String, dynamic> data = {
+        'name': name,
+        'email': email,
+        'password': password,
+        'avatarId': avatarId,
+        // If admin, use 'admin' as department and set role to admin
+        'department': department ?? 'general',
+        'role': isAdmin ? 'admin' : 'user', // Set role based on isAdmin flag
+      };
 
-      final data = await _apiService.register(
-        name,
-        email,
-        password,
-        avatarId,
-        department,
-        verificationCode ?? '',
-        profileImage,
-      );
-
-      if (data['success'] == true &&
-          data['user'] != null &&
-          data['token'] != null) {
-        final UserModel user = UserModel.fromJson(data['user']);
-
-        // Save tokens
-        await _localStorageService.saveAuthToken(data['token']);
-        if (data['refreshToken'] != null) {
-          await _localStorageService.saveRefreshToken(data['refreshToken']);
-        }
-
-        // Save user data
-        await _localStorageService.saveAuthUser(user);
-
-        return user;
+      if (verificationCode != null) {
+        data['verificationCode'] = verificationCode;
       }
 
+      // Handle file upload
+      dynamic requestData = data;
+      bool hasFormData = false;
+
+      if (profileImage != null) {
+        final formData = FormData.fromMap({
+          ...data,
+          'profileImage': await MultipartFile.fromFile(
+            profileImage.path,
+            filename: 'profile_${DateTime.now().millisecondsSinceEpoch}.jpg',
+          ),
+        });
+        requestData = formData;
+        hasFormData = true;
+      }
+
+      // Register user
+      final response = await _apiService.post(
+        ApiConstants.registerEndpoint,
+        requestData,
+        useFormData: hasFormData,
+      );
+
+      print('Signup response: ${json.encode(response)}');
+
+      if (response['success'] && response['token'] != null) {
+        // Save auth tokens
+        await _localStorageService.saveAuthToken(response['token']);
+        await _localStorageService.saveRefreshToken(response['refreshToken']);
+
+        // Save user object if available
+        if (response['user'] != null) {
+          final user = UserModel.fromJson(response['user']);
+          await _localStorageService.saveAuthUser(user);
+          return user;
+        }
+      }
       return null;
     } catch (e) {
-      print('Signup error: $e');
-      throw Exception('Signup failed: $e');
+      print('Error during signup: $e');
+      rethrow;
     }
   }
 
@@ -113,6 +137,24 @@ class AuthRepository {
     } finally {
       // Always clear local auth data
       await _localStorageService.clearAuthData();
+    }
+  }
+
+  Future<String?> getAuthToken() async {
+    try {
+      return await _localStorageService.getAuthToken();
+    } catch (e) {
+      print('Error getting auth token: $e');
+      return null;
+    }
+  }
+
+  Future<String?> getRefreshToken() async {
+    try {
+      return await _localStorageService.getRefreshToken();
+    } catch (e) {
+      print('Error getting refresh token: $e');
+      return null;
     }
   }
 

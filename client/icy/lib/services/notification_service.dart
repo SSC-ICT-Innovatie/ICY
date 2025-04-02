@@ -6,8 +6,26 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// This class handles system-level notifications using flutter_local_notifications
-class SystemNotificationService {
+abstract class NotificationService {
+  Future<void> initialize();
+  Future<void> showNotification({
+    required int id,
+    required String title,
+    required String body,
+    String? payload,
+  });
+  Future<void> scheduleDailyNotification({
+    required int id,
+    required String title,
+    required String body,
+    required TimeOfDay timeOfDay,
+    String? payload,
+  });
+  Future<void> cancelNotification(int id);
+  Future<void> cancelAllNotifications();
+}
+
+class SystemNotificationService implements NotificationService {
   static final SystemNotificationService _instance =
       SystemNotificationService._internal();
   factory SystemNotificationService() => _instance;
@@ -19,20 +37,22 @@ class SystemNotificationService {
 
   final String _notificationsEnabledKey = 'notifications_enabled';
 
+  @override
   Future<void> initialize() async {
     tz.initializeTimeZones();
+
+    // Request notification permissions
+    await _requestPermissions();
 
     // Initialize notification settings
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    // Updated for the latest version of the plugin
     final DarwinInitializationSettings initializationSettingsIOS =
         DarwinInitializationSettings(
           requestAlertPermission: false,
           requestBadgePermission: false,
           requestSoundPermission: false,
-          // Remove onDidReceiveLocalNotification as it's no longer supported
         );
 
     final InitializationSettings initializationSettings =
@@ -43,7 +63,14 @@ class SystemNotificationService {
 
     await _flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
-      onDidReceiveNotificationResponse: _onNotificationTap,
+      onDidReceiveNotificationResponse: (
+        NotificationResponse notificationResponse,
+      ) async {
+        // Handle notification tap
+        if (notificationResponse.payload != null) {
+          print('Notification payload: ${notificationResponse.payload}');
+        }
+      },
     );
 
     // Check for stored preferences
@@ -56,9 +83,14 @@ class SystemNotificationService {
     }
   }
 
-  void _onNotificationTap(NotificationResponse response) {
-    // Handle notification taps here - can navigate to specific screens
-    print('Notification tapped: ${response.payload}');
+  Future<void> _requestPermissions() async {
+    try {
+      if (await Permission.notification.isDenied) {
+        await Permission.notification.request();
+      }
+    } catch (e) {
+      print('Error requesting notification permissions: $e');
+    }
   }
 
   Future<bool> requestNotificationPermissions() async {
@@ -92,36 +124,103 @@ class SystemNotificationService {
     return prefs.getBool(_notificationsEnabledKey) ?? false;
   }
 
-  // Ensure this method is properly defined
+  @override
   Future<void> showNotification({
     required int id,
     required String title,
     required String body,
     String? payload,
   }) async {
-    const AndroidNotificationDetails androidNotificationDetails =
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(
           'icy_notifications',
           'ICY Notifications',
-          channelDescription: 'Notification channel for ICY app',
-          importance: Importance.max,
+          channelDescription: 'Notifications from ICY application',
+          importance: Importance.high,
           priority: Priority.high,
+          showWhen: true,
         );
 
-    const NotificationDetails notificationDetails = NotificationDetails(
-      android: androidNotificationDetails,
-      iOS: DarwinNotificationDetails(),
+    const DarwinNotificationDetails iOSPlatformChannelSpecifics =
+        DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        );
+
+    const NotificationDetails platformChannelSpecifics = NotificationDetails(
+      android: androidPlatformChannelSpecifics,
+      iOS: iOSPlatformChannelSpecifics,
     );
 
     await _flutterLocalNotificationsPlugin.show(
       id,
       title,
       body,
-      notificationDetails,
+      platformChannelSpecifics,
       payload: payload,
     );
   }
 
+  @override
+  Future<void> scheduleDailyNotification({
+    required int id,
+    required String title,
+    required String body,
+    required TimeOfDay timeOfDay,
+    String? payload,
+  }) async {
+    final now = DateTime.now();
+    final scheduledDate = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      timeOfDay.hour,
+      timeOfDay.minute,
+    );
+
+    // If the time has already passed today, schedule for tomorrow
+    final effectiveDate =
+        scheduledDate.isBefore(now)
+            ? scheduledDate.add(const Duration(days: 1))
+            : scheduledDate;
+
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+          'daily_notifications',
+          'Daily Notifications',
+          channelDescription: 'Daily reminder notifications',
+          importance: Importance.high,
+          priority: Priority.high,
+        );
+
+    const DarwinNotificationDetails iOSPlatformChannelSpecifics =
+        DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        );
+
+    const NotificationDetails platformChannelSpecifics = NotificationDetails(
+      android: androidPlatformChannelSpecifics,
+      iOS: iOSPlatformChannelSpecifics,
+    );
+
+    await _flutterLocalNotificationsPlugin.zonedSchedule(
+      id,
+      title,
+      body,
+      tz.TZDateTime.from(effectiveDate, tz.local),
+      platformChannelSpecifics,
+      // Use correct parameters for the current Flutter Local Notifications version
+      matchDateTimeComponents: DateTimeComponents.time,
+      payload: payload,
+      // Set this parameter for Android 12+ compatibility
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+    );
+  }
+
+  // Method needed for UserPreferencesBloc
   Future<void> scheduleNotification({
     required int id,
     required String title,
@@ -129,36 +228,45 @@ class SystemNotificationService {
     required DateTime scheduledDate,
     String? payload,
   }) async {
-    final isEnabled = await areNotificationsEnabled();
-    if (!isEnabled) return;
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+          'scheduled_notifications',
+          'Scheduled Notifications',
+          channelDescription: 'One-time scheduled notifications',
+          importance: Importance.high,
+          priority: Priority.high,
+        );
 
-    // Updated to use the current API for the latest version
+    const DarwinNotificationDetails iOSPlatformChannelSpecifics =
+        DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        );
+
+    const NotificationDetails platformChannelSpecifics = NotificationDetails(
+      android: androidPlatformChannelSpecifics,
+      iOS: iOSPlatformChannelSpecifics,
+    );
+
     await _flutterLocalNotificationsPlugin.zonedSchedule(
       id,
       title,
       body,
       tz.TZDateTime.from(scheduledDate, tz.local),
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'icy_reminders',
-          'ICY Reminders',
-          channelDescription: 'Scheduled reminders for ICY app',
-        ),
-        iOS: DarwinNotificationDetails(),
-      ),
-      // Updated to use the new scheduling API
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      // DateTimeComponents helps with recurring notifications
-      matchDateTimeComponents: DateTimeComponents.time,
+      platformChannelSpecifics,
       payload: payload,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
     );
   }
 
-  Future<void> cancelAllNotifications() async {
-    await _flutterLocalNotificationsPlugin.cancelAll();
-  }
-
+  @override
   Future<void> cancelNotification(int id) async {
     await _flutterLocalNotificationsPlugin.cancel(id);
+  }
+
+  @override
+  Future<void> cancelAllNotifications() async {
+    await _flutterLocalNotificationsPlugin.cancelAll();
   }
 }

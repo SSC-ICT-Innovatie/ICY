@@ -1,41 +1,55 @@
 import 'dart:convert';
+import 'package:icy/data/models/user_model.dart';
 
-class User {
-  final String id;
-  final String email;
-  final String name;
-  final String photoUrl;
+/// This model extends the base User model with authentication-specific properties
+class AuthUser {
+  final UserModel baseUser;
+  final bool isVerified;
+  final DateTime? lastLogin;
+  final List<String>? permissions;
 
-  User({
-    required this.id,
-    required this.email,
-    required this.name,
-    required this.photoUrl,
+  AuthUser({
+    required this.baseUser,
+    this.isVerified = false,
+    this.lastLogin,
+    this.permissions,
   });
 
-  // Convert User instance to a map
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'email': email,
-      'name': name,
-      'photoUrl': photoUrl,
-    };
-  }
-
-  // Create User instance from a map
-  factory User.fromMap(Map<String, dynamic> map) {
-    return User(
-      id: map['id'] ?? '',
-      email: map['email'] ?? '',
-      name: map['name'] ?? '',
-      photoUrl: map['photoUrl'] ?? '',
+  factory AuthUser.fromJson(Map<String, dynamic> json) {
+    return AuthUser(
+      baseUser: UserModel.fromJson(json),
+      isVerified: json['isVerified'] ?? false,
+      lastLogin:
+          json['lastLogin'] != null ? DateTime.parse(json['lastLogin']) : null,
+      permissions:
+          json['permissions'] != null
+              ? List<String>.from(json['permissions'])
+              : null,
     );
   }
 
-  // Convert User instance to JSON string
-  String toJson() => json.encode(toMap());
+  // Forward common properties from base user
+  String get id => baseUser.id;
+  String get fullName => baseUser.fullName;
+  String get email => baseUser.email;
+  String get username => baseUser.username;
+  String get department => baseUser.department;
+  String get role => baseUser.role;
+  String get avatar => baseUser.avatar;
 
-  // Create User instance from JSON string
-  factory User.fromJson(String source) => User.fromMap(json.decode(source));
+  // Helper properties
+  bool get isAdmin => role == 'admin';
+  bool get isTeamLead => role == 'team_lead';
+
+  // Convert to JSON including all fields
+  Map<String, dynamic> toJson() {
+    final baseJson = baseUser.toJson();
+
+    return {
+      ...baseJson,
+      'isVerified': isVerified,
+      'lastLogin': lastLogin?.toIso8601String(),
+      'permissions': permissions,
+    };
+  }
 }
