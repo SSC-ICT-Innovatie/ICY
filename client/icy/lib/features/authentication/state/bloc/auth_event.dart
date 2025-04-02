@@ -32,7 +32,7 @@ class AuthSignUpRequested extends AuthEvent {
   final String password;
   final String? avatarId;
   final String department;
-  final File? profileImage; 
+  final File? profileImage;
   final String? verificationCode;
   final bool isAdmin; // Add this parameter
 
