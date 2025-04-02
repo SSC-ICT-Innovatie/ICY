@@ -32,8 +32,9 @@ class AuthSignUpRequested extends AuthEvent {
   final String password;
   final String? avatarId;
   final String department;
-  final File? profileImage; // Add profile image support
-  final String? verificationCode; // Add verificationCode parameter
+  final File? profileImage; 
+  final String? verificationCode;
+  final bool isAdmin; // Add this parameter
 
   AuthSignUpRequested({
     required this.name,
@@ -42,7 +43,8 @@ class AuthSignUpRequested extends AuthEvent {
     this.avatarId,
     required this.department,
     this.profileImage,
-    this.verificationCode, // Make it optional
+    this.verificationCode,
+    this.isAdmin = false, // Default to false
   });
 }
 
