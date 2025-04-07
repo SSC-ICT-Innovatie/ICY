@@ -107,13 +107,15 @@ class _CreateSurveyScreenState extends State<CreateSurveyScreen> {
             SnackBar(content: Text(state.message), backgroundColor: Colors.red),
           );
         } else if (state is AdminLoading) {
-          setState(() {
-            _isSubmitting = true;
-          });
+          //  initially was using it for setting the isSubmititnbg to true but since the is success is generic it somertimesd causes issues so
+
+          // incase you are reading this dont put it back
+          // trace the flow of the state by going to the bloc for admin or ask me first cause it took a hella time to realise i was emmiting a generic state that triggers is submitting for no reason
         }
       },
       builder: (context, state) {
         return FScaffold(
+          contentPad: false,
           header: FHeader(
             title: const Text('Create Survey'),
             actions: [
@@ -125,6 +127,8 @@ class _CreateSurveyScreenState extends State<CreateSurveyScreen> {
           ),
           content: Form(
             key: _formKey,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -616,6 +620,9 @@ class _CreateSurveyScreenState extends State<CreateSurveyScreen> {
   }
 
   void _submitForm() {
+     setState(() {
+            _isSubmitting = true;
+          });
     if (_formKey.currentState?.validate() ?? false) {
       // Validate questions
       for (var question in _questions) {
@@ -623,6 +630,7 @@ class _CreateSurveyScreenState extends State<CreateSurveyScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Please fill in all question texts')),
           );
+         
           return;
         }
 
