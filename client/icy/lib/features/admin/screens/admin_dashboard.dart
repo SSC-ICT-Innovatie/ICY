@@ -21,14 +21,22 @@ class AdminDashboard extends StatefulWidget {
 }
 
 class _AdminDashboardState extends State<AdminDashboard> {
+  // Add error state tracking
+  String? _errorMessage;
+  String? _successMessage;
+  bool _isLoading = true;
+
   @override
   void initState() {
     super.initState();
-
     try {
       context.read<AdminBloc>().add(LoadAdminStats());
     } catch (e) {
       print("Error loading admin stats: $e");
+      setState(() {
+        _errorMessage = "Failed to load admin stats: $e";
+        _isLoading = false;
+      });
     }
   }
 
@@ -37,37 +45,100 @@ class _AdminDashboardState extends State<AdminDashboard> {
     return FScaffold(
       header: FHeader(title: const Text('Admin Dashboard')),
       content: Stack(
-        alignment: Alignment.bottomRight,
         children: [
           BlocConsumer<AdminBloc, AdminState>(
             listener: (context, state) {
               if (state is AdminError) {
-                _showSnackBar(context, state.message, isError: true);
+                setState(() {
+                  _errorMessage = state.message;
+                  _isLoading = false;
+                });
               } else if (state is AdminActionSuccess) {
-                _showSnackBar(context, state.message, isError: false);
+                setState(() {
+                  _successMessage = state.message;
+                  _isLoading = false;
+                });
+              } else if (state is AdminLoading) {
+                setState(() {
+                  _isLoading = true;
+                });
+              } else {
+                setState(() {
+                  _isLoading = false;
+                });
               }
             },
             builder: (context, state) {
-              return _buildContent(context, state);
+              // Conditionally render based on state
+              return Stack(
+                children: [
+                  _buildContent(context, state),
+
+                  // Error message
+                  if (_errorMessage != null)
+                    Positioned(
+                      top: 8,
+                      left: 8,
+                      right: 8,
+                      child: FAlert(
+                        icon: FIcon(FAssets.icons.badgeAlert),
+                        title: const Text('Error'),
+                        subtitle: Text(_errorMessage!),
+                        style: FAlertStyle.destructive,
+                      ),
+                    ),
+
+                  // Success message
+                  if (_successMessage != null)
+                    Positioned(
+                      top: 8,
+                      left: 8,
+                      right: 8,
+                      child: FAlert(
+                        icon: FIcon(FAssets.icons.badgeCheck),
+                        title: const Text('Success'),
+                        subtitle: Text(_successMessage!),
+                        style: FAlertStyle.primary,
+                      ),
+                    ),
+                ],
+              );
             },
           ),
-          _buildFloatingActionButton(context),
+
+          // Add FAB separately since we can't use floatingAction param
+          Positioned(
+            bottom: 16,
+            right: 16,
+            child: _buildFloatingActionButton(context),
+          ),
         ],
       ),
     );
   }
 
-  void _showSnackBar(
-    BuildContext context,
-    String message, {
-    bool isError = false,
-  }) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isError ? Colors.red : Colors.green,
-      ),
-    );
+  // Replace the old showSnackBar method with this:
+  void _showAlert({required String message, bool isError = false}) {
+    setState(() {
+      if (isError) {
+        _errorMessage = message;
+      } else {
+        _successMessage = message;
+      }
+    });
+
+    // Auto-dismiss after 3 seconds
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        setState(() {
+          if (isError) {
+            _errorMessage = null;
+          } else {
+            _successMessage = null;
+          }
+        });
+      }
+    });
   }
 
   Widget _buildContent(BuildContext context, AdminState state) {
@@ -228,7 +299,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   Widget _buildSectionTitle(BuildContext context, String title) {
-    return FTile(title: Text(title, style: Theme.of(context).textTheme.titleLarge));
+    return FTile(
+      title: Text(title, style: Theme.of(context).textTheme.titleLarge),
+    );
   }
 
   Widget _buildFloatingActionButton(BuildContext context) {
@@ -324,8 +397,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
     );
   }
 
+  // Modify navigation to use BlocProvider.value correctly
   void _navigateTo(BuildContext context, Widget screen) {
-    // Create a provider that preserves the existing AdminBloc instance
     try {
       final adminBloc = context.read<AdminBloc>();
       Navigator.of(context).push(
@@ -335,11 +408,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
         ),
       );
     } catch (e) {
-      // Fallback if AdminBloc is not available
       print("AdminBloc not found in context: $e");
-      Navigator.of(
-        context,
-      ).push(MaterialPageRoute(builder: (context) => screen));
+      _showAlert(message: "Navigation error: $e", isError: true);
     }
   }
 }

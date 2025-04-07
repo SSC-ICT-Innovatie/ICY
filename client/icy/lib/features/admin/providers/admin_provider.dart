@@ -10,7 +10,7 @@ import 'package:icy/services/api_service.dart';
 class AdminProvider extends StatelessWidget {
   final Widget child;
 
-  const AdminProvider({required this.child, Key? key}) : super(key: key);
+  const AdminProvider({required this.child, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -20,6 +20,7 @@ class AdminProvider extends StatelessWidget {
       existingBloc = context.read<AdminBloc>();
     } catch (e) {
       // AdminBloc not found in context, we'll create a new one
+      print('No AdminBloc available in context, creating new one');
     }
 
     // If existing AdminBloc is found, use it
@@ -28,14 +29,17 @@ class AdminProvider extends StatelessWidget {
     }
 
     // Otherwise create a new AdminBloc
+    final apiService = ApiService();
+    final adminRepository = AdminRepository(apiService: apiService);
+    final departmentRepository = DepartmentRepository(apiService: apiService);
+    final surveyRepository = SurveyRepository(apiService: apiService);
+
     return BlocProvider<AdminBloc>(
       create:
           (context) => AdminBloc(
-            adminRepository: AdminRepository(apiService: ApiService()),
-            departmentRepository: DepartmentRepository(
-              apiService: ApiService(),
-            ),
-            surveyRepository: SurveyRepository(apiService: ApiService()),
+            adminRepository: adminRepository,
+            departmentRepository: departmentRepository,
+            surveyRepository: surveyRepository,
           ),
       child: child,
     );

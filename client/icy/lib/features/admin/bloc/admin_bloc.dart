@@ -25,11 +25,14 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
        _departmentRepository = departmentRepository,
        _surveyRepository = surveyRepository,
        super(AdminInitial()) {
+    // Register event handlers
     on<LoadAdminStats>(_onLoadAdminStats);
     on<LoadDepartments>(_onLoadDepartments);
     on<LoadSurveys>(_onLoadSurveys);
     on<LoadUsers>(_onLoadUsers);
     on<CreateDepartment>(_onCreateDepartment);
+    on<UpdateDepartment>(_onUpdateDepartment);
+    on<DeleteDepartment>(_onDeleteDepartment);
     on<CreateSurvey>(_onCreateSurvey);
   }
 
@@ -103,6 +106,50 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
       }
     } catch (e) {
       emit(AdminError('Failed to create department: $e'));
+    }
+  }
+
+  Future<void> _onUpdateDepartment(
+    UpdateDepartment event,
+    Emitter<AdminState> emit,
+  ) async {
+    emit(AdminLoading());
+    try {
+      final department = await _adminRepository.updateDepartment(
+        event.id,
+        event.name,
+        event.description,
+      );
+
+      if (department != null) {
+        emit(
+          AdminActionSuccess('Department "${event.name}" updated successfully'),
+        );
+        add(LoadDepartments()); // Reload departments
+      } else {
+        emit(AdminError('Failed to update department'));
+      }
+    } catch (e) {
+      emit(AdminError('Failed to update department: $e'));
+    }
+  }
+
+  Future<void> _onDeleteDepartment(
+    DeleteDepartment event,
+    Emitter<AdminState> emit,
+  ) async {
+    emit(AdminLoading());
+    try {
+      final success = await _adminRepository.deleteDepartment(event.id);
+
+      if (success) {
+        emit(AdminActionSuccess('Department deleted successfully'));
+        add(LoadDepartments()); // Reload departments
+      } else {
+        emit(AdminError('Failed to delete department'));
+      }
+    } catch (e) {
+      emit(AdminError('Failed to delete department: $e'));
     }
   }
 

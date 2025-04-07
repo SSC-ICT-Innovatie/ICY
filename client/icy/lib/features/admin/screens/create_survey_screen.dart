@@ -28,6 +28,12 @@ class _CreateSurveyScreenState extends State<CreateSurveyScreen> {
   bool _isSubmitting = false;
   bool _isLoadingDepartments = true;
 
+  // Add error/success state handling
+  String? _errorMessage;
+  String? _successMessage;
+  // Add error state tracking for options validation
+  String? _optionsErrorMessage;
+
   @override
   void initState() {
     super.initState();
@@ -89,28 +95,20 @@ class _CreateSurveyScreenState extends State<CreateSurveyScreen> {
         } else if (state is AdminActionSuccess) {
           setState(() {
             _isSubmitting = false;
+            _successMessage = state.message;
           });
 
-          // Show success message and navigate back
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.message)));
-
-          Navigator.of(context).pop();
+          // Use delayed navigation after showing success alert
+          Future.delayed(const Duration(seconds: 2), () {
+            if (mounted) {
+              Navigator.of(context).pop();
+            }
+          });
         } else if (state is AdminError) {
           setState(() {
             _isSubmitting = false;
+            _errorMessage = state.message;
           });
-
-          // Show error message
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-          );
-        } else if (state is AdminLoading) {
-          //  initially was using it for setting the isSubmititnbg to true but since the is success is generic it somertimesd causes issues so
-
-          // incase you are reading this dont put it back
-          // trace the flow of the state by going to the bloc for admin or ask me first cause it took a hella time to realise i was emmiting a generic state that triggers is submitting for no reason
         }
       },
       builder: (context, state) {
@@ -125,58 +123,97 @@ class _CreateSurveyScreenState extends State<CreateSurveyScreen> {
               ),
             ],
           ),
-          content: Form(
-            key: _formKey,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
+          content: Stack(
+            children: [
+              Form(
+                key: _formKey,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildBasicInfo(),
+                      const SizedBox(height: 32),
 
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildBasicInfo(),
-                  const SizedBox(height: 32),
+                      _buildSectionTitle('Questions'),
+                      _buildQuestionsList(),
 
-                  _buildSectionTitle('Questions'),
-                  _buildQuestionsList(),
+                      FButton(
+                        style: FButtonStyle.secondary,
+                        onPress: _addNewQuestion,
+                        label: const Text('Add Question'),
+                        prefix: FIcon(FAssets.icons.plus),
+                      ),
+                      const SizedBox(height: 32),
 
-                  FButton(
-                    style: FButtonStyle.secondary,
-                    onPress: _addNewQuestion,
-                    label: const Text('Add Question'),
-                    prefix: FIcon(FAssets.icons.plus),
+                      _buildSectionTitle('Target Departments'),
+                      _buildDepartmentSelection(),
+                      const SizedBox(height: 32),
+
+                      _buildSectionTitle('Rewards & Duration'),
+                      _buildRewardsAndDuration(),
+                      const SizedBox(height: 32),
+
+                      SizedBox(
+                        width: double.infinity,
+                        child: FButton(
+                          onPress: _isSubmitting ? null : _submitForm,
+                          label:
+                              _isSubmitting
+                                  ? const SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                  : const Text('Create Survey'),
+                        ),
+                      ),
+                      const SizedBox(height: 64),
+                    ],
                   ),
-                  const SizedBox(height: 32),
-
-                  _buildSectionTitle('Target Departments'),
-                  _buildDepartmentSelection(),
-                  const SizedBox(height: 32),
-
-                  _buildSectionTitle('Rewards & Duration'),
-                  _buildRewardsAndDuration(),
-                  const SizedBox(height: 32),
-
-                  SizedBox(
-                    width: double.infinity,
-                    child: FButton(
-                      onPress: _isSubmitting ? null : _submitForm,
-                      label:
-                          _isSubmitting
-                              ? const SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                              : const Text('Create Survey'),
-                    ),
-                  ),
-                  const SizedBox(height: 64),
-                ],
+                ),
               ),
-            ),
+
+              // Show error message
+              if (_errorMessage != null)
+                Positioned(
+                  top: 8,
+                  left: 8,
+                  right: 8,
+                  child: FAlert(
+                    icon: FIcon(FAssets.icons.badgeAlert),
+                    title: const Text('Error'),
+                    subtitle: Text(_errorMessage!),
+                    style: FAlertStyle.destructive,
+                  ),
+                ),
+
+              // Show success message
+              if (_successMessage != null)
+                Positioned(
+                  top: 8,
+                  left: 8,
+                  right: 8,
+                  child: FAlert(
+                    icon: FIcon(FAssets.icons.badgeCheck),
+                    title: const Text('Success'),
+                    subtitle: Text(_successMessage!),
+                    style: FAlertStyle.primary,
+                  ),
+                ),
+
+              // Loading overlay
+              if (_isSubmitting)
+                Container(
+                  color: Colors.black.withOpacity(0.3),
+                  alignment: Alignment.center,
+                  child: const CircularProgressIndicator.adaptive(),
+                ),
+            ],
           ),
         );
       },
@@ -351,6 +388,19 @@ class _CreateSurveyScreenState extends State<CreateSurveyScreen> {
         const SizedBox(height: 16),
         const Text('Options:'),
         const SizedBox(height: 8),
+
+        // Show validation error if exists
+        if (_optionsErrorMessage != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: FAlert(
+              icon: FIcon(FAssets.icons.badgeAlert),
+              title: const Text('Error'),
+              subtitle: Text(_optionsErrorMessage!),
+              style: FAlertStyle.destructive,
+            ),
+          ),
+
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -377,11 +427,18 @@ class _CreateSurveyScreenState extends State<CreateSurveyScreen> {
                         options.removeAt(optionIndex);
                       });
                     } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Minimum 2 options required'),
-                        ),
-                      );
+                      setState(() {
+                        _optionsErrorMessage = 'Minimum 2 options required';
+                      });
+
+                      // Auto-dismiss the error after 3 seconds
+                      Future.delayed(const Duration(seconds: 3), () {
+                        if (mounted) {
+                          setState(() {
+                            _optionsErrorMessage = null;
+                          });
+                        }
+                      });
                     }
                   },
                 ),
@@ -619,18 +676,33 @@ class _CreateSurveyScreenState extends State<CreateSurveyScreen> {
     );
   }
 
+  void _showError(String message) {
+    setState(() {
+      _errorMessage = message;
+    });
+
+    // Auto-dismiss after 3 seconds
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        setState(() {
+          _errorMessage = null;
+        });
+      }
+    });
+  }
+
   void _submitForm() {
-     setState(() {
-            _isSubmitting = true;
-          });
+    setState(() {
+      _isSubmitting = true;
+    });
     if (_formKey.currentState?.validate() ?? false) {
       // Validate questions
       for (var question in _questions) {
         if (question['text'].isEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Please fill in all question texts')),
-          );
-         
+          _showError('Please fill in all question texts');
+          setState(() {
+            _isSubmitting = false;
+          });
           return;
         }
 
@@ -638,22 +710,20 @@ class _CreateSurveyScreenState extends State<CreateSurveyScreen> {
         if ((question['type'] == 'multiple_choice' ||
                 question['type'] == 'single_choice') &&
             (question['options'] as List).any((option) => option.isEmpty)) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Please fill in all options for choice questions'),
-            ),
-          );
+          _showError('Please fill in all options for choice questions');
+          setState(() {
+            _isSubmitting = false;
+          });
           return;
         }
       }
 
       // Validate departments selection
       if (_selectedDepartments.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please select at least one department'),
-          ),
-        );
+        _showError('Please select at least one department');
+        setState(() {
+          _isSubmitting = false;
+        });
         return;
       }
 
@@ -674,6 +744,10 @@ class _CreateSurveyScreenState extends State<CreateSurveyScreen> {
 
       // Submit survey
       context.read<AdminBloc>().add(CreateSurvey(surveyModel));
+    } else {
+      setState(() {
+        _isSubmitting = false;
+      });
     }
   }
 }

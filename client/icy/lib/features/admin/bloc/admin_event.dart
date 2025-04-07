@@ -4,7 +4,7 @@ abstract class AdminEvent extends Equatable {
   const AdminEvent();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 class LoadAdminStats extends AdminEvent {}
@@ -22,7 +22,31 @@ class CreateDepartment extends AdminEvent {
   const CreateDepartment({required this.name, required this.description});
 
   @override
-  List<Object> get props => [name, description];
+  List<Object?> get props => [name, description];
+}
+
+class UpdateDepartment extends AdminEvent {
+  final String id;
+  final String name;
+  final String description;
+
+  const UpdateDepartment({
+    required this.id,
+    required this.name,
+    required this.description,
+  });
+
+  @override
+  List<Object?> get props => [id, name, description];
+}
+
+class DeleteDepartment extends AdminEvent {
+  final String id;
+
+  const DeleteDepartment({required this.id});
+
+  @override
+  List<Object?> get props => [id];
 }
 
 class CreateSurvey extends AdminEvent {
@@ -31,5 +55,5 @@ class CreateSurvey extends AdminEvent {
   const CreateSurvey(this.survey);
 
   @override
-  List<Object> get props => [survey];
+  List<Object?> get props => [survey];
 }
