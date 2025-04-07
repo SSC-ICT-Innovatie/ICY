@@ -17,14 +17,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.3.0"
-  android_alarm_manager_plus:
-    dependency: "direct main"
-    description:
-      name: android_alarm_manager_plus
-      sha256: "84720c8ad2758aabfbeafd24a8c355d8c8dd3aa52b01eaf3bb827c7210f61a91"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.4"
   animations:
     dependency: "direct main"
     description:
@@ -961,10 +953,10 @@ packages:
     dependency: "direct main"
     description:
       name: rive_animated_icon
-      sha256: "5bdf3494f1aebd944739ee6dd22aad6995f084ab4cc726261e7f320f11b5cf7e"
+      sha256: a1d5d3e6835720d2cdc71dae9652e2b890b3b5007202ae86b02e703adf402264
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.3"
+    version: "2.0.4"
   rive_common:
     dependency: transitive
     description:
@@ -1222,10 +1214,10 @@ packages:
     dependency: transitive
     description:
       name: url_launcher_ios
-      sha256: "16a513b6c12bb419304e72ea0ae2ab4fed569920d1c7cb850263fe3acc824626"
+      sha256: "7f2022359d4c099eea7df3fdf739f7d3d3b9faf3166fb1dd390775176e0b76cb"
       url: "https://pub.dev"
     source: hosted
-    version: "6.3.2"
+    version: "6.3.3"
   url_launcher_linux:
     dependency: transitive
     description:

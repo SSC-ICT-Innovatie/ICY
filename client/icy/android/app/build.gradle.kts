@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "com.example.icy"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "27.0.12077973"
 
      compileOptions {
         // Flag to enable support for the new language APIs
