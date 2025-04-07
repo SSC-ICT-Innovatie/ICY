@@ -38,31 +38,14 @@ class HomeRepository {
     }
   }
 
-  Future<List<SurveyModel>> getDailySurveys() async {
-    try {
-      final response = await _apiService.get(
-        '${ApiConstants.surveysEndpoint}/daily',
-      );
-      final List<dynamic> surveysJson = response['data'] ?? [];
-      return surveysJson.map((json) => SurveyModel.fromJson(json)).toList();
-    } catch (e) {
-      print('Error fetching daily surveys: $e');
-      return [];
-    }
-  }
-
-  Future<List<SurveyModel>> getAllSurveys() async {
-    return getAvailableSurveys();
-  }
-
-  Future<List<AchievementModel>> getRecentAchievements() async {
+  Future<List<UserAchievement>> getRecentAchievements() async {
     try {
       final response = await _apiService.get(
         ApiConstants.recentAchievementsEndpoint,
       );
       final List<dynamic> achievementsJson = response['data'] ?? [];
       return achievementsJson
-          .map((json) => AchievementModel.fromJson(json))
+          .map((json) => UserAchievement.fromJson(json))
           .toList();
     } catch (e) {
       print('Error fetching recent achievements: $e');

@@ -14,7 +14,8 @@ class HomeLoading extends HomeState {}
 class HomeLoaded extends HomeState {
   final List<SurveyModel> availableSurveys;
   final SurveyModel? dailySurvey;
-  final List<AchievementModel> recentAchievements;
+  final List<UserAchievement> recentAchievements;
+  final List<Challenge> activeChallenges;
   final TeamModel? userTeam;
   final int? teamRank;
 
@@ -22,6 +23,7 @@ class HomeLoaded extends HomeState {
     required this.availableSurveys,
     this.dailySurvey,
     required this.recentAchievements,
+    required this.activeChallenges,
     this.userTeam,
     this.teamRank,
   });
@@ -31,6 +33,7 @@ class HomeLoaded extends HomeState {
     availableSurveys,
     dailySurvey,
     recentAchievements,
+    activeChallenges,
     userTeam,
     teamRank,
   ];

@@ -26,12 +26,13 @@ class AchievementRepository {
   // Get user badges
   Future<UserBadges> getUserBadges() async {
     try {
-      final response = await _apiService.get(ApiConstants.myBadgesEndpoint);
-      if (response['success'] == true && response['data'] != null) {
-        return UserBadges.fromJson(response['data']);
-      }
-      return UserBadges(earned: [], inProgress: []);
+      final response = await _apiService.get(
+        '${ApiConstants.achievementsEndpoint}/badges/my',
+      );
+      return UserBadges.fromJson(response['data'] ?? {});
     } catch (e) {
+      print('Error fetching user badges: $e');
+      // Return empty badges on error
       return UserBadges(earned: [], inProgress: []);
     }
   }
@@ -39,15 +40,15 @@ class AchievementRepository {
   // Get active challenges
   Future<List<Challenge>> getActiveChallenges() async {
     try {
-      final response = await _apiService.get(ApiConstants.challengesEndpoint);
-      if (response['success'] == true && response['data'] != null) {
-        return (response['data'] as List)
-            .map((challenge) => Challenge.fromJson(challenge))
-            .toList();
-      }
-      return _getDefaultChallenges();
+      final response = await _apiService.get(
+        '${ApiConstants.achievementsEndpoint}/challenges',
+      );
+      final List<dynamic> challengesJson = response['data'] ?? [];
+      return challengesJson.map((json) => Challenge.fromJson(json)).toList();
     } catch (e) {
-      return _getDefaultChallenges();
+      print('Error fetching active challenges: $e');
+      // Return empty list on error
+      return [];
     }
   }
 
@@ -72,16 +73,15 @@ class AchievementRepository {
   Future<List<UserAchievement>> getRecentAchievements() async {
     try {
       final response = await _apiService.get(
-        ApiConstants.recentAchievementsEndpoint,
+        '${ApiConstants.achievementsEndpoint}/recent',
       );
-      if (response['success'] == true && response['data'] != null) {
-        return (response['data'] as List)
-            .map((achievement) => UserAchievement.fromJson(achievement))
-            .toList();
-      }
-      return _getDefaultRecentAchievements();
+      final List<dynamic> achievementsJson = response['data'] ?? [];
+      return achievementsJson
+          .map((json) => UserAchievement.fromJson(json))
+          .toList();
     } catch (e) {
-      return _getDefaultRecentAchievements();
+      print('Error fetching recent achievements: $e');
+      return [];
     }
   }
 

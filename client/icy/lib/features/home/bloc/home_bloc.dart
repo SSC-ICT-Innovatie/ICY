@@ -34,11 +34,14 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       final dailySurveyFuture = _homeRepository.getDailySurvey();
       final availableSurveysFuture = _homeRepository.getAvailableSurveys();
       final recentAchievementsFuture = _homeRepository.getRecentAchievements();
+      final activeChallengesFuture =
+          _achievementRepository.getActiveChallenges();
       final userTeamFuture = _homeRepository.getUserTeam();
 
       final dailySurvey = await dailySurveyFuture;
       final availableSurveys = await availableSurveysFuture;
       final recentAchievements = await recentAchievementsFuture;
+      final activeChallenges = await activeChallengesFuture;
       final userTeam = await userTeamFuture;
 
       // Get team rank if there's a team
@@ -52,6 +55,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           availableSurveys: availableSurveys,
           dailySurvey: dailySurvey,
           recentAchievements: recentAchievements,
+          activeChallenges: activeChallenges,
           userTeam: userTeam,
           teamRank: teamRank,
         ),

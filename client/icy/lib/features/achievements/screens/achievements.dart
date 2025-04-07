@@ -42,6 +42,7 @@ class Achievements extends StatelessWidget {
                         itemCount: recentAchievements.length,
                         itemBuilder: (context, index) {
                           final achievement = recentAchievements[index];
+                          // Use the achievement properties directly
                           return AchievementCard(
                             title: achievement.achievementId.title,
                             description: achievement.achievementId.description,

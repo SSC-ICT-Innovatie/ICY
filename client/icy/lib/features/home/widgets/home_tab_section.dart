@@ -1,12 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:forui/forui.dart';
-import 'package:icy/abstractions/navigation/widgets/modal_wrapper.dart';
 import 'package:icy/features/home/bloc/home_bloc.dart';
-import 'package:icy/features/home/pages/tabs/today.dart';
-import 'package:icy/features/home/pages/tabs/ongoing_survey.dart';
-import 'package:icy/features/home/pages/tabs/results.dart';
 import 'package:icy/data/models/survey_model.dart';
 import 'package:icy/features/authentication/state/bloc/auth_bloc.dart';
 import 'package:icy/features/survey/screens/survey_screen.dart';
@@ -18,30 +13,7 @@ class HomeTabSection extends StatefulWidget {
   State<HomeTabSection> createState() => _HomeTabSectionState();
 }
 
-class _HomeTabSectionState extends State<HomeTabSection>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  int _selectedTab = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-    _tabController.addListener(() {
-      if (_tabController.index != _selectedTab) {
-        setState(() {
-          _selectedTab = _tabController.index;
-        });
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
+class _HomeTabSectionState extends State<HomeTabSection> {
   @override
   Widget build(BuildContext context) {
     // Get user information for department filtering
@@ -51,38 +23,29 @@ class _HomeTabSectionState extends State<HomeTabSection>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          child: Text(
-            'Available Surveys',
-            style:
-                Theme.of(
-                  context,
-                ).textTheme.titleLarge, // Use titleLarge instead of headline6
-          ),
-        ),
-
-        TabBar(
-          controller: _tabController,
-          labelColor: Theme.of(context).colorScheme.primary,
-          unselectedLabelColor: Colors.grey,
-          indicatorColor: Theme.of(context).colorScheme.primary,
-          tabs: const [Tab(text: 'For You'), Tab(text: 'All Surveys')],
-        ),
-
         Expanded(
-          child: TabBarView(
-            controller: _tabController,
-            children: [
-              // For You tab - surveys filtered by user's department
-              _buildSurveyList(
-                context,
-                filterByDepartment: true,
-                userDepartment: userDepartment,
+          child: FTabs(
+            initialIndex: 1,
+            tabs: [
+              // For You tab
+              FTabEntry(
+                label: const Text('For You'),
+                content: SingleChildScrollView(
+                  child: _buildSurveyList(
+                    context,
+                    filterByDepartment: true,
+                    userDepartment: userDepartment,
+                  ),
+                ),
               ),
 
               // All Surveys tab
-              _buildSurveyList(context, filterByDepartment: false),
+              FTabEntry(
+                label: const Text('All Surveys'),
+                content: SingleChildScrollView(
+                  child: _buildSurveyList(context, filterByDepartment: false),
+                ),
+              ),
             ],
           ),
         ),
@@ -237,7 +200,7 @@ class _HomeTabSectionState extends State<HomeTabSection>
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
-                      '${survey.estimatedTime}',
+                      survey.estimatedTime,
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,

@@ -58,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     // SliverAppBar with HomeHeader
                     SliverAppBar(
                       backgroundColor: context.theme.colorScheme.primary,
-                      expandedHeight: 200.0,
+                      expandedHeight: 220.0,
                       pinned: true,
                       flexibleSpace: FlexibleSpaceBar(
                         background: HomeHeader(
@@ -81,6 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       titleSpacing: 0,
                       centerTitle: false,
+                      
                     ),
 
                     // Daily challenge card with real data

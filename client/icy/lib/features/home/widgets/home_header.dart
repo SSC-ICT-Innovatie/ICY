@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:forui/theme.dart';
 import 'package:icy/data/models/user_model.dart';
-import 'package:icy/features/authentication/models/user.dart';
+
 import 'package:icy/data/models/team_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:icy/features/home/bloc/home_bloc.dart';
@@ -9,8 +10,7 @@ class HomeHeader extends StatelessWidget {
   final UserModel user;
   final Color primaryColor;
 
-  const HomeHeader({Key? key, required this.user, required this.primaryColor})
-    : super(key: key);
+  const HomeHeader({super.key, required this.user, required this.primaryColor});
 
   @override
   Widget build(BuildContext context) {
@@ -31,14 +31,14 @@ class HomeHeader extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Theme.of(context).colorScheme.primary,
-                Theme.of(context).colorScheme.primary.withOpacity(0.7),
+                context.theme.colorScheme.primary,
+                context.theme.colorScheme.barrier.withOpacity(0.8),
               ],
             ),
           ),
           child: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0,vertical: 55),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
