@@ -1,3 +1,5 @@
+// ignore_for_file: unused_import
+
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:icy/data/models/survey_model.dart';
@@ -15,7 +17,6 @@ class SurveyScreen extends StatefulWidget {
 class _SurveyScreenState extends State<SurveyScreen> {
   int _currentQuestion = 0;
   final Map<String, dynamic> _answers = {};
-  bool _isSubmitting = false;
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +26,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
         actions: [
           FButton.icon(
             onPress: () => Navigator.of(context).pop(),
-            child: FIcon(FAssets.icons.close),
+            child: FIcon(FAssets.icons.x),
           ),
         ],
       ),
@@ -268,7 +269,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
 
   Widget _buildTextQuestion(String questionId) {
     return FTextField(
-      autoFocus: true,
+      canRequestFocus: true,
       description: Text('Enter your answer here'),
       initialValue: _answers[questionId] ?? '',
       onChange: (value) => _setAnswer(questionId, value),
@@ -322,7 +323,6 @@ class _SurveyScreenState extends State<SurveyScreen> {
     }
 
     setState(() {
-      _isSubmitting = true;
     });
 
     // Convert answers to the format expected by the API

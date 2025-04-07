@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:icy/abstractions/navigation/services/icy_tab_registerar.dart';
-import 'package:icy/features/achievements/screens/achievement_page.dart';
+
+import 'package:icy/features/achievements/screens/achievements.dart';
 import 'package:icy/features/admin/providers/admin_provider.dart'; // Import AdminProvider
 import 'package:icy/features/admin/screens/admin_dashboard.dart';
 import 'package:icy/features/authentication/screens/login.dart';
@@ -80,7 +81,7 @@ List<IcyTab> injectNavigationTabs(BuildContext context) {
       showInTabBar: isLoggedIn && !isAdminUser,
       icon: FAssets.icons.trophy,
       title: "Achievements",
-      content: isAdminUser ? Container() : AchievementPage(),
+      content: isAdminUser ? Container() : Achievements(),
       accessRule: () => AuthCacheService().isLoggedIn,
     ),
     IcyTab(
