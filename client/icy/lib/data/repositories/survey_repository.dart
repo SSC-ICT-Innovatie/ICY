@@ -1,5 +1,6 @@
 import 'package:icy/abstractions/utils/api_constants.dart';
 import 'package:icy/data/models/survey_model.dart';
+import 'package:icy/features/admin/models/admin_model.dart';
 import 'package:icy/services/api_service.dart';
 
 class SurveyRepository {
@@ -8,21 +9,31 @@ class SurveyRepository {
   SurveyRepository({ApiService? apiService})
     : _apiService = apiService ?? ApiService();
 
-  // Get all active surveys
-  Future<List<Survey>> getSurveys() async {
+  Future<List<SurveyModel>> getSurveys() async {
     try {
       final response = await _apiService.get(ApiConstants.surveysEndpoint);
-
-      if (response['success'] == true && response['data'] != null) {
-        return (response['data'] as List)
-            .map((surveyJson) => Survey.fromJson(surveyJson))
-            .toList();
-      }
-
-      return [];
+      final List<dynamic> surveysJson = response['data'] ?? [];
+      return surveysJson.map((json) => SurveyModel.fromJson(json)).toList();
     } catch (e) {
       print('Error fetching surveys: $e');
       return [];
+    }
+  }
+
+  Future<SurveyModel?> createSurvey(SurveyCreationModel survey) async {
+    try {
+      final response = await _apiService.post(
+        ApiConstants.surveysEndpoint,
+        survey.toJson(),
+      );
+
+      if (response['success'] == true) {
+        return SurveyModel.fromJson(response['data']);
+      }
+      return null;
+    } catch (e) {
+      print('Error creating survey: $e');
+      throw e;
     }
   }
 

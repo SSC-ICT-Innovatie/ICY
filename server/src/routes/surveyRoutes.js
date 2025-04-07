@@ -3,17 +3,20 @@ const {
   getSurveys,
   getDailySurveys,
   getSurveyById,
+  createSurvey,
   submitSurveyResponse,
   updateSurveyProgress
 } = require('../controllers/surveyController');
-const { protect } = require('../middleware/authMiddleware');
+const { protect, authorize } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
 router.use(protect);
 
+// Public routes (for authenticated users)
 router.route('/')
-  .get(getSurveys);
+  .get(getSurveys)
+  .post(authorize('admin'), createSurvey); // Add POST endpoint with admin authorization
 
 router.route('/daily')
   .get(getDailySurveys);

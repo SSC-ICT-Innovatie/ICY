@@ -159,15 +159,12 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
   ) async {
     emit(AdminLoading());
     try {
-      final survey = await _adminRepository.createSurvey(event.survey);
+      final result = await _surveyRepository.createSurvey(event.survey);
 
-      if (survey != null) {
-        emit(
-          AdminActionSuccess(
-            'Survey "${event.survey.title}" created successfully',
-          ),
-        );
-        add(LoadSurveys()); // Reload surveys
+      if (result != null) {
+        emit(AdminActionSuccess('Survey created successfully'));
+        // Reload surveys after creating a new one
+        add(LoadSurveys());
       } else {
         emit(AdminError('Failed to create survey'));
       }

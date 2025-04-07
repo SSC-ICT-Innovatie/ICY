@@ -3,6 +3,51 @@ const User = require('../models/userModel');
 const asyncHandler = require('../middleware/asyncMiddleware');
 const { createError } = require('../utils/errorUtils');
 
+// @desc    Create a new survey
+// @route   POST /api/v1/surveys
+// @access  Admin
+const createSurvey = asyncHandler(async (req, res) => {
+  const {
+    title,
+    description,
+    questions,
+    estimatedTime,
+    reward,
+    expiresAt,
+    tags,
+    targetDepartments
+  } = req.body;
+
+  // Validate required fields
+  if (!title || !description || !questions || !estimatedTime || !reward || !expiresAt) {
+    throw createError(400, 'Please provide all required fields');
+  }
+
+  // Ensure questions is an array
+  if (!Array.isArray(questions) || questions.length === 0) {
+    throw createError(400, 'Please provide at least one question');
+  }
+
+  // Create survey
+  const survey = await Survey.create({
+    title,
+    description,
+    questions,
+    estimatedTime,
+    reward,
+    expiresAt: new Date(expiresAt),
+    tags: tags || [],
+    targetDepartments: targetDepartments || ['all'],
+    createdAt: new Date()
+  });
+
+  res.status(201).json({
+    success: true,
+    data: survey,
+    message: `Survey "${title}" created successfully`
+  });
+});
+
 const getSurveys = asyncHandler(async (req, res) => {
   const now = new Date();
   const surveys = await Survey.find({
@@ -204,6 +249,7 @@ module.exports = {
   getSurveys,
   getDailySurveys,
   getSurveyById,
+  createSurvey, // Add the new function to exports
   submitSurveyResponse,
   updateSurveyProgress
 };
