@@ -1,209 +1,231 @@
 import 'package:flutter/material.dart';
-import 'package:icy/core/utils/color_utils.dart';
+import 'package:icy/data/models/user_model.dart';
+import 'package:icy/features/authentication/models/user.dart';
+import 'package:icy/data/models/team_model.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:icy/features/home/bloc/home_bloc.dart';
 
 class HomeHeader extends StatelessWidget {
-  final dynamic user;
+  final UserModel user;
   final Color primaryColor;
 
-  const HomeHeader({super.key, required this.user, required this.primaryColor});
+  const HomeHeader({Key? key, required this.user, required this.primaryColor})
+    : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final Color secondaryColor = Colors.amber.shade500;
+    return BlocBuilder<HomeBloc, HomeState>(
+      builder: (context, state) {
+        // Extract team data if available
+        TeamModel? userTeam;
+        int? teamRank;
 
-    return Container(
-      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-      decoration: BoxDecoration(
-        // Amber gradient for the header
-        gradient: LinearGradient(
-          colors: [primaryColor, secondaryColor],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
-      child: SafeArea(
-        bottom: false, // Don't pad the bottom since we're in a flexible space
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Title & Notification Row - now it's part of the AppBar so we can hide it
-            const SizedBox(height: 50), // Space for the AppBar title
-            // Enhanced Gamification Container
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 12,
-                  horizontal: 16,
-                ),
-                decoration: BoxDecoration(
-                  // Fix deprecated withOpacity
-                  color: ColorUtils.applyOpacity(Colors.black, 0.15),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Gamification metrics row
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        // Streak Counter
-                        _buildStreakCounter(user),
-                        // XP Points
-                        _buildXpCounter(user),
-                      ],
-                    ),
+        if (state is HomeLoaded) {
+          userTeam = state.userTeam;
+          teamRank = state.teamRank;
+        }
 
-                    const SizedBox(height: 12),
-                    // Team competition element
-                    _buildTeamCompetition(),
-                  ],
-                ),
-              ),
+        return Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Theme.of(context).colorScheme.primary,
+                Theme.of(context).colorScheme.primary.withOpacity(0.7),
+              ],
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStreakCounter(dynamic user) {
-    // Access stats safely using dynamic
-    int streakValue = 0;
-    try {
-      streakValue = user?.stats?.streak?.current ?? 0;
-    } catch (e) {
-      print("Could not access streak: $e");
-    }
-
-    return Row(
-      children: [
-        AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
-          transitionBuilder:
-              (child, anim) => ScaleTransition(scale: anim, child: child),
-          child: Icon(
-            Icons.local_fire_department,
-            key: const ValueKey(1),
-            color: Colors.redAccent,
-            size: 26,
           ),
-        ),
-        const SizedBox(width: 6),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "$streakValue-Day Streak",
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-                color: Colors.white,
-              ),
-            ),
-            const Text(
-              "Keep it up!",
-              style: TextStyle(fontSize: 12, color: Colors.white70),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildXpCounter(dynamic user) {
-    // Access stats safely using dynamic
-    int xpValue = 0;
-    int levelValue = 1;
-    try {
-      xpValue = user?.stats?.totalXp ?? 0;
-      levelValue = user?.stats?.currentLevel ?? 1;
-    } catch (e) {
-      print("Could not access XP: $e");
-    }
-
-    return Row(
-      children: [
-        AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
-          transitionBuilder:
-              (child, anim) => ScaleTransition(scale: anim, child: child),
-          child: Icon(
-            Icons.diamond,
-            key: const ValueKey(2),
-            color: Colors.lightBlueAccent,
-            size: 26,
-          ),
-        ),
-        const SizedBox(width: 6),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "$xpValue XP",
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-                color: Colors.white,
-              ),
-            ),
-            Text(
-              "Level $levelValue",
-              style: const TextStyle(fontSize: 12, color: Colors.white70),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTeamCompetition() {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.people, color: Colors.white, size: 20),
-              const SizedBox(width: 8),
-              Column(
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text(
-                    "Team Innovation",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                      color: Colors.white,
-                    ),
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      CircleAvatar(
+                        radius: 24,
+                        backgroundImage: NetworkImage(user.avatar),
+                        backgroundColor: Colors.grey.shade200,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Welcome, ${user.fullName.split(' ').first}',
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            Text(
+                              user.department,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.white.withOpacity(0.9),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      _buildLevelBadge(context, user.level?.current ?? 1),
+                    ],
                   ),
-                  Text(
-                    "Rank #2 of 8",
-                    style: TextStyle(fontSize: 12, color: Colors.white70),
+                  const SizedBox(height: 20),
+
+                  // XP progress and team info
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: _buildXpProgress(
+                          context,
+                          current: user.level?.xp?.current ?? 0,
+                          total: user.level?.xp?.nextLevel ?? 100,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        flex: 2,
+                        child: _buildTeamInfo(context, userTeam, teamRank),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
-          ),
-          // Badge showing team progress
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: Colors.amber,
-              borderRadius: BorderRadius.circular(12),
             ),
-            child: const Text(
-              "Silver",
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildLevelBadge(BuildContext context, int level) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.amber.shade300,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Text(
+        'Level $level',
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
+          color: Colors.amber.shade900,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildXpProgress(
+    BuildContext context, {
+    required int current,
+    required int total,
+  }) {
+    final progress = total > 0 ? (current / total).clamp(0.0, 1.0) : 0.0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              '$current / $total XP',
               style: TextStyle(
-                color: Colors.white,
+                fontSize: 14,
                 fontWeight: FontWeight.bold,
-                fontSize: 12,
+                color: Colors.white.withOpacity(0.9),
               ),
+            ),
+            const Spacer(),
+            // Show streak if available
+            if (user.stats?.streak?.current != null &&
+                user.stats!.streak!.current! > 0)
+              Row(
+                children: [
+                  const Icon(
+                    Icons.local_fire_department,
+                    color: Colors.orange,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${user.stats!.streak!.current} day streak',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white.withOpacity(0.9),
+                    ),
+                  ),
+                ],
+              ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: LinearProgressIndicator(
+            value: progress,
+            backgroundColor: Colors.white30,
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.amber.shade300),
+            minHeight: 8,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTeamInfo(BuildContext context, TeamModel? team, int? rank) {
+    if (team == null) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.2),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Center(
+          child: Text(
+            'No Team',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.white.withOpacity(0.9),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            team.name,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 2),
+          Text(
+            rank != null ? 'Rank #$rank' : 'Team member',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.white.withOpacity(0.9),
             ),
           ),
         ],

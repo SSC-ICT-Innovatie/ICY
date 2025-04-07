@@ -1,3 +1,87 @@
+import 'package:equatable/equatable.dart';
+
+class TeamModel extends Equatable {
+  final String id;
+  final String name;
+  final String description;
+  final String department;
+  final String leaderId;
+  final List<String> memberIds;
+  final DateTime createdAt;
+
+  const TeamModel({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.department,
+    required this.leaderId,
+    required this.memberIds,
+    required this.createdAt,
+  });
+
+  @override
+  List<Object?> get props => [
+    id,
+    name,
+    description,
+    department,
+    leaderId,
+    memberIds,
+    createdAt,
+  ];
+}
+
+class TeamStatsModel extends Equatable {
+  final String teamId;
+  final String league;
+  final int rank;
+  final int totalTeams;
+  final double activeRate;
+  final double? goldLeagueProgress;
+  final double? silverLeagueProgress;
+  final double averageLevel;
+  final int totalSurveysCompleted;
+
+  const TeamStatsModel({
+    required this.teamId,
+    required this.league,
+    required this.rank,
+    required this.totalTeams,
+    required this.activeRate,
+    this.goldLeagueProgress,
+    this.silverLeagueProgress,
+    required this.averageLevel,
+    required this.totalSurveysCompleted,
+  });
+
+  factory TeamStatsModel.fromJson(Map<String, dynamic> json) {
+    return TeamStatsModel(
+      teamId: json['teamId'] ?? '',
+      league: json['league'] ?? '',
+      rank: json['rank'] ?? 0,
+      totalTeams: json['totalTeams'] ?? 0,
+      activeRate: (json['activeRate'] ?? 0.0).toDouble(),
+      goldLeagueProgress: json['goldLeagueProgress']?.toDouble(),
+      silverLeagueProgress: json['silverLeagueProgress']?.toDouble(),
+      averageLevel: (json['averageLevel'] ?? 0.0).toDouble(),
+      totalSurveysCompleted: json['totalSurveysCompleted'] ?? 0,
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+    teamId,
+    league,
+    rank,
+    totalTeams,
+    activeRate,
+    goldLeagueProgress,
+    silverLeagueProgress,
+    averageLevel,
+    totalSurveysCompleted,
+  ];
+}
+
 class Team {
   final String id;
   final String name;

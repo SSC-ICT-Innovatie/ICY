@@ -18,12 +18,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Load home data when screen initializes
     _loadHomeData();
   }
 
   void _loadHomeData() {
-    // Use LoadHome event instead of LoadHomeData for API compatibility
     context.read<HomeBloc>().add(const LoadHome());
   }
 
@@ -36,7 +34,6 @@ class _HomeScreenState extends State<HomeScreen> {
         }
 
         final user = authState.user;
-        // Use amber as the primary accent color
         final Color primaryColor = Colors.amber.shade700;
 
         return FScaffold(
@@ -48,6 +45,14 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             child: BlocBuilder<HomeBloc, HomeState>(
               builder: (context, homeState) {
+                // Get the daily challenge survey if available
+                final dailySurvey =
+                    (homeState is HomeLoaded && homeState.dailySurvey != null)
+                        ? homeState.dailySurvey
+                        : null;
+
+                final bool isLoading = homeState is HomeLoading;
+
                 return CustomScrollView(
                   slivers: [
                     // SliverAppBar with HomeHeader
@@ -65,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       title: Padding(
                         padding: context.theme.scaffoldStyle.contentPadding,
                         child: Text(
-                          'Icy',
+                          'ICY',
                           style: context
                               .theme
                               .headerStyle
@@ -78,10 +83,18 @@ class _HomeScreenState extends State<HomeScreen> {
                       centerTitle: false,
                     ),
 
+                    // Daily challenge card with real data
                     SliverToBoxAdapter(
                       child: DailyChallengeCard(
                         primaryColor: primaryColor,
-                        onTap: () {},
+                        dailySurvey: dailySurvey,
+                        isLoading: isLoading,
+                        onTap: () {
+                          // If there's no daily survey, refresh data
+                          if (dailySurvey == null && !isLoading) {
+                            _loadHomeData();
+                          }
+                        },
                       ),
                     ),
 

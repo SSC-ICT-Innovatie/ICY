@@ -1,50 +1,64 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:icy/data/models/achievement_model.dart' hide UserAchievement;
-import 'package:icy/data/models/achievement_model.dart' as achievement_model;
+import 'package:flutter/foundation.dart';
+import 'package:icy/data/models/achievement_model.dart';
 import 'package:icy/data/models/survey_model.dart';
-import 'package:icy/features/home/repositories/home_repository.dart';
+import 'package:icy/data/models/team_model.dart';
 import 'package:icy/data/repositories/achievement_repository.dart';
+import 'package:icy/features/home/repositories/home_repository.dart';
 import 'package:icy/features/settings/bloc/settings_bloc.dart';
 
 part 'home_event.dart';
 part 'home_state.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
+  final SettingsBloc _settingsBloc;
   final HomeRepository _homeRepository;
   final AchievementRepository _achievementRepository;
 
-  HomeBloc(SettingsBloc read, {
+  HomeBloc(
+    this._settingsBloc, {
     required HomeRepository homeRepository,
     required AchievementRepository achievementRepository,
   }) : _homeRepository = homeRepository,
        _achievementRepository = achievementRepository,
        super(HomeInitial()) {
     on<LoadHome>(_onLoadHome);
-    on<LoadHomeData>(_onLoadHome); // Map the old event to the same handler
   }
 
-  Future<void> _onLoadHome(HomeEvent event, Emitter<HomeState> emit) async {
+  Future<void> _onLoadHome(LoadHome event, Emitter<HomeState> emit) async {
     emit(HomeLoading());
-    try {
-      final dailySurveys = await _homeRepository.getDailySurveys();
-      final allSurveys = await _homeRepository.getAllSurveys();
 
-      final activeChallenges =
-          await _achievementRepository.getActiveChallenges();
-      final recentAchievements =
-          await _achievementRepository.getRecentAchievements();
+    try {
+      // Load data in parallel for efficiency
+      final dailySurveyFuture = _homeRepository.getDailySurvey();
+      final availableSurveysFuture = _homeRepository.getAvailableSurveys();
+      final recentAchievementsFuture = _homeRepository.getRecentAchievements();
+      final userTeamFuture = _homeRepository.getUserTeam();
+
+      final dailySurvey = await dailySurveyFuture;
+      final availableSurveys = await availableSurveysFuture;
+      final recentAchievements = await recentAchievementsFuture;
+      final userTeam = await userTeamFuture;
+
+      // Get team rank if there's a team
+      int? teamRank;
+      if (userTeam != null) {
+        teamRank = await _homeRepository.getTeamRank();
+      }
 
       emit(
         HomeLoaded(
-          dailySurveys: dailySurveys,
-          allSurveys: allSurveys,
-          activeChallenges: activeChallenges,
+          availableSurveys: availableSurveys,
+          dailySurvey: dailySurvey,
           recentAchievements: recentAchievements,
+          userTeam: userTeam,
+          teamRank: teamRank,
         ),
       );
-    } catch (error) {
-      emit(HomeError(message: 'Failed to load home data: $error'));
+    } catch (e) {
+      debugPrint('Error loading home data: $e');
+      emit(HomeError('Failed to load data: $e'));
     }
   }
 }
