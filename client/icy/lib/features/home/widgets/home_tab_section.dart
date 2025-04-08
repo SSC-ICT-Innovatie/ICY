@@ -71,11 +71,11 @@ class _HomeTabSectionState extends State<HomeTabSection> {
               children: [
                 Text('Error: ${state.message}'),
                 const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
+                FButton(
+                  onPress: () {
                     context.read<HomeBloc>().add(const LoadHome());
                   },
-                  child: const Text('Retry'),
+                  label: const Text('Retry'),
                 ),
               ],
             ),
