@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:forui/theme.dart';
 import 'package:icy/data/models/user_model.dart';
@@ -85,8 +87,8 @@ class HomeHeader extends StatelessWidget {
                         flex: 3,
                         child: _buildXpProgress(
                           context,
-                          current: user.level?.xp?.current ?? 0,
-                          total: user.level?.xp?.nextLevel ?? 100,
+                          current: user.level?.xp.current ?? 0,
+                          total: user.level?.xp.nextLevel ?? 100,
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -145,8 +147,8 @@ class HomeHeader extends StatelessWidget {
             ),
             const Spacer(),
             // Show streak if available
-            if (user.stats?.streak?.current != null &&
-                user.stats!.streak!.current! > 0)
+            if (user.stats?.streak.current != null &&
+                user.stats!.streak.current > 0)
               Row(
                 children: [
                   const Icon(
@@ -156,7 +158,7 @@ class HomeHeader extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    '${user.stats!.streak!.current} day streak',
+                    '${user.stats!.streak.current} day streak',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,

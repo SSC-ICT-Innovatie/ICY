@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:forui/forui.dart';
-import 'package:icy/data/repositories/department_repository.dart';
-import 'package:icy/data/repositories/survey_repository.dart';
 import 'package:icy/features/admin/bloc/admin_bloc.dart';
-import 'package:icy/features/admin/repositories/admin_repository.dart';
 import 'package:icy/features/admin/screens/create_department_screen.dart';
 import 'package:icy/features/admin/screens/create_survey_screen.dart';
 import 'package:icy/features/admin/screens/departments_screen.dart';
@@ -21,10 +18,8 @@ class AdminDashboard extends StatefulWidget {
 }
 
 class _AdminDashboardState extends State<AdminDashboard> {
-  // Add error state tracking
   String? _errorMessage;
   String? _successMessage;
-  bool _isLoading = true;
 
   @override
   void initState() {
@@ -35,7 +30,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
       print("Error loading admin stats: $e");
       setState(() {
         _errorMessage = "Failed to load admin stats: $e";
-        _isLoading = false;
       });
     }
   }
@@ -51,20 +45,16 @@ class _AdminDashboardState extends State<AdminDashboard> {
               if (state is AdminError) {
                 setState(() {
                   _errorMessage = state.message;
-                  _isLoading = false;
                 });
               } else if (state is AdminActionSuccess) {
                 setState(() {
                   _successMessage = state.message;
-                  _isLoading = false;
                 });
               } else if (state is AdminLoading) {
                 setState(() {
-                  _isLoading = true;
                 });
               } else {
                 setState(() {
-                  _isLoading = false;
                 });
               }
             },
@@ -105,8 +95,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
               );
             },
           ),
-
-          // Add FAB separately since we can't use floatingAction param
           Positioned(
             bottom: 16,
             right: 16,
@@ -117,7 +105,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
     );
   }
 
-  // Replace the old showSnackBar method with this:
   void _showAlert({required String message, bool isError = false}) {
     setState(() {
       if (isError) {
@@ -397,7 +384,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
     );
   }
 
-  // Modify navigation to use BlocProvider.value correctly
   void _navigateTo(BuildContext context, Widget screen) {
     try {
       final adminBloc = context.read<AdminBloc>();

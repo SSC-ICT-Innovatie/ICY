@@ -12,12 +12,11 @@ part 'home_event.dart';
 part 'home_state.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
-  final SettingsBloc _settingsBloc;
   final HomeRepository _homeRepository;
   final AchievementRepository _achievementRepository;
 
-  HomeBloc(
-    this._settingsBloc, {
+  HomeBloc(SettingsBloc read, 
+    {
     required HomeRepository homeRepository,
     required AchievementRepository achievementRepository,
   }) : _homeRepository = homeRepository,

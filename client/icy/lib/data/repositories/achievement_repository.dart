@@ -1,3 +1,5 @@
+// ignore_for_file: unused_element
+
 import 'package:icy/abstractions/utils/api_constants.dart';
 import 'package:icy/data/models/achievement_model.dart';
 import 'package:icy/services/api_service.dart';

@@ -326,17 +326,15 @@ class _SurveyScreenState extends State<SurveyScreen> {
     });
 
     // Convert answers to the format expected by the API
-    final formattedAnswers =
-        _answers.entries.map((entry) {
+    _answers.entries.map((entry) {
           return {'questionId': entry.key, 'answer': entry.value};
         }).toList();
 
-    // TODO: Submit the survey responses to the server
-    // This would typically be done via a BLoC event
 
-    // For now, simulate a network delay and show success
     Future.delayed(const Duration(seconds: 1), () {
+      // ignore: use_build_context_synchronously
       Navigator.of(context).pop();
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
