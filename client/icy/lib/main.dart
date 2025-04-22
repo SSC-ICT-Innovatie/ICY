@@ -113,8 +113,8 @@ class AppWithSettings extends StatelessWidget {
                 return FTheme(
                   data:
                       AppConstants().isLight(context)
-                          ? FThemes.orange.light.copyWith()
-                          : FThemes.orange.dark.copyWith(),
+                          ? FThemes.blue.light.copyWith()
+                          : FThemes.blue.dark.copyWith(),
                   child: child,
                 );
               },
