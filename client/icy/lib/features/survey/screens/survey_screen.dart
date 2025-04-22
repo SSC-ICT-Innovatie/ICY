@@ -1,8 +1,12 @@
 // ignore_for_file: unused_import
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:forui/forui.dart';
 import 'package:icy/data/models/survey_model.dart';
+import 'package:icy/data/repositories/achievement_repository.dart';
+import 'package:icy/data/repositories/survey_repository.dart';
+import 'package:icy/features/home/bloc/home_bloc.dart';
 import 'package:icy/features/home/pages/survey.dart';
 
 class SurveyScreen extends StatefulWidget {
@@ -17,6 +21,12 @@ class SurveyScreen extends StatefulWidget {
 class _SurveyScreenState extends State<SurveyScreen> {
   int _currentQuestion = 0;
   final Map<String, dynamic> _answers = {};
+  bool _isSubmitting = false;
+  final SurveyRepository _surveyRepository = SurveyRepository();
+  final AchievementRepository _achievementRepository = AchievementRepository();
+  String? _alertMessage;
+  bool _showErrorAlert = false;
+  bool _showSuccessAlert = false;
 
   @override
   Widget build(BuildContext context) {
@@ -30,66 +40,108 @@ class _SurveyScreenState extends State<SurveyScreen> {
           ),
         ],
       ),
-      content: Column(
+      content: Stack(
         children: [
-          // Survey progress indicator
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 8.0,
-            ),
-            child: Row(
-              children: [
-                Text(
-                  'Question ${_currentQuestion + 1} of ${widget.survey.questions.length}',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey,
-                  ),
+          Column(
+            children: [
+              // Survey progress indicator
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8.0,
                 ),
-                const Spacer(),
-                Text(
-                  '${(_currentQuestion + 1) * 100 ~/ widget.survey.questions.length}%',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                child: Row(
+                  children: [
+                    Text(
+                      'Question ${_currentQuestion + 1} of ${widget.survey.questions.length}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      '${(_currentQuestion + 1) * 100 ~/ widget.survey.questions.length}%',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
 
-          // Progress bar
-          LinearProgressIndicator(
-            value: (_currentQuestion + 1) / widget.survey.questions.length,
-            backgroundColor: Colors.grey[200],
-            valueColor: AlwaysStoppedAnimation<Color>(
-              Theme.of(context).colorScheme.primary,
-            ),
-          ),
-
-          // Survey content
-          Expanded(child: _buildSurveyContent()),
-
-          // Navigation buttons
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                if (_currentQuestion > 0)
-                  FButton(
-                    style: FButtonStyle.outline,
-                    onPress: _previousQuestion,
-                    label: const Text('Previous'),
-                  )
-                else
-                  const SizedBox.shrink(),
-
-                FButton(
-                  onPress: _isLastQuestion ? _submitSurvey : _nextQuestion,
-                  label: Text(_isLastQuestion ? 'Submit' : 'Next'),
+              // Progress bar
+              LinearProgressIndicator(
+                value: (_currentQuestion + 1) / widget.survey.questions.length,
+                backgroundColor: Colors.grey[200],
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  Theme.of(context).colorScheme.primary,
                 ),
-              ],
-            ),
+              ),
+
+              // Survey content
+              Expanded(child: _buildSurveyContent()),
+
+              // Navigation buttons
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    if (_currentQuestion > 0)
+                      FButton(
+                        style: FButtonStyle.outline,
+                        onPress: _previousQuestion,
+                        label: const Text('Previous'),
+                      )
+                    else
+                      const SizedBox.shrink(),
+
+                    FButton(
+                      onPress: _isSubmitting ? null : (_isLastQuestion ? _submitSurvey : _nextQuestion),
+                      label: _isSubmitting 
+                          ? const CircularProgressIndicator.adaptive() 
+                          : Text(_isLastQuestion ? 'Submit' : 'Next'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
+          
+          // Show loading overlay when submitting
+          if (_isSubmitting)
+            Container(
+              color: Colors.black.withOpacity(0.3),
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+
+          // Show error alert
+          if (_showErrorAlert)
+            FAlert(
+              title: Text(_alertMessage!),
+              subtitle: FButton(
+                label: const Text('OK'),
+                onPress: () {
+                  setState(() {
+                    _showErrorAlert = false;
+                  });
+                },
+              ),
+            ),
+
+          // Show success alert
+          if (_showSuccessAlert)
+            FAlert(
+              title: Text(_alertMessage!),
+              subtitle: FButton(
+                label: const Text('OK'),
+                onPress: () {
+                  setState(() {
+                    _showSuccessAlert = false;
+                  });
+                },
+              )),
         ],
       ),
     );
@@ -289,10 +341,11 @@ class _SurveyScreenState extends State<SurveyScreen> {
     // Check if answer is required
     if (!currentQuestion.optional &&
         !_answers.containsKey(currentQuestion.id)) {
-      // Show error message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please answer this question')),
-      );
+      // Show error message using FAlert instead of ScaffoldMessenger
+      setState(() {
+        _alertMessage = 'Please answer this question';
+        _showErrorAlert = true;
+      });
       return;
     }
 
@@ -309,40 +362,65 @@ class _SurveyScreenState extends State<SurveyScreen> {
     }
   }
 
-  void _submitSurvey() {
+  Future<void> _submitSurvey() async {
     final currentQuestion = widget.survey.questions[_currentQuestion];
 
     // Check if last answer is required
     if (!currentQuestion.optional &&
         !_answers.containsKey(currentQuestion.id)) {
-      // Show error message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please answer this question')),
-      );
+      // Show error message using FAlert instead of ScaffoldMessenger
+      setState(() {
+        _alertMessage = 'Please answer this question';
+        _showErrorAlert = true;
+      });
       return;
     }
 
     setState(() {
+      _isSubmitting = true;
     });
 
-    // Convert answers to the format expected by the API
-    _answers.entries.map((entry) {
-          return {'questionId': entry.key, 'answer': entry.value};
-        }).toList();
+    try {
+      // Convert answers to the format expected by the API
+      final formattedAnswers = _answers.entries.map((entry) {
+        return {'questionId': entry.key, 'answer': entry.value};
+      }).toList();
 
-
-    Future.delayed(const Duration(seconds: 1), () {
-      // ignore: use_build_context_synchronously
-      Navigator.of(context).pop();
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Survey submitted! You earned ${widget.survey.reward.xp} XP',
-          ),
-          backgroundColor: Colors.green,
-        ),
+      // Submit survey responses
+      final result = await _surveyRepository.submitSurveyResponses(
+        widget.survey.id,
+        formattedAnswers,
       );
-    });
+
+      // Clear caches to ensure data is refreshed
+      _surveyRepository.clearCache();
+      _achievementRepository.clearCache();
+
+      // Refresh home data
+      if (context.mounted) {
+        context.read<HomeBloc>().add(const LoadHome(forceRefresh: true));
+      }
+
+      // Extract rewards from response
+      final xpEarned = result['rewards']?['xp'] ?? widget.survey.reward.xp;
+      final coinsEarned = result['rewards']?['coins'] ?? widget.survey.reward.coins;
+
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+          _alertMessage = 'Survey submitted! You earned $xpEarned XP and $coinsEarned coins';
+          _showSuccessAlert = true;
+        });
+      }
+    } catch (e) {
+      print('Error submitting survey: $e');
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+          _alertMessage = 'Failed to submit survey: ${e.toString()}';
+          _showErrorAlert = true;
+        });
+      }
+    }
   }
 }

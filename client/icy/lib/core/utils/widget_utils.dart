@@ -36,18 +36,30 @@ class WidgetUtils {
     double? width,
     double? height,
     BoxFit fit = BoxFit.cover,
+    String? placeholder,
+    Color? backgroundColor,
   }) {
+    // Don't use placeholder.co URLs as they cause issues on some Android devices
+    if (url.contains('placehold.co') || url.contains('via.placeholder.com')) {
+      return buildAvatarPlaceholder(
+        placeholder: placeholder,
+        width: width,
+        height: height,
+        backgroundColor: backgroundColor,
+      );
+    }
+    
     return Image.network(
       url,
       width: width,
       height: height,
       fit: fit,
       errorBuilder: (context, error, stackTrace) {
-        return Container(
+        return buildAvatarPlaceholder(
+          placeholder: placeholder,
           width: width,
           height: height,
-          color: Colors.grey.shade200,
-          child: const Center(child: Icon(Icons.broken_image)),
+          backgroundColor: backgroundColor,
         );
       },
       loadingBuilder: (context, child, loadingProgress) {
@@ -59,6 +71,64 @@ class WidgetUtils {
           child: const Center(child: CircularProgressIndicator()),
         );
       },
+    );
+  }
+  
+  /// Build a placeholder widget for avatars with initials
+  static Widget buildAvatarPlaceholder({
+    String? placeholder,
+    double? width,
+    double? height,
+    Color? backgroundColor,
+  }) {
+    final bgColor = backgroundColor ?? Colors.blue.shade300;
+    final displayText = placeholder?.isNotEmpty == true
+        ? placeholder!.substring(0, placeholder.length > 2 ? 2 : placeholder.length).toUpperCase()
+        : 'U';
+        
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: bgColor,
+        shape: width == height ? BoxShape.circle : BoxShape.rectangle,
+        borderRadius: width != height ? BorderRadius.circular(8) : null,
+      ),
+      child: Center(
+        child: Text(
+          displayText,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+      ),
+    );
+  }
+  
+  /// Create an avatar widget with proper fallback
+  static Widget avatar(
+    String? imageUrl,
+    String userName, {
+    double size = 40,
+    Color? backgroundColor,
+  }) {
+    return ClipOval(
+      child: imageUrl != null && imageUrl.isNotEmpty && !imageUrl.contains('placeholder')
+          ? networkImageWithFallback(
+              imageUrl,
+              width: size,
+              height: size,
+              placeholder: userName,
+              backgroundColor: backgroundColor,
+            )
+          : buildAvatarPlaceholder(
+              placeholder: userName,
+              width: size,
+              height: size,
+              backgroundColor: backgroundColor,
+            ),
     );
   }
 }

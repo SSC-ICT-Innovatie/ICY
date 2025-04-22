@@ -5,36 +5,84 @@ import 'package:icy/services/api_service.dart';
 
 class SurveyRepository {
   final ApiService _apiService;
+  
+  // Cache survey data
+  List<SurveyModel>? _cachedSurveys;
+  DateTime _lastFetchTime = DateTime.now().subtract(const Duration(days: 1));
 
-  SurveyRepository({ApiService? apiService})
-    : _apiService = apiService ?? ApiService();
+  SurveyRepository({ApiService? apiService}) 
+      : _apiService = apiService ?? ApiService();
 
-  Future<List<SurveyModel>> getSurveys() async {
+  /// Get all available surveys
+  Future<List<SurveyModel>> getSurveys({bool forceRefresh = false}) async {
+    // Return cached surveys if available and not forcing refresh
+    if (!forceRefresh && 
+        _cachedSurveys != null && 
+        DateTime.now().difference(_lastFetchTime) < const Duration(minutes: 5)) {
+      return _cachedSurveys!;
+    }
+    
     try {
       final response = await _apiService.get(ApiConstants.surveysEndpoint);
       final List<dynamic> surveysJson = response['data'] ?? [];
-      return surveysJson.map((json) => SurveyModel.fromJson(json)).toList();
+      _cachedSurveys = surveysJson.map((json) => SurveyModel.fromJson(json)).toList();
+      _lastFetchTime = DateTime.now();
+      return _cachedSurveys!;
     } catch (e) {
       print('Error fetching surveys: $e');
-      return [];
+      if (_cachedSurveys != null) {
+        return _cachedSurveys!;
+      }
+      throw Exception('Failed to load surveys: $e');
     }
   }
 
+  /// Submit survey responses
+  Future<Map<String, dynamic>> submitSurveyResponses(String surveyId, List<Map<String, dynamic>> answers) async {
+    try {
+      // Use the correct endpoint pattern with the survey ID
+      final response = await _apiService.post(
+        '${ApiConstants.surveysEndpoint}/$surveyId/submit', 
+        {
+          'answers': answers,
+        }
+      );
+      
+      // Clear cache to force refresh of surveys
+      _cachedSurveys = null;
+      
+      return response;
+    } catch (e) {
+      print('Error submitting survey: $e');
+      throw Exception('Failed to submit survey: $e');
+    }
+  }
+  
+  /// Create a new survey (admin only)
   Future<SurveyModel?> createSurvey(SurveyCreationModel survey) async {
     try {
       final response = await _apiService.post(
-        ApiConstants.surveysEndpoint,
+        ApiConstants.surveysEndpoint, 
         survey.toJson(),
       );
-
-      if (response['success'] == true) {
+      
+      // Clear cached surveys to ensure fresh data
+      _cachedSurveys = null;
+      
+      if (response['success'] == true && response['data'] != null) {
         return SurveyModel.fromJson(response['data']);
       }
       return null;
     } catch (e) {
       print('Error creating survey: $e');
-      throw e;
+      throw Exception('Failed to create survey: $e');
     }
+  }
+  
+  /// Clear survey cache
+  void clearCache() {
+    _cachedSurveys = null;
+    _lastFetchTime = DateTime.now().subtract(const Duration(days: 1));
   }
 
   // Get daily surveys with graceful error handling

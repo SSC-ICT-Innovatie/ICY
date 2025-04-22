@@ -165,9 +165,18 @@ class _HomeTabSectionState extends State<HomeTabSection> {
   Widget _buildSurveyCard(BuildContext context, SurveyModel survey) {
     return FTile(
       onPress: () {
+        // Get the current HomeBloc
+        final homeBloc = context.read<HomeBloc>();
+        
+        // Navigate to survey screen with HomeBloc provided
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => SurveyScreen(survey: survey)),
+          MaterialPageRoute(
+            builder: (context) => BlocProvider.value(
+              value: homeBloc,
+              child: SurveyScreen(survey: survey),
+            ),
+          ),
         );
       },
       suffixIcon: Container(
