@@ -15,6 +15,15 @@ class HomeTabSection extends StatefulWidget {
 
 class _HomeTabSectionState extends State<HomeTabSection> {
   @override
+  void initState() {
+    super.initState();
+    // Ensure we load fresh data when the widget is initialized
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<HomeBloc>().add(const LoadHome(forceRefresh: true));
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     // Get user information for department filtering
     final user = (context.read<AuthBloc>().state as AuthSuccess).user;
@@ -25,16 +34,22 @@ class _HomeTabSectionState extends State<HomeTabSection> {
       children: [
         Expanded(
           child: FTabs(
-            initialIndex: 1,
+            initialIndex: 0, // Start with "For You" tab selected
             tabs: [
               // For You tab
               FTabEntry(
                 label: const Text('For You'),
-                content: SingleChildScrollView(
-                  child: _buildSurveyList(
-                    context,
-                    filterByDepartment: true,
-                    userDepartment: userDepartment,
+                content: RefreshIndicator(
+                  onRefresh: () async {
+                    context.read<HomeBloc>().add(const LoadHome(forceRefresh: true));
+                  },
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: _buildSurveyList(
+                      context,
+                      filterByDepartment: true,
+                      userDepartment: userDepartment,
+                    ),
                   ),
                 ),
               ),
@@ -42,8 +57,14 @@ class _HomeTabSectionState extends State<HomeTabSection> {
               // All Surveys tab
               FTabEntry(
                 label: const Text('All Surveys'),
-                content: SingleChildScrollView(
-                  child: _buildSurveyList(context, filterByDepartment: false),
+                content: RefreshIndicator(
+                  onRefresh: () async {
+                    context.read<HomeBloc>().add(const LoadHome(forceRefresh: true));
+                  },
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: _buildSurveyList(context, filterByDepartment: false),
+                  ),
                 ),
               ),
             ],

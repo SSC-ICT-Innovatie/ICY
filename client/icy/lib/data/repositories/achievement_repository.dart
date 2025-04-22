@@ -6,85 +6,163 @@ import 'package:icy/services/api_service.dart';
 
 class AchievementRepository {
   final ApiService _apiService;
+  
+  // Add caching mechanism
+  List<Badge>? _cachedBadges;
+  UserBadges? _cachedUserBadges;
+  List<Challenge>? _cachedChallenges;
+  List<UserChallenge>? _cachedUserChallenges;
+  List<UserAchievement>? _cachedRecentAchievements;
+  DateTime _lastCacheTime = DateTime.now().subtract(const Duration(days: 1));
 
   AchievementRepository({ApiService? apiService})
     : _apiService = apiService ?? ApiService();
 
   // Get all badges
-  Future<List<Badge>> getAllBadges() async {
+  Future<List<Badge>> getAllBadges({bool forceRefresh = false}) async {
+    // Use cache if available and not forcing refresh
+    if (!forceRefresh && 
+        _cachedBadges != null && 
+        DateTime.now().difference(_lastCacheTime) < const Duration(minutes: 5)) {
+      return _cachedBadges!;
+    }
+    
     try {
       final response = await _apiService.get(ApiConstants.badgesEndpoint);
       if (response['success'] == true && response['data'] != null) {
-        return (response['data'] as List)
+        _cachedBadges = (response['data'] as List)
             .map((badge) => Badge.fromJson(badge))
             .toList();
+        _lastCacheTime = DateTime.now();
+        return _cachedBadges!;
       }
-      return _getDefaultBadges();
+      // Fall back to default badges
+      _cachedBadges = _getDefaultBadges();
+      return _cachedBadges!;
     } catch (e) {
-      return _getDefaultBadges();
+      // Use cached data if available on error
+      if (_cachedBadges != null) return _cachedBadges!;
+      // Otherwise use defaults
+      _cachedBadges = _getDefaultBadges();
+      return _cachedBadges!;
     }
   }
 
   // Get user badges
-  Future<UserBadges> getUserBadges() async {
+  Future<UserBadges> getUserBadges({bool forceRefresh = false}) async {
+    // Use cache if available and not forcing refresh
+    if (!forceRefresh && 
+        _cachedUserBadges != null && 
+        DateTime.now().difference(_lastCacheTime) < const Duration(minutes: 2)) {
+      return _cachedUserBadges!;
+    }
+    
     try {
       final response = await _apiService.get(
         '${ApiConstants.achievementsEndpoint}/badges/my',
       );
-      return UserBadges.fromJson(response['data'] ?? {});
+      _cachedUserBadges = UserBadges.fromJson(response['data'] ?? {});
+      _lastCacheTime = DateTime.now();
+      return _cachedUserBadges!;
     } catch (e) {
       print('Error fetching user badges: $e');
+      // Use cached data if available
+      if (_cachedUserBadges != null) return _cachedUserBadges!;
       // Return empty badges on error
       return UserBadges(earned: [], inProgress: []);
     }
   }
 
   // Get active challenges
-  Future<List<Challenge>> getActiveChallenges() async {
+  Future<List<Challenge>> getActiveChallenges({bool forceRefresh = false}) async {
+    // Use cache if available and not forcing refresh
+    if (!forceRefresh && 
+        _cachedChallenges != null && 
+        DateTime.now().difference(_lastCacheTime) < const Duration(minutes: 5)) {
+      return _cachedChallenges!;
+    }
+    
     try {
       final response = await _apiService.get(
         '${ApiConstants.achievementsEndpoint}/challenges',
       );
       final List<dynamic> challengesJson = response['data'] ?? [];
-      return challengesJson.map((json) => Challenge.fromJson(json)).toList();
+      _cachedChallenges = challengesJson.map((json) => Challenge.fromJson(json)).toList();
+      _lastCacheTime = DateTime.now();
+      return _cachedChallenges!;
     } catch (e) {
       print('Error fetching active challenges: $e');
+      // Use cached data if available
+      if (_cachedChallenges != null) return _cachedChallenges!;
       // Return empty list on error
       return [];
     }
   }
 
   // Get user challenges
-  Future<List<UserChallenge>> getUserChallenges() async {
+  Future<List<UserChallenge>> getUserChallenges({bool forceRefresh = false}) async {
+    // Use cache if available and not forcing refresh
+    if (!forceRefresh && 
+        _cachedUserChallenges != null && 
+        DateTime.now().difference(_lastCacheTime) < const Duration(minutes: 2)) {
+      return _cachedUserChallenges!;
+    }
+    
     try {
       final response = await _apiService.get(
         ApiConstants.userChallengesEndpoint,
       );
       if (response['success'] == true && response['data'] != null) {
-        return (response['data'] as List)
+        _cachedUserChallenges = (response['data'] as List)
             .map((challenge) => UserChallenge.fromJson(challenge))
             .toList();
+        _lastCacheTime = DateTime.now();
+        return _cachedUserChallenges!;
       }
+      _cachedUserChallenges = [];
       return [];
     } catch (e) {
+      // Use cached data if available
+      if (_cachedUserChallenges != null) return _cachedUserChallenges!;
       return [];
     }
   }
 
   // Get recent achievements
-  Future<List<UserAchievement>> getRecentAchievements() async {
+  Future<List<UserAchievement>> getRecentAchievements({bool forceRefresh = false}) async {
+    // Use cache if available and not forcing refresh
+    if (!forceRefresh && 
+        _cachedRecentAchievements != null && 
+        DateTime.now().difference(_lastCacheTime) < const Duration(minutes: 2)) {
+      return _cachedRecentAchievements!;
+    }
+    
     try {
       final response = await _apiService.get(
         '${ApiConstants.achievementsEndpoint}/recent',
       );
       final List<dynamic> achievementsJson = response['data'] ?? [];
-      return achievementsJson
+      _cachedRecentAchievements = achievementsJson
           .map((json) => UserAchievement.fromJson(json))
           .toList();
+      _lastCacheTime = DateTime.now();
+      return _cachedRecentAchievements!;
     } catch (e) {
       print('Error fetching recent achievements: $e');
+      // Use cached data if available
+      if (_cachedRecentAchievements != null) return _cachedRecentAchievements!;
       return [];
     }
+  }
+  
+  // Clear all cached data - useful after survey completion
+  void clearCache() {
+    _cachedBadges = null;
+    _cachedUserBadges = null;
+    _cachedChallenges = null;
+    _cachedUserChallenges = null;
+    _cachedRecentAchievements = null;
+    _lastCacheTime = DateTime.now().subtract(const Duration(days: 1));
   }
 
   // Default badges for offline mode or initial testing

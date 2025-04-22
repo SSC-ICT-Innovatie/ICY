@@ -26,16 +26,19 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   }
 
   Future<void> _onLoadHome(LoadHome event, Emitter<HomeState> emit) async {
-    emit(HomeLoading());
+    // Only show loading state on initial load or force refresh
+    if (state is HomeInitial || event.forceRefresh) {
+      emit(HomeLoading());
+    }
 
     try {
       // Load data in parallel for efficiency
-      final dailySurveyFuture = _homeRepository.getDailySurvey();
-      final availableSurveysFuture = _homeRepository.getAvailableSurveys();
-      final recentAchievementsFuture = _homeRepository.getRecentAchievements();
+      final dailySurveyFuture = _homeRepository.getDailySurvey(forceRefresh: event.forceRefresh);
+      final availableSurveysFuture = _homeRepository.getAvailableSurveys(forceRefresh: event.forceRefresh);
+      final recentAchievementsFuture = _homeRepository.getRecentAchievements(forceRefresh: event.forceRefresh);
       final activeChallengesFuture =
-          _achievementRepository.getActiveChallenges();
-      final userTeamFuture = _homeRepository.getUserTeam();
+          _achievementRepository.getActiveChallenges(forceRefresh: event.forceRefresh);
+      final userTeamFuture = _homeRepository.getUserTeam(forceRefresh: event.forceRefresh);
 
       final dailySurvey = await dailySurveyFuture;
       final availableSurveys = await availableSurveysFuture;
@@ -46,7 +49,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       // Get team rank if there's a team
       int? teamRank;
       if (userTeam != null) {
-        teamRank = await _homeRepository.getTeamRank();
+        teamRank = await _homeRepository.getTeamRank(forceRefresh: event.forceRefresh);
       }
 
       emit(

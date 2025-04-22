@@ -8,15 +8,21 @@ abstract class HomeEvent extends Equatable {
 }
 
 class LoadHome extends HomeEvent {
-  const LoadHome();
+  final bool forceRefresh;
+  
+  const LoadHome({this.forceRefresh = false});
+  
+  @override
+  List<Object> get props => [forceRefresh];
 }
 
 // For backwards compatibility
 class LoadHomeData extends LoadHome {
   final String? userId;
 
-  const LoadHomeData({this.userId});
+  const LoadHomeData({this.userId, bool forceRefresh = false}) 
+      : super(forceRefresh: forceRefresh);
 
   @override
-  List<Object> get props => [userId ?? ''];
+  List<Object> get props => [userId ?? '', forceRefresh];
 }
