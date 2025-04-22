@@ -1,12 +1,14 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:forui/theme.dart';
+import 'package:icy/core/utils/widget_utils.dart';
 import 'package:icy/data/models/user_model.dart';
-
 import 'package:icy/data/models/team_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:icy/features/home/bloc/home_bloc.dart';
+import 'package:icy/features/authentication/state/bloc/auth_bloc.dart';
 
 class HomeHeader extends StatelessWidget {
   final UserModel user;
@@ -18,6 +20,10 @@ class HomeHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<HomeBloc, HomeState>(
       builder: (context, state) {
+        // Get latest user data from AuthBloc to ensure XP is current
+        final authState = context.watch<AuthBloc>().state;
+        final currentUser = authState is AuthSuccess ? authState.user : user;
+        
         // Extract team data if available
         TeamModel? userTeam;
         int? teamRank;
@@ -40,17 +46,21 @@ class HomeHeader extends StatelessWidget {
           ),
           child: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0,vertical: 55),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 55),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      CircleAvatar(
-                        radius: 24,
-                        backgroundImage: NetworkImage(user.avatar),
-                        backgroundColor: Colors.grey.shade200,
+                      // Use the avatar helper to avoid placeholder issues
+                      ClipOval(
+                        child: WidgetUtils.avatar(
+                          currentUser.avatar,
+                          currentUser.fullName,
+                          size: 48,
+                          backgroundColor: Colors.blue.shade400,
+                        ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -58,7 +68,7 @@ class HomeHeader extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Welcome, ${user.fullName.split(' ').first}',
+                              'Welcome, ${currentUser.fullName.split(' ').first}',
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -66,7 +76,7 @@ class HomeHeader extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              user.department,
+                              currentUser.department,
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Colors.white.withOpacity(0.9),
@@ -75,7 +85,7 @@ class HomeHeader extends StatelessWidget {
                           ],
                         ),
                       ),
-                      _buildLevelBadge(context, user.level?.current ?? 1),
+                      _buildLevelBadge(context, currentUser.level?.current ?? 1),
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -87,8 +97,9 @@ class HomeHeader extends StatelessWidget {
                         flex: 3,
                         child: _buildXpProgress(
                           context,
-                          current: user.level?.xp.current ?? 0,
-                          total: user.level?.xp.nextLevel ?? 100,
+                          current: currentUser.level?.xp.current ?? 0,
+                          total: currentUser.level?.xp.nextLevel ?? 100,
+                          streak: currentUser.stats?.streak.current,
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -129,6 +140,7 @@ class HomeHeader extends StatelessWidget {
     BuildContext context, {
     required int current,
     required int total,
+    int? streak,
   }) {
     final progress = total > 0 ? (current / total).clamp(0.0, 1.0) : 0.0;
 
@@ -147,8 +159,7 @@ class HomeHeader extends StatelessWidget {
             ),
             const Spacer(),
             // Show streak if available
-            if (user.stats?.streak.current != null &&
-                user.stats!.streak.current > 0)
+            if (streak != null && streak > 0)
               Row(
                 children: [
                   const Icon(
@@ -158,7 +169,7 @@ class HomeHeader extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    '${user.stats!.streak.current} day streak',
+                    '$streak day streak',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
@@ -184,23 +195,9 @@ class HomeHeader extends StatelessWidget {
   }
 
   Widget _buildTeamInfo(BuildContext context, TeamModel? team, int? rank) {
+    // Just remove the team info display completely if there's no team
     if (team == null) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Center(
-          child: Text(
-            'No Team',
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.white.withOpacity(0.9),
-            ),
-          ),
-        ),
-      );
+      return const SizedBox.shrink();
     }
 
     return Container(
