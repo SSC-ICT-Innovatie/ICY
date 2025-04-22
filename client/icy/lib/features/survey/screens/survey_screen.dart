@@ -4,8 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:forui/forui.dart';
 import 'package:icy/data/models/survey_model.dart';
+import 'package:icy/data/models/user_model.dart';
 import 'package:icy/data/repositories/achievement_repository.dart';
+import 'package:icy/data/repositories/auth_repository.dart';
 import 'package:icy/data/repositories/survey_repository.dart';
+import 'package:icy/features/authentication/state/bloc/auth_bloc.dart';
 import 'package:icy/features/home/bloc/home_bloc.dart';
 import 'package:icy/features/home/pages/survey.dart';
 
@@ -24,6 +27,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
   bool _isSubmitting = false;
   final SurveyRepository _surveyRepository = SurveyRepository();
   final AchievementRepository _achievementRepository = AchievementRepository();
+  final AuthRepository _authRepository = AuthRepository();
   String? _alertMessage;
   bool _showErrorAlert = false;
   bool _showSuccessAlert = false;
@@ -126,6 +130,11 @@ class _SurveyScreenState extends State<SurveyScreen> {
                   setState(() {
                     _showErrorAlert = false;
                   });
+                  
+                  // Close survey if already completed
+                  if (_alertMessage?.contains('already completed') ?? false) {
+                    Navigator.of(context).pop();
+                  }
                 },
               ),
             ),
@@ -140,8 +149,12 @@ class _SurveyScreenState extends State<SurveyScreen> {
                   setState(() {
                     _showSuccessAlert = false;
                   });
+                  
+                  // Return to home screen after successful submission
+                  Navigator.of(context).pop();
                 },
-              )),
+              ),
+            ),
         ],
       ),
     );
@@ -396,14 +409,30 @@ class _SurveyScreenState extends State<SurveyScreen> {
       _surveyRepository.clearCache();
       _achievementRepository.clearCache();
 
-      // Refresh home data
-      if (context.mounted) {
-        context.read<HomeBloc>().add(const LoadHome(forceRefresh: true));
-      }
-
       // Extract rewards from response
       final xpEarned = result['rewards']?['xp'] ?? widget.survey.reward.xp;
       final coinsEarned = result['rewards']?['coins'] ?? widget.survey.reward.coins;
+      
+      if (context.mounted) {
+        // Get fresh user data to update the UI
+        try {
+          // Get the updated user profile from the API
+          final response = await _authRepository.apiService.get('/auth/me');
+          if (response['success'] == true && response['data'] != null) {
+            final updatedUser = UserModel.fromJson(response['data']);
+            
+            // Update the user in AuthBloc so the XP shows in the header
+            context.read<AuthBloc>().add(UpdateUserData(updatedUser));
+            
+            // Refresh home data to show achievements, etc.
+            context.read<HomeBloc>().add(const LoadHome(forceRefresh: true));
+          }
+        } catch (e) {
+          print('Error refreshing user data: $e');
+          // Still refresh HomeBloc even if getting user data fails
+          context.read<HomeBloc>().add(const LoadHome(forceRefresh: true));
+        }
+      }
 
       if (mounted) {
         setState(() {

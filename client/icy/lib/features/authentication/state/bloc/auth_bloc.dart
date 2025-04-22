@@ -22,6 +22,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthCheckRequested>(_onAuthCheckRequested);
     on<AuthLogin>(_onAuthLogin);
     on<AuthSignUpRequested>(_onAuthSignUpRequested);
+    on<UpdateUserData>(_onUpdateUserData);
     on<Logout>(_onLogout);
 
     // Check if already logged in on startup
@@ -128,6 +129,29 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } catch (e) {
       _authCacheService.updateAuthState(false);
       emit(AuthFailure(e.toString()));
+    }
+  }
+
+  Future<void> _onUpdateUserData(
+    UpdateUserData event,
+    Emitter<AuthState> emit,
+  ) async {
+    // Get current state and preserve tokens
+    if (state is AuthSuccess) {
+      final currentState = state as AuthSuccess;
+      
+      // Save updated user data to local storage
+      await _authRepository.localStorageService.saveAuthUser(event.user);
+      
+      // Update cache
+      _authCacheService.updateUserRole(event.user.role);
+      
+      // Emit updated state with new user data but preserve tokens
+      emit(AuthSuccess(
+        user: event.user,
+        token: currentState.token,
+        refreshToken: currentState.refreshToken,
+      ));
     }
   }
 

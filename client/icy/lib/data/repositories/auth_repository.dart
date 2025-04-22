@@ -9,21 +9,21 @@ import 'package:icy/data/models/user_model.dart';
 import 'package:icy/services/api_service.dart';
 
 class AuthRepository {
-  final ApiService _apiService;
-  final LocalStorageService _localStorageService;
+  final ApiService apiService;
+  final LocalStorageService localStorageService;
 
   AuthRepository({
     ApiService? apiService,
     LocalStorageService? localStorageService,
-  }) : _apiService = apiService ?? ApiService(),
-       _localStorageService = localStorageService ?? LocalStorageService();
+  }) : apiService = apiService ?? ApiService(),
+       localStorageService = localStorageService ?? LocalStorageService();
 
   Future<UserModel?> login(String email, String password) async {
     try {
       // Run connection diagnostics before making the request
       await NetworkDiagnostics.checkServerConnection();
 
-      final data = await _apiService.login(email, password);
+      final data = await apiService.login(email, password);
 
       if (data['success'] == true &&
           data['user'] != null &&
@@ -31,13 +31,13 @@ class AuthRepository {
         final UserModel user = UserModel.fromJson(data['user']);
 
         // Save tokens
-        await _localStorageService.saveAuthToken(data['token']);
+        await localStorageService.saveAuthToken(data['token']);
         if (data['refreshToken'] != null) {
-          await _localStorageService.saveRefreshToken(data['refreshToken']);
+          await localStorageService.saveRefreshToken(data['refreshToken']);
         }
 
         // Save user data
-        await _localStorageService.saveAuthUser(user);
+        await localStorageService.saveAuthUser(user);
 
         return user;
       }
@@ -92,7 +92,7 @@ class AuthRepository {
       }
 
       // Register user
-      final response = await _apiService.post(
+      final response = await apiService.post(
         ApiConstants.registerEndpoint,
         requestData,
         useFormData: hasFormData,
@@ -102,13 +102,13 @@ class AuthRepository {
 
       if (response['success'] && response['token'] != null) {
         // Save auth tokens
-        await _localStorageService.saveAuthToken(response['token']);
-        await _localStorageService.saveRefreshToken(response['refreshToken']);
+        await localStorageService.saveAuthToken(response['token']);
+        await localStorageService.saveRefreshToken(response['refreshToken']);
 
         // Save user object if available
         if (response['user'] != null) {
           final user = UserModel.fromJson(response['user']);
-          await _localStorageService.saveAuthUser(user);
+          await localStorageService.saveAuthUser(user);
           return user;
         }
       }
@@ -121,7 +121,7 @@ class AuthRepository {
 
   Future<UserModel?> getCurrentUser() async {
     try {
-      return await _localStorageService.getAuthUser();
+      return await localStorageService.getAuthUser();
     } catch (e) {
       print('Error getting current user: $e');
       return null;
@@ -130,19 +130,19 @@ class AuthRepository {
 
   Future<void> logout() async {
     try {
-      await _apiService.logout();
+      await apiService.logout();
     } catch (e) {
       print('Logout error from API: $e');
       // Continue with local logout even if API call fails
     } finally {
       // Always clear local auth data
-      await _localStorageService.clearAuthData();
+      await localStorageService.clearAuthData();
     }
   }
 
   Future<String?> getAuthToken() async {
     try {
-      return await _localStorageService.getAuthToken();
+      return await localStorageService.getAuthToken();
     } catch (e) {
       print('Error getting auth token: $e');
       return null;
@@ -151,7 +151,7 @@ class AuthRepository {
 
   Future<String?> getRefreshToken() async {
     try {
-      return await _localStorageService.getRefreshToken();
+      return await localStorageService.getRefreshToken();
     } catch (e) {
       print('Error getting refresh token: $e');
       return null;

@@ -48,4 +48,10 @@ class AuthSignUpRequested extends AuthEvent {
   });
 }
 
+class UpdateUserData extends AuthEvent {
+  final UserModel user;
+
+  UpdateUserData(this.user);
+}
+
 class Logout extends AuthEvent {}
