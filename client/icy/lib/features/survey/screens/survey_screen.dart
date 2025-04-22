@@ -73,11 +73,22 @@ class _SurveyScreenState extends State<SurveyScreen> {
               ),
 
               // Progress bar
-              LinearProgressIndicator(
-                value: (_currentQuestion + 1) / widget.survey.questions.length,
-                backgroundColor: Colors.grey[200],
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  Theme.of(context).colorScheme.primary,
+              Container(
+                width: MediaQuery.of(context).size.width,
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    LinearProgressIndicator(
+                      value: (_currentQuestion + 1) / widget.survey.questions.length,
+                      backgroundColor: Colors.grey[200],
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Theme.of(context).colorScheme.primary,
+                      ),
+                      minHeight: 10,
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                  ],
                 ),
               ),
 

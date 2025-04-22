@@ -1,5 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:icy/core/utils/url_utils.dart';
 
 class WidgetUtils {
   /// Ensures a widget has a Material ancestor
@@ -30,17 +32,85 @@ class WidgetUtils {
     }
   }
 
-  /// Handle network images with error fallback
+  /// Network image with placeholder fallback
   static Widget networkImageWithFallback(
-    String url, {
+    String? imageUrl, {
     double? width,
     double? height,
     BoxFit fit = BoxFit.cover,
     String? placeholder,
     Color? backgroundColor,
   }) {
-    // Don't use placeholder.co URLs as they cause issues on some Android devices
-    if (url.contains('placehold.co') || url.contains('via.placeholder.com')) {
+    final bg = backgroundColor ?? Colors.grey.shade300;
+    final url = UrlUtils.getImageUrl(imageUrl);
+    
+    return Container(
+      width: width,
+      height: height,
+      color: bg,
+      child: imageUrl == null || imageUrl.isEmpty
+          ? buildAvatarPlaceholder(
+              placeholder: placeholder,
+              width: width,
+              height: height,
+              backgroundColor: bg,
+            )
+          : UrlUtils.isLocalFilePath(imageUrl)
+              ? _buildFileImage(imageUrl, width, height, fit, placeholder, bg)
+              : CachedNetworkImage(
+                  imageUrl: url,
+                  fit: fit,
+                  width: width,
+                  height: height,
+                  placeholder: (context, url) => Center(
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Colors.grey.shade500,
+                      ),
+                    ),
+                  ),
+                  errorWidget: (context, url, error) {
+                    print('Error loading image from $url: $error');
+                    return buildAvatarPlaceholder(
+                      placeholder: placeholder,
+                      width: width,
+                      height: height,
+                      backgroundColor: bg,
+                    );
+                  },
+                ),
+    );
+  }
+  
+  /// Build image from local file path
+  static Widget _buildFileImage(
+    String imageUrl,
+    double? width,
+    double? height,
+    BoxFit fit,
+    String? placeholder,
+    Color backgroundColor,
+  ) {
+    final file = UrlUtils.getFileFromUri(imageUrl);
+    
+    if (file != null && file.existsSync()) {
+      return Image.file(
+        file,
+        fit: fit,
+        width: width,
+        height: height,
+        errorBuilder: (context, error, stackTrace) {
+          print('Error loading file image: $error');
+          return buildAvatarPlaceholder(
+            placeholder: placeholder,
+            width: width,
+            height: height,
+            backgroundColor: backgroundColor,
+          );
+        },
+      );
+    } else {
       return buildAvatarPlaceholder(
         placeholder: placeholder,
         width: width,
@@ -48,30 +118,6 @@ class WidgetUtils {
         backgroundColor: backgroundColor,
       );
     }
-    
-    return Image.network(
-      url,
-      width: width,
-      height: height,
-      fit: fit,
-      errorBuilder: (context, error, stackTrace) {
-        return buildAvatarPlaceholder(
-          placeholder: placeholder,
-          width: width,
-          height: height,
-          backgroundColor: backgroundColor,
-        );
-      },
-      loadingBuilder: (context, child, loadingProgress) {
-        if (loadingProgress == null) return child;
-        return Container(
-          width: width,
-          height: height,
-          color: Colors.grey.shade100,
-          child: const Center(child: CircularProgressIndicator()),
-        );
-      },
-    );
   }
   
   /// Build a placeholder widget for avatars with initials

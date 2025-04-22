@@ -198,6 +198,24 @@ const submitSurveyResponse = asyncHandler(async (req, res) => {
     
     user.stats.participationRate = totalResponses / totalSurveys;
     
+    // Update user XP and total XP stats
+    if (survey.reward && survey.reward.xp) {
+      user.level.xp.current += survey.reward.xp;
+      user.stats.totalXp += survey.reward.xp;
+      
+      // Check if user should level up
+      if (user.level.xp.current >= user.level.xp.nextLevel) {
+        user.level.current += 1;
+        user.level.xp.current = user.level.xp.current - user.level.xp.nextLevel;
+        user.level.xp.nextLevel = Math.floor(user.level.xp.nextLevel * 1.5); // Increase XP needed for next level
+      }
+    }
+    
+    // Update coins if reward includes coins
+    if (survey.reward && survey.reward.coins) {
+      user.stats.totalCoins += survey.reward.coins;
+    }
+    
     await user.save();
   }
   

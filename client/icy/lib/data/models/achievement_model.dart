@@ -1,3 +1,5 @@
+import 'package:icy/data/models/user_model.dart';
+
 class AchievementModel {
   final String id;
   final String title;
@@ -377,33 +379,7 @@ class UserBadges {
   }
 }
 
-class EarnedBadge {
-  final Map<String, dynamic> badgeId;
-  final String dateEarned;
-  final int xpAwarded;
 
-  EarnedBadge({
-    required this.badgeId,
-    required this.dateEarned,
-    required this.xpAwarded,
-  });
-
-  factory EarnedBadge.fromJson(Map<String, dynamic> json) {
-    return EarnedBadge(
-      badgeId: json['badgeId'] ?? {},
-      dateEarned: json['dateEarned'] ?? DateTime.now().toIso8601String(),
-      xpAwarded: json['xpAwarded'] ?? 0,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'badgeId': badgeId,
-      'dateEarned': dateEarned,
-      'xpAwarded': xpAwarded,
-    };
-  }
-}
 
 class InProgressBadge {
   final Map<String, dynamic> badgeId;

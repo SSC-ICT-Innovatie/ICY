@@ -149,12 +149,19 @@ class HomeHeader extends StatelessWidget {
       children: [
         Row(
           children: [
-            Text(
-              '$current / $total XP',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Colors.white.withOpacity(0.9),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                '$current / $total XP',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white.withOpacity(0.9),
+                ),
               ),
             ),
             const Spacer(),
@@ -181,14 +188,32 @@ class HomeHeader extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 6),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: LinearProgressIndicator(
-            value: progress,
-            backgroundColor: Colors.white30,
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.amber.shade300),
-            minHeight: 8,
-          ),
+        Stack(
+          children: [
+            // Background
+            Container(
+              height: 12,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(6),
+              ),
+            ),
+            // Progress fill
+            FractionallySizedBox(
+              widthFactor: progress,
+              child: Container(
+                height: 12,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.amber.shade300, Colors.orange.shade600],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );
