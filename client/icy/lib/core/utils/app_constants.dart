@@ -27,15 +27,7 @@ class AppConstants {
 
   bool isDark(BuildContext context) => !isLight(context);
 
-  // App constants
-  final String appName = 'ICY';
-  final String appVersion = '1.0.0';
 
-  // Feature flags
-  final bool enableAnimations = true;
-  final bool enableDebugging = true;
 
-  // Navigation
-  final int homeTabIndex = 2;
-  final int profileTabIndex = 5;
+
 }

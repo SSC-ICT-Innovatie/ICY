@@ -109,9 +109,12 @@ class _HomeTabSectionState extends State<HomeTabSection> {
             );
           }
 
+          // Fixed: Use shrinkWrap: true and disable physics to prevent the unbounded height issue
           return ListView.builder(
             padding: const EdgeInsets.all(16),
             itemCount: surveys.length,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
             itemBuilder: (context, index) {
               final survey = surveys[index];
               return _buildSurveyCard(context, survey);

@@ -1,22 +1,15 @@
+import 'dart:io';
+
 class ApiConstants {
   // Use 10.0.2.2 instead of localhost for Android emulator
   // This is a special IP that the Android emulator recognizes as the host machine
   static String get apiBaseUrl {
-    // Platform-specific base URLs
-    const bool isProduction = false; // Change to true for production
 
-    if (isProduction) {
-      return 'https://api.icy-app.com/api/v1';
-    } else {
-      // Development environment
-      // For Android emulator, use 10.0.2.2 instead of localhost
-      // For iOS simulator, localhost or 127.0.0.1 works
-      const useEmulator = true; // Set to true if using Android emulator
-      return useEmulator
+      return Platform.isAndroid
           ? 'http://10.0.2.2:5001/api/v1'
           : 'http://localhost:5001/api/v1';
     }
-  }
+  
 
   // Auth endpoints
   static const String loginEndpoint = '/auth/login';
