@@ -25,7 +25,7 @@ class ModalWrapper extends StatelessWidget {
     return FScaffold(
       contentPad: false,
       content: SafeArea(
-        top: Platform.isAndroid,
+ 
         child: Column(
           children: [
             BlurryContainer(
@@ -43,7 +43,7 @@ class ModalWrapper extends StatelessWidget {
                         : Radius.zero,
               ),
 
-              height: description != null ? 100 : headerHeight,
+              height:  headerHeight,
               child: Column(
                 spacing: 14,
                 children: [
@@ -81,7 +81,7 @@ class ModalWrapper extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 2),
               ),
             ),
-            Expanded(child: SingleChildScrollView(child: body)),
+            Expanded(child: body),
           ],
         ),
       ),

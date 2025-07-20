@@ -8,7 +8,6 @@ import 'package:icy/features/profile/bloc/user_preferences_bloc.dart';
 import 'package:icy/features/profile/widgets/level_progress.dart';
 import 'package:icy/features/profile/widgets/stats_card.dart';
 import 'package:icy/features/settings/screens/settings_screen.dart';
-import 'package:icy/services/notification_service.dart'; // Import the system notification service
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -56,6 +55,11 @@ class ProfileScreen extends StatelessWidget {
             if (user.stats != null) StatsCard(stats: user.stats!),
             const SizedBox(height: 16),
             _buildUserPreferences(context, user),
+            const SizedBox(height: 8),
+            // Add status messages section
+            BlocBuilder<UserPreferencesBloc, UserPreferencesState>(
+              builder: (context, state) => _buildStatusMessages(state),
+            ),
             const SizedBox(height: 16),
             FTileGroup(
               children: [
@@ -153,21 +157,24 @@ class ProfileScreen extends StatelessWidget {
                   context.read<UserPreferencesBloc>().add(
                     ToggleNotificationsEvent(enabled: value),
                   );
-
-                  // Test notification when enabled
-                  if (value) {
-                    _sendTestNotification(context);
-                  }
                 },
               ),
             ),
-            FTile(
-              title: const Text("Daily Reminder"),
-              subtitle: Text("Time: ${state.dailyReminderTime}"),
-              suffixIcon: const Icon(Icons.access_time),
-              onPress:
-                  () => _showTimePickerDialog(context, state.dailyReminderTime),
-            ),
+            if (state.notificationsEnabled) ...[
+              FTile(
+                title: const Text("Daily Reminder"),
+                subtitle: Text("Time: ${state.dailyReminderTime}"),
+                suffixIcon: const Icon(Icons.access_time),
+                onPress:
+                    () => _showTimePickerDialog(context, state.dailyReminderTime),
+              ),
+            ] else ...[
+              FTile(
+                title: const Text("Daily Reminder"),
+                subtitle: const Text("Enable notifications to set reminder time"),
+                suffixIcon: const Icon(Icons.access_time_outlined),
+              ),
+            ],
             // Remove unused language picker dialog call
             FTile(
               title: const Text("Language"),
@@ -180,40 +187,54 @@ class ProfileScreen extends StatelessWidget {
               subtitle: Text(state.theme),
               suffixIcon: const Icon(Icons.brightness_4),
             ),
-            // Add a test notification button
-            if (state.notificationsEnabled)
-              FTile(
-                title: const Text("Test Notification"),
-                subtitle: const Text("Send a test notification"),
-                suffixIcon: const Icon(Icons.notifications_active),
-                onPress: () => _sendTestNotification(context),
-              ),
           ],
         );
       },
     );
   }
 
-  // Add a helper method to test notifications, with clear commenting about which service is used
-  void _sendTestNotification(BuildContext context) async {
-    // Using SystemNotificationService for device-level notifications
-    final notificationService = SystemNotificationService();
-    await notificationService.showNotification(
-      id: 999,
-      title: 'Test Notification',
-      body: 'This is a test notification from ICY!',
-    );
-
-    // Show feedback to user
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Test notification sent!'),
-        duration: Duration(seconds: 2),
-      ),
+  Widget _buildStatusMessages(UserPreferencesState state) {
+    return Column(
+      children: [
+        // Show status messages if any
+        if (state.message != null)
+          Container(
+            margin: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.green.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.green.withOpacity(0.3)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.green, size: 20),
+                const SizedBox(width: 8),
+                Expanded(child: Text(state.message!, style: const TextStyle(color: Colors.green))),
+              ],
+            ),
+          ),
+        if (state.error != null)
+          Container(
+            margin: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.red.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.red.withOpacity(0.3)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.error, color: Colors.red, size: 20),
+                const SizedBox(width: 8),
+                Expanded(child: Text(state.error!, style: const TextStyle(color: Colors.red))),
+              ],
+            ),
+          ),
+      ],
     );
   }
 
-  // Keep only the time picker dialog since it's being used
   void _showTimePickerDialog(BuildContext context, String currentTime) async {
     // Parse the current time string (format: "HH:mm")
     final parts = currentTime.split(':');

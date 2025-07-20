@@ -12,49 +12,31 @@ import 'package:icy/tabs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
-  // Initialize all services
-  await AppInitializationService.initialize();
-
-  // Initialize AppConstants theme cache
-  await AppConstants().initThemeCache();
-
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize all services and resources in parallel
+  final futures = await Future.wait([
+    AppInitializationService.initialize(),
+    AppConstants().initThemeCache(),
+    SharedPreferences.getInstance(),
+  ]);
+  
+  // Extract SharedPreferences from futures
+  final sharedPreferences = futures[2] as SharedPreferences;
+  
+  runApp(MyApp(sharedPreferences: sharedPreferences));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final SharedPreferences sharedPreferences;
+  
+  const MyApp({required this.sharedPreferences, super.key});
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<SharedPreferences>(
-      future: SharedPreferences.getInstance(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const MaterialApp(
-            debugShowCheckedModeBanner: false,
-            home: Scaffold(
-              body: Center(child: CircularProgressIndicator.adaptive()),
-            ),
-          );
-        }
-
-        if (snapshot.hasError) {
-          return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            home: Scaffold(
-              body: Center(
-                child: Text('Error initializing app: ${snapshot.error}'),
-              ),
-            ),
-          );
-        }
-
-        // Create SettingsBloc first
-        return BlocProvider(
-          create: (context) => SettingsBloc(prefs: snapshot.data!),
-          child: const AppWithSettings(),
-        );
-      },
+    return BlocProvider(
+      create: (context) => SettingsBloc(prefs: sharedPreferences),
+      child: const AppWithSettings(),
     );
   }
 }
@@ -64,62 +46,65 @@ class AppWithSettings extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Now we can safely access the SettingsBloc
+    // Access the SettingsBloc
     return BlocBuilder<SettingsBloc, SettingsState>(
       builder: (context, settingsState) {
-        return FutureBuilder<Widget>(
-          future: DependencyInjector().injectStateIntoApp(
-            const AuthStateListener(child: IceNavigation()),
-          ),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const MaterialApp(
-                debugShowCheckedModeBanner: false,
-                home: Scaffold(
-                  body: Center(child: CircularProgressIndicator.adaptive()),
-                ),
-              );
+        // Determine theme mode based on settings
+        ThemeMode themeMode = ThemeMode.system;
+        if (!settingsState.useSystemTheme) {
+          themeMode = settingsState.isDarkMode ? ThemeMode.dark : ThemeMode.light;
+        }
+
+        return MaterialApp(
+          title: 'ICY App',
+          themeMode: themeMode,
+          debugShowCheckedModeBanner: false,
+          home: DependencyInjectorWidget(),
+          builder: (context, child) {
+            // Safely wrap in a null check
+            if (child == null) {
+              return const Center(child: CircularProgressIndicator());
             }
 
-            if (snapshot.hasError) {
-              return MaterialApp(
-                debugShowCheckedModeBanner: false,
-                home: Scaffold(
-                  body: Center(
-                    child: Text('Error initializing app: ${snapshot.error}'),
-                  ),
-                ),
-              );
-            }
-
-            // Determine theme mode based on settings
-            ThemeMode themeMode = ThemeMode.system;
-            if (!settingsState.useSystemTheme) {
-              themeMode =
-                  settingsState.isDarkMode ? ThemeMode.dark : ThemeMode.light;
-            }
-
-            return MaterialApp(
-              title: 'ICY App',
-              themeMode: themeMode,
-              debugShowCheckedModeBanner: false,
-              home: snapshot.data,
-              builder: (context, child) {
-                // Safely wrap in a null check
-                if (child == null) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                return FTheme(
-                  data:
-                      AppConstants().isLight(context)
-                          ? FThemes.blue.light.copyWith()
-                          : FThemes.blue.dark.copyWith(),
-                  child: child,
-                );
-              },
+            return FTheme(
+              data: AppConstants().isLight(context)
+                  ? FThemes.blue.light.copyWith()
+                  : FThemes.blue.dark.copyWith(),
+              child: child,
             );
           },
+        );
+      },
+    );
+  }
+}
+
+class DependencyInjectorWidget extends StatelessWidget {
+  const DependencyInjectorWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<Widget>(
+      future: DependencyInjector().injectStateIntoApp(
+        const AuthStateListener(child: IceNavigation()),
+      ),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return  FScaffold(
+            content: Center(child: CircularProgressIndicator.adaptive()),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return FScaffold(
+            content: Center(
+              child: Text('Error initializing app: ${snapshot.error}'),
+            ),
+          );
+        }
+
+        return snapshot.data ??  FScaffold(
+            content: Center(child: Text('Failed to load application')),
         );
       },
     );
@@ -134,8 +119,7 @@ class AuthStateListener extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
-      listenWhen:
-          (previous, current) => previous.runtimeType != current.runtimeType,
+      listenWhen: (previous, current) => previous.runtimeType != current.runtimeType,
       listener: (context, state) {
         // Refresh navigation when auth state changes
         if (state is AuthSuccess || state is AuthInitial) {
@@ -143,7 +127,7 @@ class AuthStateListener extends StatelessWidget {
             final navCubit = context.read<NavigationCubit>();
             navCubit.refreshTabs(injectNavigationTabs(context));
           } catch (e) {
-            print('Error updating navigation: $e');
+            debugPrint('Error updating navigation: $e');
           }
         }
       },

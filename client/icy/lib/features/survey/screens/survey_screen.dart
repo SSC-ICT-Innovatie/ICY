@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:forui/forui.dart';
+import 'package:icy/abstractions/navigation/widgets/modal_wrapper.dart';
 import 'package:icy/data/models/survey_model.dart';
 import 'package:icy/data/models/user_model.dart';
 import 'package:icy/data/repositories/achievement_repository.dart';
@@ -34,17 +35,21 @@ class _SurveyScreenState extends State<SurveyScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FScaffold(
-      header: FHeader(
-        title: Text(widget.survey.title),
-        actions: [
-          FButton.icon(
-            onPress: () => Navigator.of(context).pop(),
-            child: FIcon(FAssets.icons.x),
+    return ModalWrapper(
+      headerHeight: 350,
+      title: widget.survey.title,
+
+      description: Column(
+        children: [
+          // progress
+          FProgress(
+            value: (_currentQuestion + 1) / widget.survey.questions.length,
           ),
+
+          Text(widget.survey.description, style: context.theme.typography.base),
         ],
       ),
-      content: Stack(
+      body: Stack(
         children: [
           Column(
             children: [
@@ -72,27 +77,6 @@ class _SurveyScreenState extends State<SurveyScreen> {
                 ),
               ),
 
-              // Progress bar
-              Container(
-                width: MediaQuery.of(context).size.width,
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    LinearProgressIndicator(
-                      value: (_currentQuestion + 1) / widget.survey.questions.length,
-                      backgroundColor: Colors.grey[200],
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        Theme.of(context).colorScheme.primary,
-                      ),
-                      minHeight: 10,
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Survey content
               Expanded(child: _buildSurveyContent()),
 
               // Navigation buttons
@@ -111,24 +95,28 @@ class _SurveyScreenState extends State<SurveyScreen> {
                       const SizedBox.shrink(),
 
                     FButton(
-                      onPress: _isSubmitting ? null : (_isLastQuestion ? _submitSurvey : _nextQuestion),
-                      label: _isSubmitting 
-                          ? const CircularProgressIndicator.adaptive() 
-                          : Text(_isLastQuestion ? 'Submit' : 'Next'),
+                      onPress:
+                          _isSubmitting
+                              ? null
+                              : (_isLastQuestion
+                                  ? _submitSurvey
+                                  : _nextQuestion),
+                      label:
+                          _isSubmitting
+                              ? const CircularProgressIndicator.adaptive()
+                              : Text(_isLastQuestion ? 'Submit' : 'Next'),
                     ),
                   ],
                 ),
               ),
             ],
           ),
-          
+
           // Show loading overlay when submitting
           if (_isSubmitting)
             Container(
               color: Colors.black.withOpacity(0.3),
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
+              child: const Center(child: CircularProgressIndicator()),
             ),
 
           // Show error alert
@@ -141,7 +129,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
                   setState(() {
                     _showErrorAlert = false;
                   });
-                  
+
                   // Close survey if already completed
                   if (_alertMessage?.contains('already completed') ?? false) {
                     Navigator.of(context).pop();
@@ -160,7 +148,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
                   setState(() {
                     _showSuccessAlert = false;
                   });
-                  
+
                   // Return to home screen after successful submission
                   Navigator.of(context).pop();
                 },
@@ -406,9 +394,10 @@ class _SurveyScreenState extends State<SurveyScreen> {
 
     try {
       // Convert answers to the format expected by the API
-      final formattedAnswers = _answers.entries.map((entry) {
-        return {'questionId': entry.key, 'answer': entry.value};
-      }).toList();
+      final formattedAnswers =
+          _answers.entries.map((entry) {
+            return {'questionId': entry.key, 'answer': entry.value};
+          }).toList();
 
       // Submit survey responses
       final result = await _surveyRepository.submitSurveyResponses(
@@ -422,8 +411,9 @@ class _SurveyScreenState extends State<SurveyScreen> {
 
       // Extract rewards from response
       final xpEarned = result['rewards']?['xp'] ?? widget.survey.reward.xp;
-      final coinsEarned = result['rewards']?['coins'] ?? widget.survey.reward.coins;
-      
+      final coinsEarned =
+          result['rewards']?['coins'] ?? widget.survey.reward.coins;
+
       if (context.mounted) {
         // Get fresh user data to update the UI
         try {
@@ -431,10 +421,10 @@ class _SurveyScreenState extends State<SurveyScreen> {
           final response = await _authRepository.apiService.get('/auth/me');
           if (response['success'] == true && response['data'] != null) {
             final updatedUser = UserModel.fromJson(response['data']);
-            
+
             // Update the user in AuthBloc so the XP shows in the header
             context.read<AuthBloc>().add(UpdateUserData(updatedUser));
-            
+
             // Refresh home data to show achievements, etc.
             context.read<HomeBloc>().add(const LoadHome(forceRefresh: true));
           }
@@ -448,7 +438,8 @@ class _SurveyScreenState extends State<SurveyScreen> {
       if (mounted) {
         setState(() {
           _isSubmitting = false;
-          _alertMessage = 'Survey submitted! You earned $xpEarned XP and $coinsEarned coins';
+          _alertMessage =
+              'Survey submitted! You earned $xpEarned XP and $coinsEarned coins';
           _showSuccessAlert = true;
         });
       }

@@ -1,3 +1,5 @@
+import 'package:animations/animations.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:forui/forui.dart';
@@ -29,48 +31,55 @@ class _HomeTabSectionState extends State<HomeTabSection> {
     final user = (context.read<AuthBloc>().state as AuthSuccess).user;
     final userDepartment = user.department;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: FTabs(
-            initialIndex: 0, // Start with "For You" tab selected
-            tabs: [
-              // For You tab
-              FTabEntry(
-                label: const Text('For You'),
-                content: RefreshIndicator(
-                  onRefresh: () async {
-                    context.read<HomeBloc>().add(const LoadHome(forceRefresh: true));
-                  },
-                  child: SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    child: _buildSurveyList(
-                      context,
-                      filterByDepartment: true,
-                      userDepartment: userDepartment,
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: FTabs(
+              initialIndex: 0, // Start with "For You" tab selected
+              tabs: [
+                // For You tab
+                FTabEntry(
+                  label: const Text('For You'),
+                  content: RefreshIndicator(
+                    onRefresh: () async {
+                      context.read<HomeBloc>().add(
+                        const LoadHome(forceRefresh: true),
+                      );
+                    },
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: _buildSurveyList(
+                        context,
+                        filterByDepartment: true,
+                        userDepartment: userDepartment,
+                      ),
                     ),
                   ),
                 ),
-              ),
-
-              // All Surveys tab
-              FTabEntry(
-                label: const Text('All Surveys'),
-                content: RefreshIndicator(
-                  onRefresh: () async {
-                    context.read<HomeBloc>().add(const LoadHome(forceRefresh: true));
-                  },
-                  child: SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    child: _buildSurveyList(context, filterByDepartment: false),
+      
+                // All Surveys tab
+                FTabEntry(
+                  label: const Text('All Surveys'),
+                  content: RefreshIndicator(
+                    onRefresh: () async {
+                      context.read<HomeBloc>().add(
+                        const LoadHome(forceRefresh: true),
+                      );
+                    },
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: _buildSurveyList(context, filterByDepartment: false),
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -82,7 +91,7 @@ class _HomeTabSectionState extends State<HomeTabSection> {
     return BlocBuilder<HomeBloc, HomeState>(
       builder: (context, state) {
         if (state is HomeLoading) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator.adaptive());
         }
 
         if (state is HomeError) {
@@ -132,10 +141,8 @@ class _HomeTabSectionState extends State<HomeTabSection> {
 
           // Fixed: Use shrinkWrap: true and disable physics to prevent the unbounded height issue
           return FTileGroup.builder(
-          
             count: surveys.length,
-          
-         
+
             tileBuilder: (context, index) {
               final survey = surveys[index];
               return _buildSurveyCard(context, survey);
@@ -165,22 +172,13 @@ class _HomeTabSectionState extends State<HomeTabSection> {
   Widget _buildSurveyCard(BuildContext context, SurveyModel survey) {
     return FTile(
       onPress: () {
-        // Get both the HomeBloc and AuthBloc
-        final homeBloc = context.read<HomeBloc>();
-        final authBloc = context.read<AuthBloc>();
-        
+
         // Navigate to survey screen with both blocs provided
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MultiBlocProvider(
-              providers: [
-                BlocProvider.value(value: homeBloc),
-                BlocProvider.value(value: authBloc),
-              ],
-              child: SurveyScreen(survey: survey),
-            ),
-          ),
+        showModalBottomSheet(
+          context: context,
+          builder:
+              (context) =>  SurveyScreen(survey: survey),
+              
         );
       },
       suffixIcon: Container(

@@ -57,7 +57,10 @@ class UserPreferencesBloc
 
     // If notifications are enabled, schedule the reminder
     if (notificationsEnabled && reminderEnabled) {
-      _scheduleDailyReminder(reminderTime);
+      await _scheduleDailyReminder(reminderTime);
+      print('Initialized with daily reminders enabled at $reminderTime');
+    } else {
+      print('Initialized with daily reminders disabled (notifications: $notificationsEnabled, reminders: $reminderEnabled)');
     }
 
     emit(
@@ -78,25 +81,81 @@ class UserPreferencesBloc
   ) async {
     emit(state.copyWith(isLoading: true));
 
-    await _prefs.setBool(_notificationEnabledKey, event.enabled);
-    await _notificationService.setNotificationsEnabled(event.enabled);
+    try {
+      await _prefs.setBool(_notificationEnabledKey, event.enabled);
+      await _notificationService.setNotificationsEnabled(event.enabled);
 
-    if (event.enabled && state.reminderEnabled) {
-      // Schedule daily reminder with existing time
-      _scheduleDailyReminder(state.dailyReminderTime);
+      // When enabling notifications, also enable reminders by default
+      if (event.enabled) {
+        await _prefs.setBool(_reminderEnabledKey, true);
+        
+        // First request permissions explicitly
+        final hasPermissions = await _notificationService.requestNotificationPermissions();
+        
+        if (hasPermissions) {
+          // Schedule daily reminder with existing time
+          await _scheduleDailyReminder(state.dailyReminderTime);
 
-      // If notifications are being enabled, show a confirmation notification
-      await _notificationService.showNotification(
-        id: 0,
-        title: 'Notifications Enabled',
-        body: 'You will now receive notifications from ICY',
-      );
-    } else {
-      // Cancel scheduled notifications if disabled
-      await _notificationService.cancelAllNotifications();
+          // If notifications are being enabled, show a confirmation notification
+          await _notificationService.showNotification(
+            id: 0,
+            title: 'Notifications Enabled',
+            body: 'Daily reminders are now active at ${state.dailyReminderTime}',
+          );
+          
+          emit(state.copyWith(
+            notificationsEnabled: event.enabled, 
+            reminderEnabled: true,
+            isLoading: false,
+            message: 'Notifications and daily reminders enabled',
+          ));
+        } else {
+          // Permissions denied
+          await _prefs.setBool(_notificationEnabledKey, false);
+          await _prefs.setBool(_reminderEnabledKey, false);
+          
+          emit(state.copyWith(
+            notificationsEnabled: false, 
+            reminderEnabled: false,
+            isLoading: false,
+            error: 'Notification permissions denied. Please enable in device settings.',
+          ));
+        }
+      } else {
+        // When disabling notifications, disable reminders too
+        await _prefs.setBool(_reminderEnabledKey, false);
+        
+        // Cancel scheduled notifications if disabled
+        await _notificationService.cancelAllNotifications();
+        
+        emit(state.copyWith(
+          notificationsEnabled: event.enabled, 
+          reminderEnabled: false,
+          isLoading: false,
+          message: 'Notifications and daily reminders disabled',
+        ));
+      }
+
+      // Clear messages after 3 seconds
+      Future.delayed(const Duration(seconds: 3), () {
+        if (!emit.isDone) {
+          emit(state.copyWith(message: null, error: null));
+        }
+      });
+    } catch (e) {
+      print('Error in notification toggle: $e');
+      emit(state.copyWith(
+        isLoading: false,
+        error: 'Failed to update notification settings: $e',
+      ));
+      
+      // Clear error after 5 seconds
+      Future.delayed(const Duration(seconds: 5), () {
+        if (!emit.isDone) {
+          emit(state.copyWith(error: null));
+        }
+      });
     }
-
-    emit(state.copyWith(notificationsEnabled: event.enabled, isLoading: false));
   }
 
   void _onSetDailyReminderTime(
@@ -105,40 +164,84 @@ class UserPreferencesBloc
   ) async {
     emit(state.copyWith(isLoading: true));
 
-    await _prefs.setString(_dailyReminderTimeKey, event.time);
+    try {
+      await _prefs.setString(_dailyReminderTimeKey, event.time);
 
-    // If notifications are enabled, schedule the daily reminder
-    if (state.notificationsEnabled && state.reminderEnabled) {
-      _scheduleDailyReminder(event.time);
+      // Always schedule the daily reminder if notifications are enabled
+      if (state.notificationsEnabled) {
+        await _scheduleDailyReminder(event.time);
+        print('Scheduled daily reminder for ${event.time}');
+        
+        emit(state.copyWith(
+          dailyReminderTime: event.time, 
+          isLoading: false,
+          message: 'Daily reminder time updated to ${event.time}',
+        ));
+      } else {
+        emit(state.copyWith(
+          dailyReminderTime: event.time, 
+          isLoading: false,
+          message: 'Reminder time saved. Enable notifications to activate reminders.',
+        ));
+      }
+
+      // Clear message after 3 seconds
+      Future.delayed(const Duration(seconds: 3), () {
+        if (!emit.isDone) {
+          emit(state.copyWith(message: null));
+        }
+      });
+    } catch (e) {
+      print('Error setting reminder time: $e');
+      emit(state.copyWith(
+        isLoading: false,
+        error: 'Failed to update reminder time: $e',
+      ));
+      
+      // Clear error after 5 seconds
+      Future.delayed(const Duration(seconds: 5), () {
+        if (!emit.isDone) {
+          emit(state.copyWith(error: null));
+        }
+      });
     }
-
-    emit(state.copyWith(dailyReminderTime: event.time, isLoading: false));
   }
 
   // Helper method to schedule daily reminders
   Future<void> _scheduleDailyReminder(String timeString) async {
-    // First cancel any existing reminders
-    await _notificationService.cancelNotification(1);
+    try {
+      print('Attempting to schedule daily reminder for $timeString');
+      
+      // First cancel any existing reminders
+      await _notificationService.cancelNotification(1);
+      print('Cancelled existing notifications');
 
-    // Parse time string (format: "HH:mm")
-    final parts = timeString.split(':');
-    if (parts.length == 2) {
-      final hour = int.tryParse(parts[0]);
-      final minute = int.tryParse(parts[1]);
+      // Parse time string (format: "HH:mm")
+      final parts = timeString.split(':');
+      if (parts.length == 2) {
+        final hour = int.tryParse(parts[0]);
+        final minute = int.tryParse(parts[1]);
 
-      if (hour != null && minute != null) {
-        // Convert to TimeOfDay for scheduling
-        final timeOfDay = TimeOfDay(hour: hour, minute: minute);
+        if (hour != null && minute != null) {
+          // Convert to TimeOfDay for scheduling
+          final timeOfDay = TimeOfDay(hour: hour, minute: minute);
 
-        await _notificationService.scheduleDailyNotification(
-          id: 1,
-          title: 'ICY Daily Check-in',
-          body: 'Remember to complete your daily activities!',
-          timeOfDay: timeOfDay,
-        );
+          await _notificationService.scheduleDailyNotification(
+            id: 1,
+            title: 'ICY Daily Check-in',
+            body: 'Remember to complete your daily activities!',
+            timeOfDay: timeOfDay,
+          );
 
-        print('Scheduled daily reminder for $timeString');
+          print('Successfully scheduled daily reminder for $timeString');
+        } else {
+          print('Error: Could not parse hour ($hour) or minute ($minute) from $timeString');
+        }
+      } else {
+        print('Error: Invalid time format $timeString, expected HH:mm');
       }
+    } catch (e) {
+      print('Error scheduling daily reminder: $e');
     }
   }
 

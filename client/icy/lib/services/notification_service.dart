@@ -39,74 +39,87 @@ class SystemNotificationService implements NotificationService {
 
   @override
   Future<void> initialize() async {
-    tz.initializeTimeZones();
-
-    // Request notification permissions
-    await _requestPermissions();
-
-    // Initialize notification settings
-    const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
-
-    final DarwinInitializationSettings initializationSettingsIOS =
-        DarwinInitializationSettings(
-          requestAlertPermission: false,
-          requestBadgePermission: false,
-          requestSoundPermission: false,
-        );
-
-    final InitializationSettings initializationSettings =
-        InitializationSettings(
-          android: initializationSettingsAndroid,
-          iOS: initializationSettingsIOS,
-        );
-
-    await _flutterLocalNotificationsPlugin.initialize(
-      initializationSettings,
-      onDidReceiveNotificationResponse: (
-        NotificationResponse notificationResponse,
-      ) async {
-        // Handle notification tap
-        if (notificationResponse.payload != null) {
-          print('Notification payload: ${notificationResponse.payload}');
-        }
-      },
-    );
-
-    // Check for stored preferences
-    final prefs = await SharedPreferences.getInstance();
-    final bool? notificationsEnabled = prefs.getBool(_notificationsEnabledKey);
-
-    // If notifications are enabled in preferences, request permissions
-    if (notificationsEnabled == true) {
-      await requestNotificationPermissions();
-    }
-  }
-
-  Future<void> _requestPermissions() async {
     try {
-      if (await Permission.notification.isDenied) {
-        await Permission.notification.request();
+      print('Initializing notification service for iOS...');
+      tz.initializeTimeZones();
+
+      // Initialize notification settings
+      const AndroidInitializationSettings initializationSettingsAndroid =
+          AndroidInitializationSettings('@mipmap/ic_launcher');
+
+      final DarwinInitializationSettings initializationSettingsIOS =
+          DarwinInitializationSettings(
+            requestAlertPermission: true,   // Request alert permission
+            requestBadgePermission: true,   // Request badge permission
+            requestSoundPermission: true,   // Request sound permission
+            requestCriticalPermission: false,
+            defaultPresentAlert: true,
+            defaultPresentBadge: true,
+            defaultPresentSound: true,
+          );
+
+      final InitializationSettings initializationSettings =
+          InitializationSettings(
+            android: initializationSettingsAndroid,
+            iOS: initializationSettingsIOS,
+          );
+
+      final bool? initialized = await _flutterLocalNotificationsPlugin.initialize(
+        initializationSettings,
+        onDidReceiveNotificationResponse: (
+          NotificationResponse notificationResponse,
+        ) async {
+          // Handle notification tap
+          print('Notification tapped: ${notificationResponse.payload}');
+          if (notificationResponse.payload != null) {
+            print('Notification payload: ${notificationResponse.payload}');
+          }
+        },
+      );
+
+      print('Notification plugin initialized: $initialized');
+
+      // For iOS, explicitly request permissions on initialization
+      if (Platform.isIOS) {
+        final bool hasPermissions = await requestNotificationPermissions();
+        print('iOS notification permissions granted: $hasPermissions');
       }
+
+      // Check for stored preferences
+      final prefs = await SharedPreferences.getInstance();
+      final bool? notificationsEnabled = prefs.getBool(_notificationsEnabledKey);
+
+      print('Stored notification preference: $notificationsEnabled');
+      print('Notification service initialization complete');
     } catch (e) {
-      print('Error requesting notification permissions: $e');
+      print('Error initializing notification service: $e');
     }
   }
 
   Future<bool> requestNotificationPermissions() async {
-    // Request permissions for notifications
-    if (Platform.isIOS) {
-      final bool? result = await _flutterLocalNotificationsPlugin
-          .resolvePlatformSpecificImplementation<
-            IOSFlutterLocalNotificationsPlugin
-          >()
-          ?.requestPermissions(alert: true, badge: true, sound: true);
-      return result ?? false;
-    } else if (Platform.isAndroid) {
-      final status = await Permission.notification.request();
-      return status.isGranted;
+    try {
+      print('Requesting notification permissions...');
+      
+      // Request permissions for notifications
+      if (Platform.isIOS) {
+        final bool? result = await _flutterLocalNotificationsPlugin
+            .resolvePlatformSpecificImplementation<
+              IOSFlutterLocalNotificationsPlugin
+            >()
+            ?.requestPermissions(alert: true, badge: true, sound: true);
+        
+        print('iOS notification permission result: $result');
+        return result ?? false;
+      } else if (Platform.isAndroid) {
+        final status = await Permission.notification.request();
+        print('Android notification permission status: $status');
+        return status.isGranted;
+      }
+      return false;
+    } catch (e) {
+      print('Error requesting notification permissions: $e');
+      return false;
     }
-    return false;
   }
 
   Future<void> setNotificationsEnabled(bool enabled) async {
@@ -131,35 +144,44 @@ class SystemNotificationService implements NotificationService {
     required String body,
     String? payload,
   }) async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
-          'icy_notifications',
-          'ICY Notifications',
-          channelDescription: 'Notifications from ICY application',
-          importance: Importance.high,
-          priority: Priority.high,
-          showWhen: true,
-        );
+    try {
+      print('Attempting to show notification: $title');
+      
+      const AndroidNotificationDetails androidPlatformChannelSpecifics =
+          AndroidNotificationDetails(
+            'icy_notifications',
+            'ICY Notifications',
+            channelDescription: 'Notifications from ICY application',
+            importance: Importance.high,
+            priority: Priority.high,
+            showWhen: true,
+          );
 
-    const DarwinNotificationDetails iOSPlatformChannelSpecifics =
-        DarwinNotificationDetails(
-          presentAlert: true,
-          presentBadge: true,
-          presentSound: true,
-        );
+      const DarwinNotificationDetails iOSPlatformChannelSpecifics =
+          DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+          );
 
-    const NotificationDetails platformChannelSpecifics = NotificationDetails(
-      android: androidPlatformChannelSpecifics,
-      iOS: iOSPlatformChannelSpecifics,
-    );
+      const NotificationDetails platformChannelSpecifics = NotificationDetails(
+        android: androidPlatformChannelSpecifics,
+        iOS: iOSPlatformChannelSpecifics,
+      );
 
-    await _flutterLocalNotificationsPlugin.show(
-      id,
-      title,
-      body,
-      platformChannelSpecifics,
-      payload: payload,
-    );
+      await _flutterLocalNotificationsPlugin.show(
+        id,
+        title,
+        body,
+        platformChannelSpecifics,
+        payload: payload,
+      );
+      
+      print('Notification shown successfully: $title');
+    } catch (e) {
+      print('Error showing notification: $e');
+      rethrow;
+    }
   }
 
   @override
@@ -171,6 +193,8 @@ class SystemNotificationService implements NotificationService {
     String? payload,
   }) async {
     try {
+      print('Scheduling daily notification for ${timeOfDay.hour}:${timeOfDay.minute.toString().padLeft(2, '0')}');
+      
       final now = DateTime.now();
       final scheduledDate = DateTime(
         now.year,
@@ -185,6 +209,8 @@ class SystemNotificationService implements NotificationService {
           scheduledDate.isBefore(now)
               ? scheduledDate.add(const Duration(days: 1))
               : scheduledDate;
+
+      print('Effective notification date: $effectiveDate');
 
       const AndroidNotificationDetails androidPlatformChannelSpecifics =
           AndroidNotificationDetails(
@@ -221,18 +247,21 @@ class SystemNotificationService implements NotificationService {
             AndroidScheduleMode
                 .inexactAllowWhileIdle, // Use inexact mode to avoid permission issues
       );
+      
+      print('Successfully scheduled daily notification with ID $id');
     } catch (e) {
       // Log the error but don't crash
       print('Failed to schedule notification: $e');
 
-      // Try to show a regular notification instead
+      // Try to show a regular notification instead as a test
       try {
         await showNotification(
           id: id,
-          title: title,
-          body: body,
+          title: 'Test: $title',
+          body: 'Fallback notification - $body',
           payload: payload,
         );
+        print('Showed fallback notification');
       } catch (innerE) {
         print('Failed to show fallback notification: $innerE');
       }
