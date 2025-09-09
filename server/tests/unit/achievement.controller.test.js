@@ -1,10 +1,10 @@
 const chai = require('chai');
 const { expect } = chai;
 const sinon = require('sinon');
-const { createError } = require('../../../src/utils/errorUtils');
-const User = require('../../../src/models/userModel');
-const { Badge } = require('../../../src/models/achievementModel');
-const { getUserBadges } = require('../../../src/controllers/achievementController');
+const { createError } = require('../../src/utils/errorUtils');
+const User = require('../../src/models/userModel');
+const { Badge } = require('../../src/models/achievementModel');
+const { getUserBadges } = require('../../src/controllers/achievementController');
 
 describe('Achievement Controller Unit Tests', () => {
   describe('getUserBadges', () => {
@@ -42,7 +42,7 @@ describe('Achievement Controller Unit Tests', () => {
 
       sinon.stub(User, 'findById').resolves(user);
       sinon.stub(Badge, 'find').resolves(allBadges);
-      sinon.stub(require('../../../src/models/achievementModel').UserBadge, 'find').resolves(earnedBadges);
+      sinon.stub(require('../../src/models/achievementModel').UserBadge, 'find').resolves(earnedBadges);
 
       await getUserBadges(req, res, next);
 

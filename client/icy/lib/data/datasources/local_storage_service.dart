@@ -80,7 +80,6 @@ class LocalStorageService {
   }
   
   // Achievement and XP operations
-  static const String _achievementsKey = 'user_achievements';
   static const String _userXpKey = 'user_xp';
   static const String _userStreakKey = 'user_streak';
   static const String _lastStreakUpdateKey = 'last_streak_update';
@@ -180,3 +179,4 @@ class LocalStorageService {
     await saveAchievementProgress(currentProgress);
   }
 }
+

@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:icy/features/notifications/models/notification_model.dart';
 import 'package:icy/services/api_service.dart';
 
@@ -88,3 +87,4 @@ class NotificationsRepository {
     ];
   }
 }
+

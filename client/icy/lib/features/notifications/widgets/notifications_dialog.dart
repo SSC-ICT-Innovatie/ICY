@@ -151,7 +151,6 @@ class _NotificationsDialogState extends State<NotificationsDialog> {
         iconColor = Colors.green;
         break;
       case NotificationType.general:
-      default:
         iconData = Icons.notifications;
         iconColor = Colors.grey;
         break;
@@ -163,3 +162,4 @@ class _NotificationsDialogState extends State<NotificationsDialog> {
     );
   }
 }
+

@@ -30,7 +30,7 @@ class ApiService {
 
     // Handle 401 responses from Dio (e.g., form-data uploads)
     _dio.interceptors.add(InterceptorsWrapper(
-      onError: (DioError err, handler) async {
+      onError: (DioException err, handler) async {
         try {
           if (err.response?.statusCode == 401) {
             final refreshed = await _tryRefreshToken();

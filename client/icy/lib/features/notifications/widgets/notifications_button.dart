@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:icy/features/notifications/bloc/notifications_bloc.dart';
-import 'package:icy/features/notifications/widgets/notifications_dialog.dart';
 
 class NotificationsButton extends StatelessWidget {
   const NotificationsButton({super.key});
@@ -93,3 +92,4 @@ class _NotificationsDialogState extends State<NotificationsDialog> {
     return Container();
   }
 }
+

@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:icy/data/models/user_model.dart';
 
 /// This model extends the base User model with authentication-specific properties
@@ -53,3 +52,4 @@ class AuthUser {
     };
   }
 }
+

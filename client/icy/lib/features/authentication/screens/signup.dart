@@ -521,7 +521,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                         !_codeRequested
                                             ? (value) {
                                               setState(() {
-                                                _isAdminSignup = value ?? false;
+                                                _isAdminSignup = value;
                                               });
                                             }
                                             : null,
@@ -587,3 +587,4 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 }
+
