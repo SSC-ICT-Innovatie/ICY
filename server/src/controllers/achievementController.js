@@ -1,5 +1,6 @@
 const asyncHandler = require('../middleware/asyncMiddleware');
 const { Badge, UserBadge } = require('../models/achievementModel');
+const User = require('../models/userModel');
 const { createError } = require('../utils/errorUtils');
 const logger = require('../utils/logger');
 
@@ -39,12 +40,37 @@ exports.getUserBadges = asyncHandler(async (req, res, next) => {
       badge => !earnedBadgeIds.includes(badge._id.toString())
     );
     
+    // Get the full user object to access stats for progress calculation
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return next(createError(404, 'User not found'));
+    }
+
     // Format in-progress badges with progress info
-    // In a real app, you'd calculate actual progress from user stats
     const formattedInProgress = inProgressBadges.map(badge => {
+      let progress = 0;
+      const condition = badge.conditions; // Assuming single condition for now
+
+      if (condition && condition.stat && condition.target > 0 && user.stats) {
+        // Access nested stats like 'streak.current'
+        const statPath = condition.stat.split('.');
+        let userStat = user.stats;
+        for (const key of statPath) {
+          if (userStat && typeof userStat === 'object' && key in userStat) {
+            userStat = userStat[key];
+          } else {
+            userStat = 0;
+            break;
+          }
+        }
+        
+        const currentValue = typeof userStat === 'number' ? userStat : 0;
+        progress = Math.min((currentValue / condition.target) * 100, 100);
+      }
+
       return {
         badgeId: badge,
-        progress: Math.random() // This is just a placeholder - real progress would be calculated
+        progress: progress
       };
     });
     
@@ -209,3 +235,4 @@ exports.markAchievementAsComplete = asyncHandler(async (req, res, next) => {
     return next(error);
   }
 });
+
