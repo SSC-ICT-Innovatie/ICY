@@ -3,13 +3,15 @@ const mongoose = require('mongoose');
 const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcryptjs');
+const colors = require('colors');
 const User = require('../models/userModel');
 const { Survey } = require('../models/surveyModel');
 const { MarketplaceCategory, MarketplaceItem } = require('../models/marketplaceModel');
 const { Badge, Challenge, Achievement } = require('../models/achievementModel');
 const { Team, League } = require('../models/teamModel');
-const { connectDB } = require('../config/database');
+const connectDB = require('../config/database');
 const seedDepartments = require('../seeds/departmentSeeds');
+const { seedMarketplace: seedMarketplaceData } = require('../seeds/marketplaceSeeds');
 
 const importData = async () => {
   try {
@@ -96,28 +98,8 @@ const seedSurveys = async () => {
 };
 
 const seedMarketplace = async () => {
-  const marketplaceDataPath = path.join(__dirname, '../data/marketplace.json');
-  const marketplaceData = JSON.parse(fs.readFileSync(marketplaceDataPath));
-  
-  const categories = await MarketplaceCategory.insertMany(marketplaceData.categories);
-  
-  const categoriesMap = categories.reduce((map, category) => {
-    map[category.name] = category._id;
-    return map;
-  }, {});
-  
-  const itemsWithCategoryIds = marketplaceData.items.map(item => ({
-    ...item,
-    categoryId: categoriesMap[getCategoryNameById(marketplaceData.categories, item.categoryId)]
-  }));
-  
-  await MarketplaceItem.insertMany(itemsWithCategoryIds);
+  await seedMarketplaceData();
 };
-
-function getCategoryNameById(categories, categoryId) {
-  const category = categories.find(cat => cat.id === categoryId);
-  return category ? category.name : 'Beloningen'; // Default fallback
-}
 
 const seedAchievements = async () => {
   const dataPath = path.join(__dirname, '../data/badges_challenges.json');
@@ -162,10 +144,11 @@ const seedAllData = async () => {
     // Connect to MongoDB
     await connectDB();
     
-    // Seed departments (add this line)
+    // Seed departments
     await seedDepartments();
     
-    // ...seed other data...
+    // Seed marketplace data
+    await seedMarketplace();
     
     console.log('Database seeding completed!'.green.bold);
     process.exit(0);
@@ -176,3 +159,4 @@ const seedAllData = async () => {
 };
 
 seedAllData();
+

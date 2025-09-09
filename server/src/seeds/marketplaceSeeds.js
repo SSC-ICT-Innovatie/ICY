@@ -33,41 +33,35 @@ const marketplaceItems = [
     name: 'Premium Avatar Pack',
     description: 'Unlock 10 exclusive avatar options',
     price: 500,
-    categoryId: null, // Will be set after categories are created
-    imageUrl: 'https://placehold.co/200x200?text=Avatar+Pack',
+    image: 'https://placehold.co/200x200?text=Avatar+Pack',
     featured: true,
-    available: true,
-    type: 'avatar_pack'
+    available: true
   },
   {
     name: 'Dark Theme',
     description: 'Elegant dark theme for the app',
     price: 200,
-    categoryId: null, // Will be set after categories are created
-    imageUrl: 'https://placehold.co/200x200?text=Dark+Theme',
+    image: 'https://placehold.co/200x200?text=Dark+Theme',
     featured: true,
-    available: true,
-    type: 'theme'
+    available: true
   },
   {
     name: 'XP Booster',
     description: 'Double XP for 24 hours',
     price: 300,
-    categoryId: null, // Will be set after categories are created
-    imageUrl: 'https://placehold.co/200x200?text=XP+Booster',
+    image: 'https://placehold.co/200x200?text=XP+Booster',
     featured: false,
     available: true,
-    type: 'power_up'
+    expiryDays: 1
   },
   {
     name: 'Golden Badge Frame',
     description: 'Special golden frame for your badges',
     price: 400,
-    categoryId: null, // Will be set after categories are created
-    imageUrl: 'https://placehold.co/200x200?text=Golden+Badge',
+    image: 'https://placehold.co/200x200?text=Golden+Badge',
     featured: false,
     available: true,
-    type: 'badge_frame'
+    permanent: true
   }
 ];
 
@@ -106,3 +100,4 @@ const seedMarketplace = async () => {
 };
 
 module.exports = { seedMarketplace };
+
